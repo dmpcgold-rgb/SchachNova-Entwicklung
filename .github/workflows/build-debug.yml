@@ -24,6 +24,8 @@ jobs:
           ls "$ANDROID_SDK_ROOT/platforms"
       - name: Check JavaScript syntax
         run: node --check app/src/main/assets/chess.js
+      - name: Run chess rule regression tests
+        run: node tests/chess-rules.test.cjs
       - name: Build debug APK
         run: gradle :app:assembleDebug --no-daemon
       - name: Generate checksum and source archive
