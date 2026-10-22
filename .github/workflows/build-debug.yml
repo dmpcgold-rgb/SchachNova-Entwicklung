@@ -33,6 +33,7 @@ jobs:
           test -n "$JS" && test -n "$WASM"
           cp "$JS" app/src/main/assets/stockfish.js
           cp "$WASM" app/src/main/assets/stockfish.wasm
+          curl -fsSL https://www.gnu.org/licenses/gpl-3.0.txt -o app/src/main/assets/STOCKFISH-GPLv3.txt
           test -s app/src/main/assets/stockfish.js && test -s app/src/main/assets/stockfish.wasm
       - name: Check JavaScript syntax
         run: node --check app/src/main/assets/chess.js
