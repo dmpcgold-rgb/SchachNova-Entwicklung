@@ -31,12 +31,14 @@ jobs:
           JS=$(find /tmp/sf-package/package -name 'stockfish-19-lite-single.js' -type f | head -1)
           WASM=$(find /tmp/sf-package/package -name 'stockfish-19-lite-single.wasm' -type f | head -1)
           test -n "$JS" && test -n "$WASM"
-          cp "$JS" app/src/main/assets/stockfish.js
-          cp "$WASM" app/src/main/assets/stockfish.wasm
+          cp "$JS" app/src/main/assets/stockfish-19-lite-single.js
+          cp "$WASM" app/src/main/assets/stockfish-19-lite-single.wasm
           curl -fsSL https://www.gnu.org/licenses/gpl-3.0.txt -o app/src/main/assets/STOCKFISH-GPLv3.txt
-          test -s app/src/main/assets/stockfish.js && test -s app/src/main/assets/stockfish.wasm
+          test -s app/src/main/assets/stockfish-19-lite-single.js && test -s app/src/main/assets/stockfish-19-lite-single.wasm
       - name: Check JavaScript syntax
-        run: node --check app/src/main/assets/chess.js
+        run: |
+          node --check app/src/main/assets/chess.js
+          node --check app/src/main/assets/stockfish-bridge.js
       - name: Run chess rule regression tests
         run: node tests/chess-rules.test.cjs
       - name: Build debug APK
