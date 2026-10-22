@@ -27,7 +27,7 @@ if(premove&&current().t===1&&!ended&&document.getElementById("botMode").value===
 function choose(i){if(ended||viewIndex!==history.length-1)return;const s=current();
 // Im Bot-Modus darf Weiß während der gegnerischen Bedenkzeit genau einen Zug vormerken.
 if(s.t===-1&&document.getElementById("botMode").value==="bot"){
- const previous=history[history.length-2];
+ const previous=s;
  if(premoveFrom<0){if(previous&&side(previous.b[i])===1){premoveFrom=i;premove=null;}else{premoveFrom=-1;premove=null;}render();return;}
  if(i===premoveFrom){premoveFrom=-1;premove=null;render();return;}
  if(previous&&side(previous.b[i])===1){premoveFrom=i;premove=null;render();return;}
