@@ -22,6 +22,18 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
           test -d "$ANDROID_SDK_ROOT"
           ls "$ANDROID_SDK_ROOT/platforms"
+      - name: Bundle offline Stockfish engine
+        run: |
+          npm pack stockfish@19.0.0 --pack-destination /tmp
+          mkdir -p /tmp/sf-package
+          tar -xzf /tmp/stockfish-19.0.0.tgz -C /tmp/sf-package
+          find /tmp/sf-package/package -iname '*lite*single*' -type f
+          JS=$(find /tmp/sf-package/package -name 'stockfish-19-lite-single.js' -type f | head -1)
+          WASM=$(find /tmp/sf-package/package -name 'stockfish-19-lite-single.wasm' -type f | head -1)
+          test -n "$JS" && test -n "$WASM"
+          cp "$JS" app/src/main/assets/stockfish.js
+          cp "$WASM" app/src/main/assets/stockfish.wasm
+          test -s app/src/main/assets/stockfish.js && test -s app/src/main/assets/stockfish.wasm
       - name: Check JavaScript syntax
         run: node --check app/src/main/assets/chess.js
       - name: Run chess rule regression tests
