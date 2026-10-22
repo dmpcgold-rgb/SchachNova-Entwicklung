@@ -35,6 +35,7 @@ document.getElementById("settingsButton").onclick=()=>{const el=document.getElem
 document.getElementById("statsButton").onclick=()=>document.getElementById("historyPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
 document.getElementById("coachButton").onclick=()=>{document.getElementById("settingsPanel").hidden=false;document.getElementById("coachButton").textContent="🔇 Coach";};
 document.getElementById("vibrationToggle").onchange=e=>{vibrationOn=e.target.checked;};
+document.getElementById("testVibration").onclick=()=>vibrate([90,70,90]);
 document.getElementById("ratedToggle").onchange=e=>{rated=e.target.checked;document.getElementById("addTime").disabled=rated;document.getElementById("takeback").disabled=rated;document.getElementById("modeLabel").textContent=rated?"Lokale Partie · Gewertet (ohne Online-Elo)":"Lokale Partie · Ungewertet";};
 document.getElementById("timeSelect").onchange=()=>{if(history.length===1&&!running)document.getElementById("newGame").click();};
 timer=setInterval(tick,250);render();
