@@ -8,7 +8,7 @@ const setInfo=t=>{if(info)info.textContent=t;};
 function startEngine(){
  if(worker)return;
  try{
-   worker=new Worker("stockfish.js");
+   worker=new Worker("stockfish-19-lite-single.js");
    worker.onmessage=e=>{const line=String(e.data);if(line==="uciok"){worker.postMessage("isready");}
      if(line==="readyok"){ready=true;setInfo("Stockfish 19 bereit · offline");maybePlay();}
      if(line.startsWith("info depth")&&line.includes(" score ")){const m=line.match(/score (cp|mate) (-?\d+)/);if(m&&mode!=="human")setInfo(m[1]==="cp"?"Bewertung: "+(Number(m[2])/100).toFixed(2):"Matt in "+m[2]);}
