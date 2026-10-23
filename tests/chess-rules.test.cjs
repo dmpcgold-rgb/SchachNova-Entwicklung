@@ -114,6 +114,19 @@ s=play(s,"d7d5");
 s=play(s,"e5d6");
 assert.equal(s.b[sq("c6")],"P","Adjacent white pawn survives atomic en passant");
 assert.equal(s.b[sq("e6")],"p","Adjacent black pawn survives atomic en passant");
+// Atomic promotions: a quiet promotion survives, a capturing promotion explodes.
+s=position({a1:"K",g7:"P"},{a8:"k"},1);
+s=play(s,"g7g8q");
+assert.equal(s.b[sq("g8")],"Q","Quiet atomic promotion keeps promoted piece");
+s=position({a1:"K",g7:"P"},{a8:"k",h8:"r"},1);
+s=play(s,"g7h8q");
+assert.equal(s.b[sq("h8")],".","Capturing atomic promotion explodes promoted piece");
+// Atomic queenside castling: rook lands on d1, king on c1.
+s=position({e1:"K",a1:"R"},{h8:"k"},1,2);
+assert(legal(s).some(m=>uci(m)==="e1c1"),"Safe atomic queenside castling is legal");
+s=play(s,"e1c1");
+assert.equal(s.b[sq("c1")],"K","Atomic queenside king destination");
+assert.equal(s.b[sq("d1")],"R","Atomic queenside rook destination");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
