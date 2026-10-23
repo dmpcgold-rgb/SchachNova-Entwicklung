@@ -104,6 +104,16 @@ s.ep=sq("d3");
 assert(!atomicKingThreat(s,1),"Opponent cannot capture en passant when not to move");
 s={...s,t:-1};
 assert(atomicKingThreat(s,1),"En passant blast threatens adjacent king on capturer's turn");
+// Adjacent kings are permitted in atomic chess; kings may not capture.
+s=position({e4:"K"},{e5:"k"},1);
+assert(legal(s).some(m=>uci(m)==="e4d4"),"Adjacent atomic kings do not create conventional check");
+assert(!legal(s).some(m=>uci(m)==="e4e5"),"Atomic kings may not capture each other");
+// En passant: the captured pawn is removed, but adjacent pawns survive the blast.
+s=position({a1:"K",e5:"P",c6:"P"},{h8:"k",d7:"p",e6:"p"},-1);
+s=play(s,"d7d5");
+s=play(s,"e5d6");
+assert.equal(s.b[sq("c6")],"P","Adjacent white pawn survives atomic en passant");
+assert.equal(s.b[sq("e6")],"p","Adjacent black pawn survives atomic en passant");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
