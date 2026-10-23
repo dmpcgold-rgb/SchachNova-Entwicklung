@@ -61,6 +61,18 @@ function renderTraining(){
   if(p!==".")btn.innerHTML='<img class="piece-img" draggable="false" alt="" src="pieces/'+(side(p)===1?"w":"b")+p.toUpperCase()+'.svg">';
   btn.onclick=()=>click(i);board.append(btn);
  }
+ if(hintStep===2&&hintFrom>=0&&hintTo>=0){
+  const flipped=active.opening&&active.data.side===-1;
+  const xy=i=>({x:(flipped?7-(i&7):(i&7))*12.5+6.25,y:(flipped?7-(i>>4):(i>>4))*12.5+6.25});
+  const from=xy(hintFrom),to=xy(hintTo);
+  const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
+  svg.setAttribute("viewBox","0 0 100 100");svg.setAttribute("aria-hidden","true");svg.classList.add("training-hint-arrow");
+  const defs=document.createElementNS(ns,"defs"),marker=document.createElementNS(ns,"marker");
+  marker.setAttribute("id","trainingArrowHead");marker.setAttribute("markerWidth","4");marker.setAttribute("markerHeight","4");marker.setAttribute("refX","2.8");marker.setAttribute("refY","2");marker.setAttribute("orient","auto");
+  const head=document.createElementNS(ns,"path");head.setAttribute("d","M0,0 L4,2 L0,4 Z");head.setAttribute("fill","#a6df59");marker.append(head);defs.append(marker);svg.append(defs);
+  const line=document.createElementNS(ns,"line");line.setAttribute("x1",from.x);line.setAttribute("y1",from.y);line.setAttribute("x2",to.x);line.setAttribute("y2",to.y);
+  line.setAttribute("stroke","#a6df59");line.setAttribute("stroke-width","2.6");line.setAttribute("stroke-linecap","round");line.setAttribute("marker-end","url(#trainingArrowHead)");svg.append(line);board.append(svg);
+ }
 }
 function start(data,isOpening){
  stopWorker();active={data,opening:isOpening};ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
