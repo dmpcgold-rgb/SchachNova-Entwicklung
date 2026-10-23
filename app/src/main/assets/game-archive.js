@@ -18,7 +18,10 @@ function showArchive(){
    $("archivePanel").hidden=true;$("homeScreen").hidden=true;$("gameScreen").hidden=false;
    render();$("openReview").click();
   }catch(e){alert("Partie kann nicht geöffnet werden: "+e.message)}};
-  list.append(row);
+  const wrap=document.createElement("div");wrap.style.cssText="display:flex;gap:8px;align-items:center";row.style.flex="1";
+  const remove=document.createElement("button");remove.textContent="🗑";remove.title="Partie löschen";remove.setAttribute("aria-label","Partie löschen");remove.style.cssText="padding:12px;border-radius:10px;color:#fca5a5;background:#3b2424";
+  remove.onclick=()=>{if(!confirm("Diese gespeicherte Partie wirklich löschen?"))return;save(read().filter(x=>x.id!==g.id));showArchive();};
+  wrap.append(row,remove);list.append(wrap);
  });
  panel.hidden=false;
 }
@@ -33,6 +36,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  const btn=$("archiveOpen"),back=$("archiveClose");
  if(btn)btn.onclick=showArchive;
  if(back)back.onclick=()=>{$("archivePanel").hidden=true};
+ $("archiveSearch")?.addEventListener("input",showArchive);
  $("newGame")?.addEventListener("click",()=>clearTimeout(pending));
  $("backHome")?.addEventListener("click",()=>clearTimeout(pending));
 });
