@@ -41,7 +41,12 @@ document.getElementById("newGame").onclick=()=>{history=[initial()];movesPlayed=
 document.getElementById("startClock").onclick=()=>{if(!ended){running=!running;last=performance.now();document.getElementById("startClock").textContent=running?"Uhr pausieren":"Uhr starten";}};
 document.getElementById("undo").onclick=()=>{if(history.length>1){history.pop();movesPlayed.pop();clockHistory.pop();clock=clockHistory[clockHistory.length-1].slice();viewIndex=history.length-1;selected=-1;premove=null;premoveFrom=-1;ended="";running=false;last=performance.now();document.getElementById("startClock").textContent="▶ Uhr starten";render();}};
 document.getElementById("forward").onclick=()=>{viewIndex=Math.min(history.length-1,viewIndex+1);selected=-1;render();};
-document.getElementById("board").addEventListener("touchstart",()=>{}, {passive:true});
+// Touch-Ziehen auf Android: Startfeld merken und Zielfeld über elementFromPoint bestimmen.
+let touchOrigin=-1,touchStartX=0,touchStartY=0;
+const boardElement=document.getElementById("board");
+boardElement.addEventListener("touchstart",e=>{if(e.touches.length!==1)return;const sq=e.target.closest(".sq");if(!sq)return;touchOrigin=[...boardElement.children].indexOf(sq);touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;},{passive:true});
+boardElement.addEventListener("touchend",e=>{if(touchOrigin<0||!e.changedTouches.length)return;const t=e.changedTouches[0],origin=touchOrigin;touchOrigin=-1;if(Math.hypot(t.clientX-touchStartX,t.clientY-touchStartY)<18)return;const rect=boardElement.getBoundingClientRect();const x=Math.floor((t.clientX-rect.left)/rect.width*8),y=Math.floor((t.clientY-rect.top)/rect.height*8);if(x<0||x>7||y<0||y>7)return;const fromRow=Math.floor(origin/8),fromCol=origin%8;const from=flipped?(7-fromRow)*16+(7-fromCol):fromRow*16+fromCol;const to=flipped?(7-y)*16+(7-x):y*16+x;selected=from;choose(to);e.preventDefault();},{passive:false});
+boardElement.addEventListener("touchcancel",()=>{touchOrigin=-1;},{passive:true});
 document.getElementById("addTime").onclick=()=>{if(rated)return;const i=current().t===1?0:1;clock[i]+=15;clockHistory[clockHistory.length-1]=clock.slice();renderClocks();};
 const originalUndo=document.getElementById("undo").onclick;
 document.getElementById("undo").onclick=()=>{if(viewIndex>0){viewIndex--;selected=-1;render();}};
