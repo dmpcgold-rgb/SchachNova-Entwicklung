@@ -6,7 +6,18 @@ const on=i=>i>=0&&i<128&&!(i&136), side=p=>p==="."?0:p===p.toUpperCase()?1:-1;
 function initial(){const b=Array(128).fill(".");start.split("/").forEach((row,r)=>{let c=0;for(const p of row){if(/[1-8]/.test(p))c+=Number(p);else b[r*16+c++]=p;}});return {b,t:1,c:15,ep:-1,half:0,full:1};}
 function attacked(s,target,by){for(let f=0;f<128;f++){if(!on(f)||side(s.b[f])!==by)continue;const p=s.b[f].toLowerCase();if(p==="p"){if(target===f-16*by-1||target===f-16*by+1)return true;continue;}const ds=p==="q"?[...dirs.b,...dirs.r]:dirs[p];for(const d of (ds||(()=>{throw Error("Unknown piece "+JSON.stringify(s.b[f])+" at index "+f)})()))for(let t=f+d;on(t);t+=d){if(t===target)return true;if(s.b[t]!=="."||p==="n"||p==="k")break;}}return false;}
 function checked(s,color=s.t){return attacked(s,s.b.indexOf(color===1?"K":"k"),-color);}
-function apply(s,m){const [f,t,promo,flag]=m,b=s.b.slice(),p=b[f],cap=b[t];let c=s.c;b[f]=".";b[t]=promo?(s.t===1?promo.toUpperCase():promo):p;if(flag==="ep")b[t+16*s.t]=".";if(flag==="castle"){const rf=t>f?f+3:f-4,rt=t>f?f+1:f-1;b[rt]=b[rf];b[rf]=".";}if(p==="K")c&=~3;if(p==="k")c&=~12;const bits={119:1,112:2,7:4,0:8};if(p.toLowerCase()==="r")c&=~(bits[f]||0);if(cap.toLowerCase()==="r")c&=~(bits[t]||0);return {b,t:-s.t,c,ep:p.toLowerCase()==="p"&&Math.abs(t-f)===32?(t+f)/2:-1,half:p.toLowerCase()==="p"||cap!=="."||flag==="ep"?0:s.half+1,full:s.full+(s.t===-1?1:0)};}
+function apply(s,m){const [f,t,promo,flag]=m,b=s.b.slice(),p=b[f],cap=b[t];let c=s.c;b[f]=".";b[t]=promo?(s.t===1?promo.toUpperCase():promo):p;if(flag==="ep")b[t+16*s.t]=".";if(flag==="castle"){const rf=t>f?f+3:f-4,rt=t>f?f+1:f-1;b[rt]=b[rf];b[rf]=".";}if(p==="K")c&=~3;if(p==="k")c&=~12;const bits={119:1,112:2,7:4,0:8};if(p.toLowerCase()==="r")c&=~(bits[f]||0);if(cap.toLowerCase()==="r")c&=~(bits[t]||0);const result={b,t:-s.t,c,ep:p.toLowerCase()==="p"&&Math.abs(t-f)===32?(t+f)/2:-1,half:p.toLowerCase()==="p"||cap!=="."||flag==="ep"?0:s.half+1,full:s.full+(s.t===-1?1:0)};return variantMode==="atomic"?atomicExplosion(result,m):result;}
+function atomicExplosion(s,m){
+ const b=s.b.slice(),to=m[1],capture=s.b[to]!=="."||m[3]==="ep";
+ if(!capture)return s;
+ b[to]=".";
+ for(const d of dirs.k){const i=to+d;if(on(i)&&b[i]!=="."&&b[i].toLowerCase()!=="p")b[i]=".";}
+ let rights=s.c;
+ if(b[116]!=="K")rights&=~3;if(b[4]!=="k")rights&=~12;
+ if(b[119]!=="R")rights&=~1;if(b[112]!=="R")rights&=~2;
+ if(b[7]!=="r")rights&=~4;if(b[0]!=="r")rights&=~8;
+ return {...s,b,c:rights};
+}
 function pseudo(s){const out=[];for(let f=0;f<128;f++){if(!on(f)||side(s.b[f])!==s.t)continue;const p=s.b[f].toLowerCase();const add=(t,flag="")=>{if(s.b[t].toLowerCase()==="k"&&variantMode!=="antichess")return;if(p==="p"&&((t>>4)===0||(t>>4)===7))for(const q of (variantMode==="antichess"?["q","r","b","n","k"]:["q","r","b","n"]))out.push([f,t,q,flag]);else out.push([f,t,"",flag]);};if(p==="p"){const t=f-16*s.t;if(on(t)&&s.b[t]==="."){add(t);const u=t-16*s.t;if((f>>4)===(s.t===1?6:1)&&s.b[u]===".")add(u);}for(const d of [-1,1]){const u=t+d;if(!on(u))continue;if(side(s.b[u])===-s.t)add(u);else if(u===s.ep&&s.b[u]==="."&&s.b[u+16*s.t]===(s.t===1?"p":"P"))add(u,"ep");}}else{const ds=p==="q"?[...dirs.b,...dirs.r]:dirs[p];for(const d of (ds||(()=>{throw Error("Unknown piece "+JSON.stringify(s.b[f])+" at index "+f)})()))for(let t=f+d;on(t);t+=d){if(side(s.b[t])===s.t)break;add(t);if(s.b[t]!=="."||p==="n"||p==="k")break;}const home=s.t===1?116:4,rook=s.t===1?"R":"r",bits=s.t===1?[1,2]:[4,8];if(p==="k"&&variantMode!=="antichess"&&f===home&&!checked(s)){if((s.c&bits[0])&&s.b[f+3]===rook&&s.b[f+1]==="."&&s.b[f+2]==="."&&!attacked(s,f+1,-s.t)&&!attacked(s,f+2,-s.t))add(f+2,"castle");if((s.c&bits[1])&&s.b[f-4]===rook&&s.b[f-1]==="."&&s.b[f-2]==="."&&s.b[f-3]==="."&&!attacked(s,f-1,-s.t)&&!attacked(s,f-2,-s.t))add(f-2,"castle");}}}return out;}
 function legal(s){
  if(variantMode==="antichess"){
