@@ -25,6 +25,22 @@ function atomicKingThreat(s,color){
  const enemyKing=s.b.indexOf(color===1?"k":"K");
  // A capture that also explodes the attacking king is illegal.
  const threatSquares=[king,...dirs.k.map(d=>king+d).filter(on)];
+ // En passant: the captured pawn disappears, while the explosion is
+ // centred on the empty landing square rather than the captured pawn.
+ if(s.ep>=0&&on(s.ep)&&s.b[s.ep]==="."){
+  const attackingColor=-color,landing=s.ep;
+  const capturedPawn=landing+16*attackingColor;
+  const ownPawn=color===1?"P":"p";
+  const enemyPawn=attackingColor===1?"P":"p";
+  if(on(capturedPawn)&&s.b[capturedPawn]===ownPawn&&
+     (landing===king||dirs.k.some(d=>landing+d===king))&&
+     !(enemyKing===landing||dirs.k.some(d=>landing+d===enemyKing))){
+   for(const d of [-1,1]){
+    const from=landing+16*attackingColor+d;
+    if(on(from)&&s.b[from]===enemyPawn)return true;
+   }
+  }
+ }
  for(let from=0;from<128;from++){
   if(!on(from)||side(s.b[from])!==-color||s.b[from].toLowerCase()==="k")continue;
   const p=s.b[from].toLowerCase();
