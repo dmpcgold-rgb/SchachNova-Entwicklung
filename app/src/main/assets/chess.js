@@ -75,7 +75,7 @@ let dragGhost=null;
 function showDragGhost(img,x,y){hideDragGhost();dragGhost=img.cloneNode(true);dragGhost.className="drag-ghost";dragGhost.style.left=x+"px";dragGhost.style.top=y+"px";document.body.appendChild(dragGhost);}
 function hideDragGhost(){if(dragGhost){dragGhost.remove();dragGhost=null;}}
 function showPromotion(callback){const dialog=document.getElementById("promotionDialog");if(!dialog){callback("q");return;}dialog.hidden=false;dialog.querySelectorAll("[data-promotion]").forEach(b=>b.onclick=()=>{dialog.hidden=true;callback(b.dataset.promotion);});}
-function showGameResult(message){running=false;const dialog=document.getElementById("resultDialog");if(!dialog)return;document.getElementById("resultMessage").textContent=message;dialog.hidden=true;const notice=document.getElementById("gameEndNotice");if(notice){notice.textContent="Partie beendet: "+message+" · Du kannst die Züge weiterhin ansehen.";notice.hidden=false;}}
+function showGameResult(message){running=false;const dialog=document.getElementById("resultDialog");if(!dialog)return;document.getElementById("resultMessage").textContent=message;dialog.hidden=true;try{window.dispatchEvent(new CustomEvent("schachnova:finished",{detail:{message,variant:variantMode,moves:movesPlayed.map(m=>[...m]),positions:history.map(p=>JSON.parse(JSON.stringify(p))),timestamp:Date.now()}}));}catch(e){console.warn("Archivierung:",e);}const notice=document.getElementById("gameEndNotice");if(notice){notice.textContent="Partie beendet: "+message+" · Du kannst die Züge weiterhin ansehen.";notice.hidden=false;}}
 function clearPremoves(){premove=null;premoveFrom=-1;premoveQueue=[];render();}
 function removeLastPremove(){if(premoveQueue.length)premoveQueue.pop();else premove=null;premoveFrom=-1;render();}
 
