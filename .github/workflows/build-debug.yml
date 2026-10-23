@@ -44,6 +44,7 @@ jobs:
           node --check app/src/main/assets/chess.js
           node --check app/src/main/assets/stockfish-bridge.js
           node --check app/src/main/assets/game-review.js
+          node --check app/src/main/assets/progress-dashboard.js
           node --check app/src/main/assets/game-archive.js
           node --check app/src/main/assets/live-coach.js
           node --check app/src/main/assets/training.js
