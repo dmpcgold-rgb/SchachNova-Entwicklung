@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const coord=i=>"abcdefgh"[i&7]+(8-(i>>4));
 const notation=m=>coord(m[0])+coord(m[1])+(m[2]||"");
 const review=$("reviewPanel"),launch=$("openReview"),close=$("closeReview"),progress=$("reviewProgress"),summary=$("reviewSummary"),items=$("reviewMoves"),headline=$("reviewHeadline");
-let worker=null,positions=[],results=[],index=0,score=null,best="",active=false,token=0,reviewAt=0,playTimer=null;
+let worker=null,positions=[],results=[],index=0,score=null,best="",active=false,token=0,reviewAt=0,playTimer=null,analysisKey="";
 function fen(s){
  const rows=[];for(let r=0;r<8;r++){let row="",empty=0;for(let c=0;c<8;c++){const p=s.b[r*16+c];if(p===".")empty++;else{if(empty)row+=empty;empty=0;row+=p;}}if(empty)row+=empty;rows.push(row);}
  const castle=(s.c&1?"K":"")+(s.c&2?"Q":"")+(s.c&4?"k":"")+(s.c&8?"q":"");
@@ -51,6 +51,9 @@ function drawReviewBoard(previous=-1){
  let message="Wähle einen Zug oder starte die animierte Wiedergabe.";
  if(i>=0){const loss=before&&after?Math.max(0,Math.round((before.cp-after.cp)*positions[i].t)):null;
  message=loss===null?"Zug "+notation(movesPlayed[i])+" – Engine-Auswertung läuft.":label(loss,false)[0]+": "+notation(movesPlayed[i])+". "+describe(i,loss,before.best);}
+ const level=$("coachDetail")?.value||"normal";
+ if(level==="basic"&&i>=0&&before&&after){const loss=Math.max(0,Math.round((before.cp-after.cp)*positions[i].t));message=loss<95?"Gut gespielt. Achte weiter auf sichere Figuren.":"Hier lohnt es sich, nach einem besseren Zug zu suchen.";}
+ if(level==="advanced"&&i>=0&&before){message+=" Engine-Empfehlung (UCI): "+(before.best||"nicht verfügbar")+".";}
  $("reviewCoachText").textContent=message;
  $("reviewPrevious").disabled=reviewAt===0;
  $("reviewNext").disabled=reviewAt>=movesPlayed.length;
@@ -100,7 +103,7 @@ function renderOverview(){
  $("overviewCoach").textContent="Die Analyse ist bereit. Sieh dir an, welche Züge gut waren und wo du dich verbessern kannst.";
  $("overviewStart").disabled=false;
 }
-function finish(){active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();drawReviewBoard();renderOverview();}
+function finish(){try{localStorage.setItem("schachnova.review.v2."+analysisKey,JSON.stringify({results,version:2}));}catch(e){console.warn("Analyse-Cache nicht gespeichert",e);}active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();drawReviewBoard();renderOverview();}
 function next(t){
  if(t!==token||!active)return;
  if(index>=positions.length){finish();return;}
@@ -113,6 +116,10 @@ function start(){
  if(variantMode!=="standard"){progress.textContent="Die Stockfish-Analyse unterstützt derzeit nur klassisches Schach.";return;}
  if(worker)worker.terminate();token++;const t=token;
  positions=history.slice();results=[];index=0;reviewAt=0;active=true;drawReviewBoard();items.replaceChildren();summary.textContent="";headline.textContent="Stockfish analysiert deine Partie";
+ analysisKey=movesPlayed.map(notation).join("_");
+ try{const cached=JSON.parse(localStorage.getItem("schachnova.review.v2."+analysisKey)||"null");
+ if(cached?.version===2&&Array.isArray(cached.results)&&cached.results.length===positions.length&&cached.results.every(r=>Number.isFinite(r.cp))){results=cached.results;active=false;progress.textContent="Gespeicherte Analyse geladen.";renderReview();drawReviewBoard();renderOverview();return;}}catch(e){console.warn("Analyse-Cache beschädigt",e);}
+ 
  try{worker=new Worker("stockfish-19-lite-single.js");worker.onmessage=e=>{
   if(t!==token||!active)return;const line=String(e.data);
   if(line==="uciok"){worker.postMessage("isready");return;}
@@ -133,5 +140,9 @@ $("reviewAgain").onclick=start;
 $("reviewBack").onclick=()=>{stopReplay();review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
 $("reviewPrevious").onclick=()=>{stopReplay();selectReview(reviewAt-1)};
 $("reviewNext").onclick=()=>{stopReplay();selectReview(reviewAt+1)};
-$("reviewPlay").onclick=()=>{if(playTimer){stopReplay();return;}if(reviewAt>=movesPlayed.length)selectReview(0);$("reviewPlay").textContent="⏸ Pause";playTimer=setInterval(()=>{if(reviewAt>=movesPlayed.length){stopReplay();return;}selectReview(reviewAt+1);},900);};
+$("reviewPlay").onclick=()=>{if(playTimer){stopReplay();return;}if(reviewAt>=movesPlayed.length)selectReview(0);$("reviewPlay").textContent="⏸ Pause";playTimer=setInterval(()=>{if(reviewAt>=movesPlayed.length){stopReplay();return;}selectReview(reviewAt+1);},Number($("reviewSpeed")?.value||900));};
+$("reviewSpeed")?.addEventListener("change",()=>{if(playTimer){stopReplay();$("reviewPlay").click();}});
+$("coachDetail")?.addEventListener("change",()=>drawReviewBoard());
+$("coachSpeak")?.addEventListener("click",()=>{if(!("speechSynthesis" in window))return;window.speechSynthesis.cancel();const speech=new SpeechSynthesisUtterance($("reviewCoachText").textContent);speech.lang="de-DE";speech.rate=.95;window.speechSynthesis.speak(speech);});
+$("overviewChart")?.addEventListener("click",e=>{if(!results.length)return;const rect=e.currentTarget.getBoundingClientRect(),fraction=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));$("overviewStart").click();selectReview(Math.round(fraction*movesPlayed.length));});
 })();
