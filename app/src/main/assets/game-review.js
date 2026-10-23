@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const coord=i=>"abcdefgh"[i&7]+(8-(i>>4));
 const notation=m=>coord(m[0])+coord(m[1])+(m[2]||"");
 const review=$("reviewPanel"),launch=$("openReview"),close=$("closeReview"),progress=$("reviewProgress"),summary=$("reviewSummary"),items=$("reviewMoves"),headline=$("reviewHeadline");
-let worker=null,positions=[],results=[],index=0,score=null,best="",active=false,token=0,reviewAt=0,playTimer=null,analysisKey="",engineDepth=0;
+let worker=null,positions=[],results=[],index=0,score=null,best="",active=false,token=0,reviewAt=0,playTimer=null,analysisKey="",engineDepth=0,principal=[],training=null,previewState=null,previewMove=null;
 function fen(s){
  const rows=[];for(let r=0;r<8;r++){let row="",empty=0;for(let c=0;c<8;c++){const p=s.b[r*16+c];if(p===".")empty++;else{if(empty)row+=empty;empty=0;row+=p;}}if(empty)row+=empty;rows.push(row);}
  const castle=(s.c&1?"K":"")+(s.c&2?"Q":"")+(s.c&4?"k":"")+(s.c&8?"q":"");
@@ -30,15 +30,16 @@ function describe(i,loss,bestMove){
 }
 function drawReviewBoard(previous=-1){
  const board=$("reviewBoard");if(!board||!positions.length)return;
- const state=positions[reviewAt];if(!state)return;
+ const state=previewState||positions[reviewAt];if(!state)return;
  board.replaceChildren();
- const move=reviewAt>0?movesPlayed[reviewAt-1]:null;
+ const move=previewMove||(reviewAt>0?movesPlayed[reviewAt-1]:null);
  for(let j=0;j<64;j++){
   const i=(j>>3)*16+(j&7),p=state.b[i],cell=document.createElement("div");
   cell.className="review-square "+(((j>>3)+(j&7))%2?"review-dark":"review-light");
   if(move&&(i===move[0]||i===move[1]))cell.classList.add("review-highlight");
   if(p!=="."){const img=document.createElement("img");img.src="pieces/"+(p===p.toUpperCase()?"w":"b")+p.toUpperCase()+".svg";img.alt="";img.className="review-piece";cell.append(img);}
-  board.append(cell);
+  if(training&&training.square===i){cell.style.outline="3px solid #ffda65";cell.style.outlineOffset="-3px";}
+  cell.onclick=()=>trainingClick(i);board.append(cell);
  }
  if(previous>=0&&reviewAt===previous+1&&move){
   const from=(move[0]>>4)*8+(move[0]&7),to=(move[1]>>4)*8+(move[1]&7);
@@ -58,7 +59,30 @@ function drawReviewBoard(previous=-1){
  $("reviewPrevious").disabled=reviewAt===0;
  $("reviewNext").disabled=reviewAt>=movesPlayed.length;
 }
-function selectReview(n){const previous=reviewAt;reviewAt=Math.max(0,Math.min(movesPlayed.length,n));drawReviewBoard(previous);}
+function selectReview(n){const previous=reviewAt;reviewAt=Math.max(0,Math.min(movesPlayed.length,n));previewState=null;previewMove=null;training=null;drawReviewBoard(previous);}
+function trainingClick(i){
+ if(!training)return;
+ if(training.square===null){if(training.state.b[i]!=="."&&((training.state.b[i]===training.state.b[i].toUpperCase())===(training.state.t===1))){training.square=i;drawReviewBoard();}return;}
+ const attempt=coord(training.square)+coord(i),expected=training.expected;
+ if(attempt===expected.slice(0,4)){ $("reviewExerciseStatus").textContent="✓ Richtig! "+expected+" ist die Engine-Empfehlung.";training=null;previewState=null;previewMove=null;drawReviewBoard();return;}
+ $("reviewExerciseStatus").textContent="Noch nicht richtig. Suche den stärksten Zug.";training.square=null;drawReviewBoard();
+}
+function beginTraining(){
+ stopReplay();const i=reviewAt-1;
+ if(i<0||!results[i]?.best||results[i].best==="(none)"){ $("reviewExerciseStatus").textContent="Wähle zuerst einen ausgewerteten Zug.";return;}
+ training={state:positions[i],expected:results[i].best,square:null};previewState=positions[i];previewMove=null;drawReviewBoard();
+ $("reviewExerciseStatus").textContent="Trainingsaufgabe: Du bist "+(positions[i].t===1?"Weiß":"Schwarz")+". Finde einen besseren Zug. Tippe zuerst auf eine Figur, dann auf ihr Zielfeld.";
+}
+function playBestLine(){
+ stopReplay();const i=reviewAt-1;
+ if(i<0||!results[i]?.best||results[i].best==="(none)"){$("reviewExerciseStatus").textContent="Für diesen Zug liegt keine Engine-Empfehlung vor.";return;}
+ const move=results[i].best,from=move.slice(0,2),to=move.slice(2,4);
+ const state=positions[i],fromIndex=(8-Number(from[1]))*16+"abcdefgh".indexOf(from[0]),toIndex=(8-Number(to[1]))*16+"abcdefgh".indexOf(to[0]);
+ const piece=state.b[fromIndex];if(!piece||piece===".")return;
+ const b=state.b.slice();b[fromIndex]=".";b[toIndex]=move[4]?(state.t===1?move[4].toUpperCase():move[4]):piece;
+ previewState={...state,b};previewMove=[fromIndex,toIndex];training=null;drawReviewBoard();
+ $("reviewExerciseStatus").textContent="Stockfish empfiehlt "+move+". Vorschau des ersten Zuges; vollständige Variantenfolge folgt nach PV-Integration.";
+}
 function stopReplay(){if(playTimer){clearInterval(playTimer);playTimer=null;}const b=$("reviewPlay");if(b)b.textContent="▶ Abspielen";}
 function renderReview(){
  items.replaceChildren();let counts={best:0,good:0,inaccurate:0,mistake:0,blunder:0},losses=0;
@@ -107,7 +131,7 @@ function finish(){try{localStorage.setItem("schachnova.review.v3."+analysisKey,J
 function next(t){
  if(t!==token||!active)return;
  if(index>=positions.length){finish();return;}
- score=null;best="";engineDepth=0;progress.textContent="Analysiere Stellung "+(index+1)+" von "+positions.length+" …";$("overviewProgress").textContent=progress.textContent;
+ score=null;best="";principal=[];engineDepth=0;progress.textContent="Analysiere Stellung "+(index+1)+" von "+positions.length+" …";$("overviewProgress").textContent=progress.textContent;
  worker.postMessage("position fen "+fen(positions[index]));
  worker.postMessage("go depth 10");
 }
@@ -126,9 +150,9 @@ function start(){
   if(line==="readyok"){next(t);return;}
   if(line.startsWith("info ")&&line.includes(" score ")){
    const m=line.match(/score (cp|mate) (-?\d+)/);
-   if(m){const depth=Number(line.match(/\bdepth (\d+)/)?.[1]||0);if(depth>=engineDepth&&!/\bmultipv [2-9]/.test(line)){engineDepth=depth;const v=Number(m[2]);score=(m[1]==="cp"?v:Math.sign(v)*10000)*positions[index].t;}}
+   if(m){const depth=Number(line.match(/\bdepth (\d+)/)?.[1]||0);if(depth>=engineDepth&&!/\bmultipv [2-9]/.test(line)){engineDepth=depth;principal=(line.match(/\bpv ([a-h][1-8][a-h][1-8][qrbn]?(?:\s+[a-h][1-8][a-h][1-8][qrbn]?)*)/)?.[1]||"").split(/\s+/).filter(Boolean);const v=Number(m[2]);score=(m[1]==="cp"?v:Math.sign(v)*10000)*positions[index].t;}}
   }
-  if(line.startsWith("bestmove ")){best=line.split(" ")[1];results.push({cp:score===null?null:score,best,depth:engineDepth});index++;next(t);}
+  if(line.startsWith("bestmove ")){best=line.split(" ")[1];results.push({cp:score===null?null:score,best,pv:principal.slice(),depth:engineDepth});index++;next(t);}
  };worker.onerror=()=>{active=false;progress.textContent="Stockfish konnte nicht gestartet werden. Bitte die Offline-Engine prüfen.";};worker.postMessage("uci");}
  catch(e){active=false;progress.textContent="Analyse nicht verfügbar: "+e.message;}
 }
@@ -141,6 +165,9 @@ $("reviewBack").onclick=()=>{stopReplay();review.hidden=true;active=false;token+
 $("reviewPrevious").onclick=()=>{stopReplay();selectReview(reviewAt-1)};
 $("reviewNext").onclick=()=>{stopReplay();selectReview(reviewAt+1)};
 $("reviewPlay").onclick=()=>{if(playTimer){stopReplay();return;}if(reviewAt>=movesPlayed.length)selectReview(0);$("reviewPlay").textContent="⏸ Pause";playTimer=setInterval(()=>{if(reviewAt>=movesPlayed.length){stopReplay();return;}selectReview(reviewAt+1);},Number($("reviewSpeed")?.value||900));};
+$("reviewBestLine")?.addEventListener("click",playBestLine);
+$("reviewRetry")?.addEventListener("click",beginTraining);
+$("reviewTraining")?.addEventListener("click",()=>{const i=results.findIndex((r,j)=>j<movesPlayed.length&&results[j+1]&&Number.isFinite(r.cp)&&Number.isFinite(results[j+1].cp)&&((r.cp-results[j+1].cp)*positions[j].t)>170&&r.best&&r.best!=="(none)");if(i<0){$("reviewExerciseStatus").textContent="Keine geeignete Fehleraufgabe gefunden.";return;}selectReview(i+1);beginTraining();});
 $("reviewSpeed")?.addEventListener("change",()=>{if(playTimer){stopReplay();$("reviewPlay").click();}});
 $("coachDetail")?.addEventListener("change",()=>drawReviewBoard());
 $("coachSpeak")?.addEventListener("click",()=>{if(!("speechSynthesis" in window))return;window.speechSynthesis.cancel();const speech=new SpeechSynthesisUtterance($("reviewCoachText").textContent);speech.lang="de-DE";speech.rate=.95;window.speechSynthesis.speak(speech);});
