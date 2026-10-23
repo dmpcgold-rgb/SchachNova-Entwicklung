@@ -20,4 +20,6 @@ assert.match(fairy,/ready=false;awaitingReady=true;for\(const cmd/,"Fairy must a
 assert.match(bridge,/fairy\.configure\(variantMode\);fairyVariant=variantMode;return;/,"Variant search must wait for readyok");
 assert.match(fairy,/for\(const cmd of window\.schachNovaVariantUciOptions\(name\)\)post\(cmd\);post\("isready"\);/,"Fairy must explicitly request readyok after variant options");
 assert.match(fairy,/const completed=request;request=null;if\(completed&&uciMove\(move\)\)notify\("bestmove"/,"Fairy request must be cleared before notifying listeners");
+assert.match(bridge,/catch\(e\)\{fairyRequested=false;setInfo\("Fairy-Stockfish-Start fehlgeschlagen:/,"Fairy startup failure must permit retry");
+assert.match(bridge,/if\(event.type==="error"\)\{fairyReady=false;fairyVariant=null;/,"Fairy errors must invalidate variant state");
 console.log("SchachNova: variant integration assertions passed");
