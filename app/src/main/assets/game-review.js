@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const coord=i=>"abcdefgh"[i&7]+(8-(i>>4));
 const notation=m=>coord(m[0])+coord(m[1])+(m[2]||"");
 const review=$("reviewPanel"),launch=$("openReview"),close=$("closeReview"),progress=$("reviewProgress"),summary=$("reviewSummary"),items=$("reviewMoves"),headline=$("reviewHeadline");
-let worker=null,positions=[],results=[],index=0,score=null,best="",active=false,token=0,reviewAt=0,playTimer=null,analysisKey="",engineDepth=0,principal=[],training=null,previewState=null,previewMove=null;
+let worker=null,positions=[],results=[],index=0,score=null,best="",active=false,token=0,reviewAt=0,playTimer=null,analysisKey="",engineDepth=0,principal=[],training=null,previewState=null,previewMove=null,lineTimer=null;
 function fen(s){
  const rows=[];for(let r=0;r<8;r++){let row="",empty=0;for(let c=0;c<8;c++){const p=s.b[r*16+c];if(p===".")empty++;else{if(empty)row+=empty;empty=0;row+=p;}}if(empty)row+=empty;rows.push(row);}
  const castle=(s.c&1?"K":"")+(s.c&2?"Q":"")+(s.c&4?"k":"")+(s.c&8?"q":"");
@@ -53,17 +53,20 @@ function drawReviewBoard(previous=-1){
  if(i>=0){const loss=before&&after&&Number.isFinite(before.cp)&&Number.isFinite(after.cp)?Math.max(0,Math.round((before.cp-after.cp)*positions[i].t)):null;
  message=loss===null?"Zug "+notation(movesPlayed[i])+" – Engine-Auswertung läuft.":label(loss,false)[0]+": "+notation(movesPlayed[i])+". "+describe(i,loss,before.best);}
  const level=$("coachDetail")?.value||"normal";
- if(level==="basic"&&i>=0&&before&&after){const loss=Math.max(0,Math.round((before.cp-after.cp)*positions[i].t));message=loss<95?"Gut gespielt. Achte weiter auf sichere Figuren.":"Hier lohnt es sich, nach einem besseren Zug zu suchen.";}
+ if(level==="basic"&&i>=0&&before&&after&&Number.isFinite(before.cp)&&Number.isFinite(after.cp)){const loss=Math.max(0,Math.round((before.cp-after.cp)*positions[i].t));message=loss<95?"Gut gespielt. Achte weiter auf sichere Figuren.":"Hier lohnt es sich, nach einem besseren Zug zu suchen.";}
  if(level==="advanced"&&i>=0&&before){message+=" Engine-Empfehlung (UCI): "+(before.best||"nicht verfügbar")+".";}
  $("reviewCoachText").textContent=message;
  $("reviewPrevious").disabled=reviewAt===0;
  $("reviewNext").disabled=reviewAt>=movesPlayed.length;
 }
-function selectReview(n){const previous=reviewAt;reviewAt=Math.max(0,Math.min(movesPlayed.length,n));previewState=null;previewMove=null;training=null;drawReviewBoard(previous);}
+function selectReview(n){stopLine();const previous=reviewAt;reviewAt=Math.max(0,Math.min(movesPlayed.length,n));previewState=null;previewMove=null;training=null;drawReviewBoard(previous);}
+function uciLegal(s,u){if(!/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(u))return null;return legal(s).find(m=>notation(m)===u)||null;}
+function stopLine(){if(lineTimer){clearTimeout(lineTimer);lineTimer=null;}}
 function trainingClick(i){
  if(!training)return;
  if(training.square===null){if(training.state.b[i]!=="."&&((training.state.b[i]===training.state.b[i].toUpperCase())===(training.state.t===1))){training.square=i;drawReviewBoard();}return;}
  const attempt=coord(training.square)+coord(i),expected=training.expected;
+ const valid=legal(training.state).some(m=>notation(m).slice(0,4)===attempt);if(!valid){$("reviewExerciseStatus").textContent="Dieser Zug ist nicht erlaubt.";training.square=null;drawReviewBoard();return;}
  if(attempt===expected.slice(0,4)){ $("reviewExerciseStatus").textContent="✓ Richtig! "+expected+" ist die Engine-Empfehlung.";training=null;previewState=null;previewMove=null;drawReviewBoard();return;}
  $("reviewExerciseStatus").textContent="Noch nicht richtig. Suche den stärksten Zug.";training.square=null;drawReviewBoard();
 }
@@ -74,16 +77,23 @@ function beginTraining(){
  $("reviewExerciseStatus").textContent="Trainingsaufgabe: Du bist "+(positions[i].t===1?"Weiß":"Schwarz")+". Finde einen besseren Zug. Tippe zuerst auf eine Figur, dann auf ihr Zielfeld.";
 }
 function playBestLine(){
- stopReplay();const i=reviewAt-1;
+ stopReplay();stopLine();const i=reviewAt-1;
  if(i<0||!results[i]?.best||results[i].best==="(none)"){$("reviewExerciseStatus").textContent="Für diesen Zug liegt keine Engine-Empfehlung vor.";return;}
- const move=results[i].best,from=move.slice(0,2),to=move.slice(2,4);
- const state=positions[i],fromIndex=(8-Number(from[1]))*16+"abcdefgh".indexOf(from[0]),toIndex=(8-Number(to[1]))*16+"abcdefgh".indexOf(to[0]);
- const piece=state.b[fromIndex];if(!piece||piece===".")return;
- const b=state.b.slice();b[fromIndex]=".";b[toIndex]=move[4]?(state.t===1?move[4].toUpperCase():move[4]):piece;
- previewState={...state,b};previewMove=[fromIndex,toIndex];training=null;drawReviewBoard();
- $("reviewExerciseStatus").textContent="Stockfish empfiehlt "+move+". Vorschau des ersten Zuges; vollständige Variantenfolge folgt nach PV-Integration.";
+ const sequence=results[i].pv?.length?results[i].pv:[results[i].best];
+ let state=positions[i],step=0;training=null;
+ function advance(){
+  if(step>=sequence.length){lineTimer=null;$("reviewExerciseStatus").textContent="Stockfish-Variante beendet ("+step+" Halbzüge).";return;}
+  const u=sequence[step],m=uciLegal(state,u);
+  if(!m){lineTimer=null;$("reviewExerciseStatus").textContent="Variante nach "+step+" Zügen beendet: nicht legaler Engine-Zug.";return;}
+  state=apply(state,m);previewState=state;previewMove=m;drawReviewBoard();
+  const from=(m[0]>>4)*8+(m[0]&7),to=(m[1]>>4)*8+(m[1]&7),img=$("reviewBoard").children[to]?.querySelector("img");
+  if(img?.animate){const width=$("reviewBoard").children[to].getBoundingClientRect().width;img.animate([{transform:"translate("+((from%8)-(to%8))*width+"px,"+(Math.floor(from/8)-Math.floor(to/8))*width+"px)"},{transform:"translate(0,0)"}],{duration:330,easing:"ease-out"});}
+  step++;$("reviewExerciseStatus").textContent="Stockfish-Variante: "+step+" / "+sequence.length+" · "+u;
+  lineTimer=setTimeout(advance,Math.max(450,Number($("reviewSpeed")?.value||900)));
+ }
+ advance();
 }
-function stopReplay(){if(playTimer){clearInterval(playTimer);playTimer=null;}const b=$("reviewPlay");if(b)b.textContent="▶ Abspielen";}
+function stopReplay(){stopLine();if(playTimer){clearInterval(playTimer);playTimer=null;}const b=$("reviewPlay");if(b)b.textContent="▶ Abspielen";}
 function renderReview(){
  items.replaceChildren();let counts={best:0,good:0,inaccurate:0,mistake:0,blunder:0},losses=0;
  for(let i=0;i<movesPlayed.length;i++){
