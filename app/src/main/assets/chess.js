@@ -33,11 +33,19 @@ function animateMovedPiece(m){
  const board=document.getElementById("board");if(!board)return;
  const toRow=m[1]>>4,toCol=m[1]&7,fromRow=m[0]>>4,fromCol=m[0]&7;
  const r=flipped?7-toRow:toRow,c=flipped?7-toCol:toCol;
- const img=board.children[r*8+c]?.querySelector(".piece-img");if(!img)return;
- const cell=board.children[r*8+c];const width=cell.getBoundingClientRect().width,height=cell.getBoundingClientRect().height;
- const dx=(flipped?toCol-fromCol:fromCol-toCol)*width;
- const dy=(flipped?toRow-fromRow:fromRow-toRow)*height;
- if(img.animate)img.animate([{transform:"translate("+dx+"px, "+dy+"px)"},{transform:"translate(0,0)"}],{duration:420,easing:"cubic-bezier(.22,.61,.36,1)",fill:"both"});
+ const cell=board.children[r*8+c],img=cell?.querySelector(".piece-img");if(!img||!img.animate)return;
+ const width=cell.getBoundingClientRect().width,height=cell.getBoundingClientRect().height;
+ const dx=(flipped?toCol-fromCol:fromCol-toCol)*width,dy=(flipped?toRow-fromRow:fromRow-toRow)*height;
+ // Render creates the final position first; the moving piece then glides from its old square.
+ // Animate the full square to avoid the image-only clipping/jitter of the previous version.
+ cell.style.zIndex="4";cell.style.position="relative";
+ const animation=img.animate([
+  {transform:"translate3d("+dx+"px,"+dy+"px,0) scale(1)",offset:0},
+  {transform:"translate3d("+(dx*.45)+"px,"+(dy*.45)+"px,0) scale(1.055)",offset:.55},
+  {transform:"translate3d(0,0,0) scale(1)",offset:1}
+ ],{duration:340,easing:"cubic-bezier(.25,.1,.25,1)",fill:"none"});
+ animation.onfinish=()=>{cell.style.zIndex="";cell.style.position="";};
+ animation.oncancel=()=>{cell.style.zIndex="";cell.style.position="";};
 }
 function choose(i){if(ended||viewIndex!==history.length-1)return;const s=current();
 // Im Bot-Modus darf Weiß während der gegnerischen Bedenkzeit genau einen Zug vormerken.
