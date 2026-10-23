@@ -134,6 +134,17 @@ s=position({h1:"K",e5:"P"},{c6:"k",d5:"p"},1,0,sq("d6"));
 assert(atomicKingThreat(s,-1),"White en passant explosion threatens black king on c6");
 s={...s,t:-1};
 assert(!atomicKingThreat(s,-1),"White en passant is not available on black's turn");
+// Atomic king safety: a quiet king move into an explosion radius is illegal.
+s=position({e1:"K",f2:"P"},{a8:"k",f8:"r"},1);
+assert(!legal(s).some(m=>uci(m)==="e1f1"),"King cannot step beside a capturable pawn");
+// Atomic king safety: an attacker cannot threaten via a capture exploding its own king.
+s=position({a1:"K",b2:"P"},{c3:"k",b8:"r"},1);
+assert(!atomicKingThreat(s,1),"A blast that also destroys the attacking king is not a legal threat");
+// Atomic black en passant: captured white pawn lies behind landing square.
+s=position({c4:"K",d4:"P"},{h8:"k",e4:"p"},-1,0,sq("d3"));
+assert(atomicKingThreat(s,1),"Black en passant explosion threatens white king on c4");
+s={...s,t:1};
+assert(!atomicKingThreat(s,1),"Black en passant is unavailable on white's turn");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
