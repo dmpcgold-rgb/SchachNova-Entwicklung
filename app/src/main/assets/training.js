@@ -51,21 +51,23 @@ function showMenu(group){
  $("trainingBack").onclick=()=>group==="home"?exit():showMenu(["e4","d4","other"].includes(group)?"openings":"home");
 }
 function exit(){stopWorker();$("trainingScreen").hidden=true;$("homeScreen").hidden=false;active=null;}
+let hintStep=0,hintFrom=-1,hintTo=-1;
+function resetHint(){hintStep=0;hintFrom=-1;hintTo=-1;}
 function renderTraining(){
  const board=$("trainingBoard");board.replaceChildren();const flipped=active.opening&&active.data.side===-1;
  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
   const i=flipped?(7-r)*16+(7-c):r*16+c,p=state.b[i],btn=document.createElement("button");
-  btn.className="sq "+((r+c)%2?"dark":"light")+(selected===i?" selected":"");
+  btn.className="sq "+((r+c)%2?"dark":"light")+(selected===i?" selected":"")+(hintFrom===i?" hint-origin":"")+(hintTo===i?" hint-destination":"");
   if(p!==".")btn.innerHTML='<img class="piece-img" draggable="false" alt="" src="pieces/'+(side(p)===1?"w":"b")+p.toUpperCase()+'.svg">';
   btn.onclick=()=>click(i);board.append(btn);
  }
 }
 function start(data,isOpening){
- stopWorker();active={data,opening:isOpening};ply=0;errors=0;selected=-1;state=isOpening?initial():fenState(data.fen);
+ stopWorker();active={data,opening:isOpening};ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
  $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
  $("trainingBack").onclick=()=>showMenu(isOpening?data.group:"endgames");
  $("trainingReset").onclick=()=>start(data,isOpening);
- $("trainingHint").onclick=()=>{if(isOpening){const next=data.moves[ply];label(next?"Hinweis: Suche den Zug "+next.slice(0,2)+" → "+next.slice(2,4)+". "+data.notes[ply]:"Übung abgeschlossen.");}else label(data.goal);};
+ $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{const candidate=legal(state)[0];if(candidate)moveText=uci(candidate);}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();};
  label(isOpening?"Übe die Eröffnung mit "+(data.side===1?"Weiß":"Schwarz")+". Ziehe die richtige Figur.":"Ziel: "+data.goal);
  renderTraining();if(isOpening)autoOpening();
 }
@@ -75,7 +77,7 @@ function autoOpening(){
  while(ply<data.moves.length&&state.t!==data.side){
   const moveText=data.moves[ply],m=legal(state).find(m=>uci(m)===moveText);
   if(!m){label("Trainingslinie enthält einen ungültigen Zug: "+moveText);return;}
-  state=apply(state,m);ply++;
+  resetHint();state=apply(state,m);ply++;
  }
  renderTraining();
  if(ply>=data.moves.length)label("Sehr gut! Eröffnung abgeschlossen. Fehler: "+errors+". Du kannst die Übung wiederholen.");
@@ -89,9 +91,9 @@ function click(i){
  if(active.opening){
   const expected=active.data.moves[ply];
   if(uci(m)!==expected){errors++;label("Nicht die gesuchte Fortsetzung. Überlege, wie du das Zentrum kontrollierst und deine Figuren entwickelst. Tipp zeigt den erwarteten Zug.");renderTraining();return;}
-  state=apply(state,m);ply++;label("Richtig! "+active.data.notes[ply-1]);autoOpening();return;
+  resetHint();state=apply(state,m);ply++;label("Richtig! "+active.data.notes[ply-1]);autoOpening();return;
  }
- state=apply(state,m);renderTraining();
+ resetHint();state=apply(state,m);renderTraining();
  if(!legal(state).length){label(checked(state)?"Schachmatt! "+(state.t===-1?"Weiß":"Schwarz")+" gewinnt.":"Patt – versuche die Übung erneut.");return;}
  if(active.data.kind==="promotion"&&state.b.some(p=>p==="Q")){label("Geschafft: Der Bauer wurde umgewandelt!");return;}
  engineReply();
