@@ -74,6 +74,17 @@ function renderTraining(){
   line.setAttribute("stroke","#a6df59");line.setAttribute("stroke-width","2.6");line.setAttribute("stroke-linecap","round");line.setAttribute("marker-end","url(#trainingArrowHead)");svg.append(line);board.append(svg);
  }
 }
+function animateTrainingMove(m,piece){
+ const board=$("trainingBoard");if(!board||!m||!piece)return;
+ const flipped=active.opening&&active.data.side===-1;
+ const cell=i=>board.children[(flipped?7-(i>>4):(i>>4))*8+(flipped?7-(i&7):(i&7))];
+ const from=cell(m[0]),to=cell(m[1]);if(!from||!to)return;
+ const target=to.querySelector(".piece-img");if(!target||!target.animate)return;
+ const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
+ const dx=a.left-b.left,dy=a.top-b.top;
+ target.animate([{transform:"translate3d("+dx+"px,"+dy+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration:210,easing:"cubic-bezier(.32,.05,.24,1)"});
+}
+function applyTrainingMove(m){const piece=state.b[m[0]];state=apply(state,m);renderTraining();animateTrainingMove(m,piece);}
 function start(data,isOpening){
  stopWorker();active={data,opening:isOpening};ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
  $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
@@ -89,7 +100,7 @@ function autoOpening(){
  while(ply<data.moves.length&&state.t!==data.side){
   const moveText=data.moves[ply],m=legal(state).find(m=>uci(m)===moveText);
   if(!m){label("Trainingslinie enthält einen ungültigen Zug: "+moveText);return;}
-  resetHint();state=apply(state,m);ply++;
+  resetHint();applyTrainingMove(m);ply++;
  }
  renderTraining();
  if(ply>=data.moves.length)label("Sehr gut! Eröffnung abgeschlossen. Fehler: "+errors+". Du kannst die Übung wiederholen.");
@@ -103,9 +114,9 @@ function click(i){
  if(active.opening){
   const expected=active.data.moves[ply];
   if(uci(m)!==expected){errors++;label("Nicht die gesuchte Fortsetzung. Überlege, wie du das Zentrum kontrollierst und deine Figuren entwickelst. Tipp zeigt den erwarteten Zug.");renderTraining();return;}
-  resetHint();state=apply(state,m);ply++;label("Richtig! "+active.data.notes[ply-1]);autoOpening();return;
+  resetHint();applyTrainingMove(m);ply++;label("Richtig! "+active.data.notes[ply-1]);autoOpening();return;
  }
- resetHint();state=apply(state,m);renderTraining();
+ resetHint();applyTrainingMove(m);
  if(!legal(state).length){label(checked(state)?"Schachmatt! "+(state.t===-1?"Weiß":"Schwarz")+" gewinnt.":"Patt – versuche die Übung erneut.");return;}
  if(active.data.kind==="promotion"&&state.b.some(p=>p==="Q")){label("Geschafft: Der Bauer wurde umgewandelt!");return;}
  engineReply();
@@ -119,7 +130,7 @@ function engineReply(){
    if(w!==worker)return;const line=String(e.data);
    if(line==="uciok"){w.postMessage("isready");return;}
    if(line==="readyok"){w.postMessage("position fen "+posFen(state));w.postMessage("go depth 8");return;}
-   if(line.startsWith("bestmove ")){const moveText=line.split(" ")[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){state=apply(state,m);renderTraining();label("Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else label("Kein gültiger Gegenzug gefunden.");}
+   if(line.startsWith("bestmove ")){const moveText=line.split(" ")[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){applyTrainingMove(m);label("Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else label("Kein gültiger Gegenzug gefunden.");}
   };
   w.onerror=()=>{stopWorker();label("Offline-Engine nicht verfügbar. Die Übung kann zurückgesetzt werden.");};
   w.postMessage("uci");
