@@ -15,4 +15,7 @@ assert.match(config,/atomic:\{label:"Atomschach",uci:"atomic",local:true,bot:fal
 assert.match(bridge,/SchachNovaVariants\?\.\[variantMode\]\?\.bot===false/,"Engine bridge must enforce unsupported variant bots");
 assert.match(bridge,/if\(variantMode!=="standard"\)\{setInfo\("Stockfish-Analyse für diese Variante noch nicht freigegeben"\)/,"Standard Stockfish analysis must reject variants");
 assert.match(bridge,/coachEnabled&&variantMode==="standard"/,"Standard Stockfish coach must not analyze special variants");
+const fairy=fs.readFileSync("app/src/main/assets/fairy-bridge.js","utf8");
+assert.match(fairy,/ready=false;awaitingReady=true;for\(const cmd/,"Fairy must await variant configuration");
+assert.match(bridge,/fairy\.configure\(variantMode\);fairyVariant=variantMode;return;/,"Variant search must wait for readyok");
 console.log("SchachNova: variant integration assertions passed");
