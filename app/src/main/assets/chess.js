@@ -32,7 +32,6 @@ if(premove&&current().t===1&&!ended&&document.getElementById("botMode").value===
 let activePieceAnimation=null;
 function animateMovedPiece(m){
  const board=document.getElementById("board");if(!board)return;
- // Animate a separate piece across the BOARD, never inside a clipped destination square.
  const fromRow=m[0]>>4,fromCol=m[0]&7,toRow=m[1]>>4,toCol=m[1]&7;
  const fromIndex=(flipped?7-fromRow:fromRow)*8+(flipped?7-fromCol:fromCol);
  const toIndex=(flipped?7-toRow:toRow)*8+(flipped?7-toCol:toCol);
@@ -40,23 +39,25 @@ function animateMovedPiece(m){
  const target=toCell?.querySelector(".piece-img");
  if(!fromCell||!toCell||!target||!target.animate)return;
  if(activePieceAnimation){activePieceAnimation.finish();activePieceAnimation=null;}
- const boardRect=board.getBoundingClientRect(),a=fromCell.getBoundingClientRect(),z=toCell.getBoundingClientRect();
- const sprite=target.cloneNode(true);
- sprite.classList.add("moving-piece");
- sprite.style.cssText="position:absolute!important;pointer-events:none!important;z-index:100!important;margin:0!important;display:block!important;transform:none!important;filter:drop-shadow(0 2px 2px #0006);";
- sprite.style.left=(a.left-boardRect.left)+"px";sprite.style.top=(a.top-boardRect.top)+"px";
- sprite.style.width=a.width+"px";sprite.style.height=a.height+"px";
- target.style.visibility="hidden";
- board.style.position="relative";board.append(sprite);
- const dx=z.left-a.left,dy=z.top-a.top;
- const distance=Math.hypot(toCol-fromCol,toRow-fromRow);
- const duration=Math.min(430,Math.max(180,170+distance*32));
- let cleaned=false;
- function cleanup(){if(cleaned)return;cleaned=true;sprite.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;}
- const animation=sprite.animate([
-  {transform:"translate3d(0,0,0)",offset:0},
-  {transform:"translate3d("+dx+"px,"+dy+"px,0)",offset:1}
- ],{duration,easing:"cubic-bezier(.32,.05,.24,1)",fill:"forwards"});
+ const br=board.getBoundingClientRect(),fr=fromCell.getBoundingClientRect(),tr=toCell.getBoundingClientRect();
+ // Use a dedicated square-sized overlay. Never append a raw piece image directly
+ // to the grid: that creates an extra grid item and can enlarge it dramatically.
+ const overlay=document.createElement("div");
+ overlay.className="piece-motion-overlay";
+ overlay.style.cssText="position:absolute;inset:0;pointer-events:none;z-index:50;overflow:visible;";
+ const sprite=document.createElement("div");
+ sprite.style.cssText="position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;will-change:transform;";
+ sprite.style.left=(fr.left-br.left)+"px";sprite.style.top=(fr.top-br.top)+"px";
+ sprite.style.width=fr.width+"px";sprite.style.height=fr.height+"px";
+ const piece=target.cloneNode(true);
+ piece.style.cssText="display:block!important;width:96%!important;height:96%!important;max-width:96%!important;max-height:96%!important;object-fit:contain!important;";
+ sprite.append(piece);overlay.append(sprite);
+ board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
+ const dx=tr.left-fr.left,dy=tr.top-fr.top;
+ const duration=Math.min(430,Math.max(190,165+Math.hypot(toCol-fromCol,toRow-fromRow)*32));
+ let done=false,animation;
+ const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;};
+ animation=sprite.animate([{transform:"translate3d(0,0,0)"},{transform:"translate3d("+dx+"px,"+dy+"px,0)"}],{duration,easing:"cubic-bezier(.32,.05,.24,1)",fill:"forwards"});
  activePieceAnimation=animation;animation.onfinish=cleanup;animation.oncancel=cleanup;
 }
 function choose(i){if(ended||viewIndex!==history.length-1)return;const s=current();
