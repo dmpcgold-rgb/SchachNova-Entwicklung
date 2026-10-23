@@ -39,6 +39,23 @@ s=position({e1:"K",b1:"N"},{e8:"k",g8:"n"});assert(!insufficient(s),"Knight vers
 s=position({e1:"K",c1:"B"},{e8:"k",c8:"b"});assert(!insufficient(s),"Bishops on opposite colors are not dead");
 s=position({e1:"K",c1:"B"},{e8:"k",f8:"b"});assert(insufficient(s),"Bishops on same square color are dead");
 s=initial();assert.equal(key(s),key({...s,ep:sq("e3")}),"Uncapturable en-passant target does not alter repetition identity");
+// Antichess: compulsory capture, no check restriction, no castling, king promotion.
+variantMode="antichess";
+s=position({e1:"K",e4:"P"},{e8:"k",d5:"p"},1);
+assert(legal(s).length>0);
+assert(legal(s).every(m=>uci(m)==="e4d5"),"Antichess must force captures");
+s=play(s,"e4d5");assert.equal(s.b[sq("d5")],"P");
+s=position({e1:"K",h1:"R"},{e8:"k",e2:"r"},1,1);
+assert(!legal(s).some(m=>uci(m)==="e1g1"),"No castling in antichess");
+assert(legal(s).some(m=>uci(m)==="e1e2"),"Kings can be captured in antichess");
+s=position({e1:"K",a7:"P"},{e8:"k"},1);
+assert(legal(s).some(m=>uci(m)==="a7a8k"),"Antichess permits king promotion");
+s=play(s,"a7a8k");assert.equal(s.b[sq("a8")],"K");
+s=position({e1:"K",e5:"P"},{e8:"k",d7:"p"},-1);
+s=play(s,"d7d5");
+assert(legal(s).some(m=>uci(m)==="e5d6"),"Antichess en passant must be available");
+assert(legal(s).every(m=>uci(m)==="e5d6"),"En passant capture must be compulsory");
+variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
 vm.runInNewContext(engine+"\n"+suite,{globalAssert:assert,console},{timeout:3000});
