@@ -19,7 +19,42 @@ function atomicExplosion(s,m,capture){
  return {...s,b,c:rights};
 }
 function pseudo(s){const out=[];for(let f=0;f<128;f++){if(!on(f)||side(s.b[f])!==s.t)continue;const p=s.b[f].toLowerCase();const add=(t,flag="")=>{if(s.b[t].toLowerCase()==="k"&&variantMode!=="antichess")return;if(p==="p"&&((t>>4)===0||(t>>4)===7))for(const q of (variantMode==="antichess"?["q","r","b","n","k"]:["q","r","b","n"]))out.push([f,t,q,flag]);else out.push([f,t,"",flag]);};if(p==="p"){const t=f-16*s.t;if(on(t)&&s.b[t]==="."){add(t);const u=t-16*s.t;if((f>>4)===(s.t===1?6:1)&&s.b[u]===".")add(u);}for(const d of [-1,1]){const u=t+d;if(!on(u))continue;if(side(s.b[u])===-s.t)add(u);else if(u===s.ep&&s.b[u]==="."&&s.b[u+16*s.t]===(s.t===1?"p":"P"))add(u,"ep");}}else{const ds=p==="q"?[...dirs.b,...dirs.r]:dirs[p];for(const d of (ds||(()=>{throw Error("Unknown piece "+JSON.stringify(s.b[f])+" at index "+f)})()))for(let t=f+d;on(t);t+=d){if(side(s.b[t])===s.t)break;add(t);if(s.b[t]!=="."||p==="n"||p==="k")break;}const home=s.t===1?116:4,rook=s.t===1?"R":"r",bits=s.t===1?[1,2]:[4,8];if(p==="k"&&variantMode!=="antichess"&&f===home&&!checked(s)){if((s.c&bits[0])&&s.b[f+3]===rook&&s.b[f+1]==="."&&s.b[f+2]==="."&&!attacked(s,f+1,-s.t)&&!attacked(s,f+2,-s.t))add(f+2,"castle");if((s.c&bits[1])&&s.b[f-4]===rook&&s.b[f-1]==="."&&s.b[f-2]==="."&&s.b[f-3]==="."&&!attacked(s,f-1,-s.t)&&!attacked(s,f-2,-s.t))add(f-2,"castle");}}}return out;}
+function atomicKingThreat(s,color){
+ const king=s.b.indexOf(color===1?"K":"k");
+ if(king<0)return true;
+ const enemyKing=s.b.indexOf(color===1?"k":"K");
+ // A capture that also explodes the attacking king is illegal.
+ const threatSquares=[king,...dirs.k.map(d=>king+d).filter(on)];
+ for(let from=0;from<128;from++){
+  if(!on(from)||side(s.b[from])!==-color||s.b[from].toLowerCase()==="k")continue;
+  const p=s.b[from].toLowerCase();
+  for(const target of threatSquares){
+   if(side(s.b[target])!==color)continue;
+   if(enemyKing>=0&&(target===enemyKing||dirs.k.some(d=>target+d===enemyKing)))continue;
+   const delta=target-from;
+   if(p==="p"){if(delta===16*color-1||delta===16*color+1)return true;continue;}
+   const ds=p==="n"?dirs.n:p==="b"?dirs.b:p==="r"?dirs.r:[...dirs.b,...dirs.r];
+   if(ds.includes(delta)&&p==="n")return true;
+   if(p==="n")continue;
+   for(const d of ds){
+    let t=from+d;
+    while(on(t)){if(t===target)return true;if(s.b[t]!==".")break;t+=d;}
+   }
+  }
+ }
+ return false;
+}
 function legal(s){
+ if(variantMode==="atomic"){
+  if(s.b.indexOf(s.t===1?"K":"k")<0)return [];
+  return pseudo(s).filter(m=>{
+   if(s.b[m[0]].toLowerCase()==="k"&&(s.b[m[1]]!=="."||m[3]==="ep"))return false;
+   const next=apply(s,m);
+   if(next.b.indexOf(s.t===1?"K":"k")<0)return false;
+   if(next.b.indexOf(s.t===1?"k":"K")<0)return true;
+   return !atomicKingThreat(next,s.t);
+  });
+ }
  if(variantMode==="antichess"){
   const moves=pseudo(s).filter(m=>m[3]!=="castle");
   const captures=moves.filter(m=>s.b[m[1]]!=="."||m[3]==="ep");
