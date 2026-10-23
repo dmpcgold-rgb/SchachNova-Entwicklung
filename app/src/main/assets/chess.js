@@ -29,23 +29,35 @@ if(premove&&current().t===1&&!ended&&document.getElementById("botMode").value===
  const queued=premove;premove=null;premoveFrom=-1;
  setTimeout(()=>{if(ended||current().t!==1)return;const legalPremove=legal(current()).find(x=>x[0]===queued[0]&&x[1]===queued[1]);if(legalPremove)move(legalPremove);else{premoveQueue=[];render();}},120);
 }}
+let activePieceAnimation=null;
 function animateMovedPiece(m){
  const board=document.getElementById("board");if(!board)return;
- const toRow=m[1]>>4,toCol=m[1]&7,fromRow=m[0]>>4,fromCol=m[0]&7;
- const r=flipped?7-toRow:toRow,c=flipped?7-toCol:toCol;
- const cell=board.children[r*8+c],img=cell?.querySelector(".piece-img");if(!img||!img.animate)return;
- const width=cell.getBoundingClientRect().width,height=cell.getBoundingClientRect().height;
- const dx=(flipped?toCol-fromCol:fromCol-toCol)*width,dy=(flipped?toRow-fromRow:fromRow-toRow)*height;
- // Render creates the final position first; the moving piece then glides from its old square.
- // Animate the full square to avoid the image-only clipping/jitter of the previous version.
- cell.style.zIndex="4";cell.style.position="relative";
- const animation=img.animate([
-  {transform:"translate3d("+dx+"px,"+dy+"px,0) scale(1)",offset:0},
-  {transform:"translate3d("+(dx*.45)+"px,"+(dy*.45)+"px,0) scale(1.055)",offset:.55},
-  {transform:"translate3d(0,0,0) scale(1)",offset:1}
- ],{duration:340,easing:"cubic-bezier(.25,.1,.25,1)",fill:"none"});
- animation.onfinish=()=>{cell.style.zIndex="";cell.style.position="";};
- animation.oncancel=()=>{cell.style.zIndex="";cell.style.position="";};
+ // Animate a separate piece across the BOARD, never inside a clipped destination square.
+ const fromRow=m[0]>>4,fromCol=m[0]&7,toRow=m[1]>>4,toCol=m[1]&7;
+ const fromIndex=(flipped?7-fromRow:fromRow)*8+(flipped?7-fromCol:fromCol);
+ const toIndex=(flipped?7-toRow:toRow)*8+(flipped?7-toCol:toCol);
+ const fromCell=board.children[fromIndex],toCell=board.children[toIndex];
+ const target=toCell?.querySelector(".piece-img");
+ if(!fromCell||!toCell||!target||!target.animate)return;
+ if(activePieceAnimation){activePieceAnimation.finish();activePieceAnimation=null;}
+ const boardRect=board.getBoundingClientRect(),a=fromCell.getBoundingClientRect(),z=toCell.getBoundingClientRect();
+ const sprite=target.cloneNode(true);
+ sprite.classList.add("moving-piece");
+ sprite.style.cssText="position:absolute!important;pointer-events:none!important;z-index:100!important;margin:0!important;display:block!important;transform:none!important;filter:drop-shadow(0 2px 2px #0006);";
+ sprite.style.left=(a.left-boardRect.left)+"px";sprite.style.top=(a.top-boardRect.top)+"px";
+ sprite.style.width=a.width+"px";sprite.style.height=a.height+"px";
+ target.style.visibility="hidden";
+ board.style.position="relative";board.append(sprite);
+ const dx=z.left-a.left,dy=z.top-a.top;
+ const distance=Math.hypot(toCol-fromCol,toRow-fromRow);
+ const duration=Math.min(430,Math.max(180,170+distance*32));
+ let cleaned=false;
+ function cleanup(){if(cleaned)return;cleaned=true;sprite.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;}
+ const animation=sprite.animate([
+  {transform:"translate3d(0,0,0)",offset:0},
+  {transform:"translate3d("+dx+"px,"+dy+"px,0)",offset:1}
+ ],{duration,easing:"cubic-bezier(.32,.05,.24,1)",fill:"forwards"});
+ activePieceAnimation=animation;animation.onfinish=cleanup;animation.oncancel=cleanup;
 }
 function choose(i){if(ended||viewIndex!==history.length-1)return;const s=current();
 // Im Bot-Modus darf Weiß während der gegnerischen Bedenkzeit genau einen Zug vormerken.
