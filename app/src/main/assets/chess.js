@@ -34,9 +34,10 @@ function animateMovedPiece(m){
  const toRow=m[1]>>4,toCol=m[1]&7,fromRow=m[0]>>4,fromCol=m[0]&7;
  const r=flipped?7-toRow:toRow,c=flipped?7-toCol:toCol;
  const img=board.children[r*8+c]?.querySelector(".piece-img");if(!img)return;
- const dx=(flipped?toCol-fromCol:fromCol-toCol)*100;
- const dy=(flipped?toRow-fromRow:fromRow-toRow)*100;
- if(img.animate)img.animate([{transform:"translate("+dx+"%, "+dy+"%)"},{transform:"translate(0,0)"}],{duration:280,easing:"cubic-bezier(.18,.8,.3,1)"});
+ const cell=board.children[r*8+c];const width=cell.getBoundingClientRect().width,height=cell.getBoundingClientRect().height;
+ const dx=(flipped?toCol-fromCol:fromCol-toCol)*width;
+ const dy=(flipped?toRow-fromRow:fromRow-toRow)*height;
+ if(img.animate)img.animate([{transform:"translate("+dx+"px, "+dy+"px)"},{transform:"translate(0,0)"}],{duration:300,easing:"cubic-bezier(.18,.8,.3,1)"});
 }
 function choose(i){if(ended||viewIndex!==history.length-1)return;const s=current();
 // Im Bot-Modus darf Weiß während der gegnerischen Bedenkzeit genau einen Zug vormerken.
