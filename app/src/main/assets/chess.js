@@ -6,9 +6,9 @@ const on=i=>i>=0&&i<128&&!(i&136), side=p=>p==="."?0:p===p.toUpperCase()?1:-1;
 function initial(){const b=Array(128).fill(".");start.split("/").forEach((row,r)=>{let c=0;for(const p of row){if(/[1-8]/.test(p))c+=Number(p);else b[r*16+c++]=p;}});return {b,t:1,c:15,ep:-1,half:0,full:1};}
 function attacked(s,target,by){for(let f=0;f<128;f++){if(!on(f)||side(s.b[f])!==by)continue;const p=s.b[f].toLowerCase();if(p==="p"){if(target===f-16*by-1||target===f-16*by+1)return true;continue;}const ds=p==="q"?[...dirs.b,...dirs.r]:dirs[p];for(const d of (ds||(()=>{throw Error("Unknown piece "+JSON.stringify(s.b[f])+" at index "+f)})()))for(let t=f+d;on(t);t+=d){if(t===target)return true;if(s.b[t]!=="."||p==="n"||p==="k")break;}}return false;}
 function checked(s,color=s.t){return attacked(s,s.b.indexOf(color===1?"K":"k"),-color);}
-function apply(s,m){const [f,t,promo,flag]=m,b=s.b.slice(),p=b[f],cap=b[t];let c=s.c;b[f]=".";b[t]=promo?(s.t===1?promo.toUpperCase():promo):p;if(flag==="ep")b[t+16*s.t]=".";if(flag==="castle"){const rf=t>f?f+3:f-4,rt=t>f?f+1:f-1;b[rt]=b[rf];b[rf]=".";}if(p==="K")c&=~3;if(p==="k")c&=~12;const bits={119:1,112:2,7:4,0:8};if(p.toLowerCase()==="r")c&=~(bits[f]||0);if(cap.toLowerCase()==="r")c&=~(bits[t]||0);const result={b,t:-s.t,c,ep:p.toLowerCase()==="p"&&Math.abs(t-f)===32?(t+f)/2:-1,half:p.toLowerCase()==="p"||cap!=="."||flag==="ep"?0:s.half+1,full:s.full+(s.t===-1?1:0)};return variantMode==="atomic"?atomicExplosion(result,m):result;}
-function atomicExplosion(s,m){
- const b=s.b.slice(),to=m[1],capture=s.b[to]!=="."||m[3]==="ep";
+function apply(s,m){const [f,t,promo,flag]=m,b=s.b.slice(),p=b[f],cap=b[t];let c=s.c;b[f]=".";b[t]=promo?(s.t===1?promo.toUpperCase():promo):p;if(flag==="ep")b[t+16*s.t]=".";if(flag==="castle"){const rf=t>f?f+3:f-4,rt=t>f?f+1:f-1;b[rt]=b[rf];b[rf]=".";}if(p==="K")c&=~3;if(p==="k")c&=~12;const bits={119:1,112:2,7:4,0:8};if(p.toLowerCase()==="r")c&=~(bits[f]||0);if(cap.toLowerCase()==="r")c&=~(bits[t]||0);const result={b,t:-s.t,c,ep:p.toLowerCase()==="p"&&Math.abs(t-f)===32?(t+f)/2:-1,half:p.toLowerCase()==="p"||cap!=="."||flag==="ep"?0:s.half+1,full:s.full+(s.t===-1?1:0)};return variantMode==="atomic"?atomicExplosion(result,m,cap!=="."||flag==="ep"):result;}
+function atomicExplosion(s,m,capture){
+ const b=s.b.slice(),to=m[1];
  if(!capture)return s;
  b[to]=".";
  for(const d of dirs.k){const i=to+d;if(on(i)&&b[i]!=="."&&b[i].toLowerCase()!=="p")b[i]=".";}
