@@ -70,6 +70,18 @@ s=position({e1:"K",e7:"R"},{e8:"k"},1);
 assert(legal(s).some(m=>uci(m)==="e7e8"),"Atomic rook can capture enemy king");
 s=play(s,"e7e8");
 assert(!s.b.includes("k"),"Atomic king capture ends with king removed");
+// Atomic en passant: the landing square is the blast centre.
+s=position({a1:"K",e5:"P",c6:"B"},{h8:"k",d7:"p",e6:"n"},-1);
+s=play(s,"d7d5");
+assert(legal(s).some(m=>uci(m)==="e5d6"),"Atomic en passant capture is legal");
+s=play(s,"e5d6");
+assert.equal(s.b[sq("d6")],".","En passant capturing pawn explodes");
+assert.equal(s.b[sq("d5")],".","En passant captured pawn removed");
+assert.equal(s.b[sq("e6")],".","Adjacent knight explodes");
+assert.equal(s.b[sq("c6")],".","Adjacent bishop explodes");
+s=position({d4:"K",e5:"P"},{h8:"k",d7:"p"},-1);
+s=play(s,"d7d5");
+assert(!legal(s).some(m=>uci(m)==="e5d6"),"Atomic en passant cannot explode own king");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
