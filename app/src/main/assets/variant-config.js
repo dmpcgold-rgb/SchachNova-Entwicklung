@@ -10,7 +10,7 @@ window.SchachNovaVariants=Object.freeze({
  threecheck:{label:"Drei-Schach",uci:"3check",local:true},
  antichess:{label:"Räuberschach",uci:"antichess",local:true,bot:false},
  chess960:{label:"Schach960",uci:"chess",uciChess960:true,local:false},
- atomic:{label:"Atomschach",uci:"atomic",local:false},
+ atomic:{label:"Atomschach",uci:"atomic",local:true,bot:false},
  horde:{label:"Horde",uci:"horde",local:false},
  racingkings:{label:"Racing Kings",uci:"racingkings",local:false},
  crazyhouse:{label:"Crazyhouse",uci:"crazyhouse",local:false}
