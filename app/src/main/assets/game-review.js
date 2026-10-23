@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const coord=i=>"abcdefgh"[i&7]+(8-(i>>4));
 const notation=m=>coord(m[0])+coord(m[1])+(m[2]||"");
 const review=$("reviewPanel"),launch=$("openReview"),close=$("closeReview"),progress=$("reviewProgress"),summary=$("reviewSummary"),items=$("reviewMoves"),headline=$("reviewHeadline");
-let worker=null,positions=[],results=[],index=0,score=null,best="",active=false,token=0;
+let worker=null,positions=[],results=[],index=0,score=null,best="",active=false,token=0,reviewAt=0,playTimer=null;
 function fen(s){
  const rows=[];for(let r=0;r<8;r++){let row="",empty=0;for(let c=0;c<8;c++){const p=s.b[r*16+c];if(p===".")empty++;else{if(empty)row+=empty;empty=0;row+=p;}}if(empty)row+=empty;rows.push(row);}
  const castle=(s.c&1?"K":"")+(s.c&2?"Q":"")+(s.c&4?"k":"")+(s.c&8?"q":"");
@@ -28,6 +28,35 @@ function describe(i,loss,bestMove){
  if(loss<320)return "Hier verliert deine Stellung deutlich an Wert. Suche zuerst nach gegnerischen taktischen Möglichkeiten und prüfe Kandidatenzüge."+(better?" Die Engine bevorzugt "+better+".":"");
  return "Dieser Zug führt zu einem großen Bewertungsverlust. Überprüfe, ob eine Figur hängt, ein Mattangriff entsteht oder eine taktische Kombination möglich ist."+(better?" Stärker war "+better+".":"");
 }
+function drawReviewBoard(previous=-1){
+ const board=$("reviewBoard");if(!board||!positions.length)return;
+ const state=positions[reviewAt];if(!state)return;
+ board.replaceChildren();
+ const move=reviewAt>0?movesPlayed[reviewAt-1]:null;
+ for(let j=0;j<64;j++){
+  const i=(j>>3)*16+(j&7),p=state.b[i],cell=document.createElement("div");
+  cell.className="review-square "+(((j>>3)+(j&7))%2?"review-dark":"review-light");
+  if(move&&(i===move[0]||i===move[1]))cell.classList.add("review-highlight");
+  if(p!=="."){const img=document.createElement("img");img.src="pieces/"+(p===p.toUpperCase()?"w":"b")+p.toUpperCase()+".svg";img.alt="";img.className="review-piece";cell.append(img);}
+  board.append(cell);
+ }
+ if(previous>=0&&reviewAt===previous+1&&move){
+  const from=(move[0]>>4)*8+(move[0]&7),to=(move[1]>>4)*8+(move[1]&7);
+  const img=board.children[to]?.querySelector("img");
+  if(img){const dx=((from%8)-(to%8))*100,dy=(Math.floor(from/8)-Math.floor(to/8))*100;
+   img.animate([{transform:"translate("+dx+"%, "+dy+"%)"},{transform:"translate(0,0)"}],{duration:360,easing:"cubic-bezier(.2,.75,.25,1)"});}
+ }
+ $("reviewStep").textContent=reviewAt+" / "+movesPlayed.length;
+ const i=reviewAt-1, before=results[i],after=results[i+1];
+ let message="Wähle einen Zug oder starte die animierte Wiedergabe.";
+ if(i>=0){const loss=before&&after?Math.max(0,Math.round((before.cp-after.cp)*positions[i].t)):null;
+ message=loss===null?"Zug "+notation(movesPlayed[i])+" – Engine-Auswertung läuft.":label(loss,false)[0]+": "+notation(movesPlayed[i])+". "+describe(i,loss,before.best);}
+ $("reviewCoachText").textContent=message;
+ $("reviewPrevious").disabled=reviewAt===0;
+ $("reviewNext").disabled=reviewAt>=movesPlayed.length;
+}
+function selectReview(n){const previous=reviewAt;reviewAt=Math.max(0,Math.min(movesPlayed.length,n));drawReviewBoard(previous);}
+function stopReplay(){if(playTimer){clearInterval(playTimer);playTimer=null;}const b=$("reviewPlay");if(b)b.textContent="▶ Abspielen";}
 function renderReview(){
  items.replaceChildren();let counts={best:0,good:0,inaccurate:0,mistake:0,blunder:0},losses=0;
  for(let i=0;i<movesPlayed.length;i++){
@@ -40,7 +69,7 @@ function renderReview(){
   const num=Math.floor(i/2)+1+(i%2?"…":".");
   row.innerHTML="<strong>"+num+" "+notation(movesPlayed[i])+"</strong><span style='color:"+color+"'>"+name+"</span><small>−"+(delta/100).toFixed(2)+" Bauerneinheiten</small>";
   const explanation=document.createElement("p");explanation.textContent=describe(i,delta,before.best);explanation.hidden=true;
-  row.append(explanation);row.onclick=()=>{explanation.hidden=!explanation.hidden;viewIndex=i+1;renderBoardSafely();};
+  row.append(explanation);row.onclick=()=>{explanation.hidden=!explanation.hidden;selectReview(i+1);review.scrollTo({top:0,behavior:"smooth"});};
   items.append(row);
  }
  const analyzed=items.children.length;
@@ -49,8 +78,8 @@ function renderReview(){
  summary.textContent="Geschätzte Analysequalität: "+accuracy+"/100 · Beste Züge: "+counts.best+" · Gut: "+counts.good+" · Ungenauigkeiten: "+counts.inaccurate+" · Fehler: "+counts.mistake+" · Grobe Fehler: "+counts.blunder;
  headline.textContent="Partieanalyse abgeschlossen";
 }
-function renderBoardSafely(){if(typeof window.render==="function")window.render();else if(typeof render==="function")render();}
-function finish(){active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();}
+
+function finish(){active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();drawReviewBoard();}
 function next(t){
  if(t!==token||!active)return;
  if(index>=positions.length){finish();return;}
@@ -62,7 +91,7 @@ function start(){
  if(!history||history.length<2){progress.textContent="Noch keine Züge vorhanden.";return;}
  if(variantMode!=="standard"){progress.textContent="Die Stockfish-Analyse unterstützt derzeit nur klassisches Schach.";return;}
  if(worker)worker.terminate();token++;const t=token;
- positions=history.slice();results=[];index=0;active=true;items.replaceChildren();summary.textContent="";headline.textContent="Stockfish analysiert deine Partie";
+ positions=history.slice();results=[];index=0;reviewAt=0;active=true;drawReviewBoard();items.replaceChildren();summary.textContent="";headline.textContent="Stockfish analysiert deine Partie";
  try{worker=new Worker("stockfish-19-lite-single.js");worker.onmessage=e=>{
   if(t!==token||!active)return;const line=String(e.data);
   if(line==="uciok"){worker.postMessage("isready");return;}
@@ -75,8 +104,11 @@ function start(){
  };worker.onerror=()=>{active=false;progress.textContent="Stockfish konnte nicht gestartet werden. Bitte die Offline-Engine prüfen.";};worker.postMessage("uci");}
  catch(e){active=false;progress.textContent="Analyse nicht verfügbar: "+e.message;}
 }
-launch.onclick=()=>{review.hidden=false;start();};
-close.onclick=()=>{review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
+launch.onclick=()=>{stopReplay();review.hidden=false;start();};
+close.onclick=()=>{stopReplay();review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
 $("reviewAgain").onclick=start;
-$("reviewBack").onclick=()=>{review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
+$("reviewBack").onclick=()=>{stopReplay();review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
+$("reviewPrevious").onclick=()=>{stopReplay();selectReview(reviewAt-1)};
+$("reviewNext").onclick=()=>{stopReplay();selectReview(reviewAt+1)};
+$("reviewPlay").onclick=()=>{if(playTimer){stopReplay();return;}if(reviewAt>=movesPlayed.length)selectReview(0);$("reviewPlay").textContent="⏸ Pause";playTimer=setInterval(()=>{if(reviewAt>=movesPlayed.length){stopReplay();return;}selectReview(reviewAt+1);},900);};
 })();
