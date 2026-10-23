@@ -29,7 +29,7 @@ function atomicKingThreat(s,color){
  // centred on the empty landing square rather than the captured pawn.
  if(s.t===-color&&s.ep>=0&&on(s.ep)&&s.b[s.ep]==="."){
   const attackingColor=-color,landing=s.ep;
-  const capturedPawn=landing-16*attackingColor;
+  const capturedPawn=landing+16*attackingColor;
   const ownPawn=color===1?"P":"p";
   const enemyPawn=attackingColor===1?"P":"p";
   if(on(capturedPawn)&&s.b[capturedPawn]===ownPawn&&
