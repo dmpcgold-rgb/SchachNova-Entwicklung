@@ -41,8 +41,8 @@ function maybePlay(){
   if(!fairyRequested){fairyRequested=true;try{fairy.start();}catch(e){setInfo("Fairy-Stockfish-Start fehlgeschlagen: "+e.message);}return;}
   if(!fairyReady)return;
   try{
-   if(fairyVariant!==variantMode){fairy.configure(variantMode);fairyVariant=variantMode;}
-   if(fairy.state.thinking)return;
+   if(fairyVariant!==variantMode){fairy.configure(variantMode);fairyVariant=variantMode;return;}
+   if(!fairy.state.ready||fairy.state.thinking)return;
    fairy.search(movesPlayed.map(notation),Math.max(1,Math.min(16,Math.round(strength*.7)+2)));
    setInfo("Fairy-Stockfish denkt · "+(window.SchachNovaVariants[variantMode]?.label||variantMode));
   }catch(e){setInfo("Fairy-Stockfish: "+e.message);}
