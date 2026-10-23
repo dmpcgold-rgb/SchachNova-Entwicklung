@@ -2,11 +2,11 @@
 "use strict";
 const path=require("node:path");
 const assert=require("node:assert/strict");
-const {pathToFileURL}=require("node:url");
+const fs=require("node:fs");
 const corePath=path.resolve(process.argv[2]||"node_modules/fairy-stockfish-nnue.wasm/stockfish.js");
 const factory=require(corePath);
 (async()=>{
- const engine=await factory({locateFile:file=>pathToFileURL(path.join(path.dirname(corePath),file)).href});
+ const engine=await factory({wasmBinary:fs.readFileSync(path.join(path.dirname(corePath),"stockfish.wasm"))});
  let output=[];
  engine.addMessageListener?.(line=>output.push(String(line)));
  const command=async(value,expected,timeout=30000)=>{
