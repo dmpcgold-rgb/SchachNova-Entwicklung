@@ -149,7 +149,7 @@ assert(!atomicKingThreat(s,1),"Black en passant is unavailable on white's turn")
 s=position({c4:"K"},{h8:"k",e4:"p"},-1,0,sq("d3"));
 assert(!atomicKingThreat(s,1),"No en passant threat without the captured pawn");
 // An enemy king in the blast radius makes the attacking capture illegal.
-s=position({c4:"K",d4:"P"},{c2:"k",e4:"p"},-1,0,sq("d3"));
+s=position({c4:"K",d4:"P"},{e2:"k",e4:"p"},-1,0,sq("d3"));
 assert(!atomicKingThreat(s,1),"En passant cannot explode both kings");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
