@@ -33,7 +33,11 @@ jobs:
           test -n "$JS" && test -n "$WASM"
           cp "$JS" app/src/main/assets/stockfish-19-lite-single.js
           cp "$WASM" app/src/main/assets/stockfish-19-lite-single.wasm
-          curl -fsSL https://www.gnu.org/licenses/gpl-3.0.txt -o app/src/main/assets/STOCKFISH-GPLv3.txt
+          # The GPL license is bundled in the npm package; avoid a flaky external GNU download.
+          LICENSE=$(find /tmp/sf-package/package -maxdepth 3 -type f \( -iname "COPYING*" -o -iname "LICENSE*" \) | head -1)
+          test -n "$LICENSE"
+          cp "$LICENSE" app/src/main/assets/STOCKFISH-GPLv3.txt
+          test -s app/src/main/assets/STOCKFISH-GPLv3.txt
           test -s app/src/main/assets/stockfish-19-lite-single.js && test -s app/src/main/assets/stockfish-19-lite-single.wasm
       - name: Check JavaScript syntax
         run: |
