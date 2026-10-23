@@ -27,7 +27,7 @@ function atomicKingThreat(s,color){
  const threatSquares=[king,...dirs.k.map(d=>king+d).filter(on)];
  // En passant: the captured pawn disappears, while the explosion is
  // centred on the empty landing square rather than the captured pawn.
- if(s.ep>=0&&on(s.ep)&&s.b[s.ep]==="."){
+ if(s.t===-color&&s.ep>=0&&on(s.ep)&&s.b[s.ep]==="."){
   const attackingColor=-color,landing=s.ep;
   const capturedPawn=landing+16*attackingColor;
   const ownPawn=color===1?"P":"p";
