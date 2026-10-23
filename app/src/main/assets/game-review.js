@@ -20,13 +20,49 @@ function label(loss,book){
  if(loss<320)return ["Fehler","#f19a4e"];
  return ["Grober Fehler","#ed6660"];
 }
+const openingLines=[
+ ["e2e4 e7e5 g1f3 b8c6 f1c4","Italienische Partie"],
+ ["e2e4 e7e5 g1f3 b8c6 f1b5","Spanische Partie"],
+ ["e2e4 c7c5","Sizilianische Verteidigung"],
+ ["e2e4 e7e6","Französische Verteidigung"],
+ ["e2e4 c7c6","Caro-Kann-Verteidigung"],
+ ["e2e4 e7e5 g1f3 g8f6","Russische Verteidigung"],
+ ["e2e4 e7e5 g1f3 b8c6 f1c4 f8c5","Italienische Partie · Giuoco Piano"],
+ ["d2d4 d7d5 c2c4 e7e6","Abgelehntes Damengambit"],
+ ["d2d4 d7d5 c2c4 d5c4","Angenommenes Damengambit"],
+ ["d2d4 g8f6 c2c4 e7e6 b1c3 f8b4","Nimzo-Indische Verteidigung"],
+ ["d2d4 g8f6 c2c4 g7g6","Königsindischer Aufbau"],
+ ["d2d4 d7d5 c1f4","Londoner System"],
+ ["e2e4 e7e5 g1f3 b8c6 d2d4","Schottische Partie"],
+ ["e2e4 d7d5","Skandinavische Verteidigung"],
+ ["e2e4 d7d6","Pirc-Verteidigung"],
+ ["c2c4","Englische Eröffnung"],
+ ["g1f3","Réti-Eröffnung"]
+];
+function openingName(){
+ const moves=movesPlayed.map(notation).join(" ");let found=null;
+ for(const [seq,name] of openingLines){if(moves===seq||moves.startsWith(seq+" ")){if(!found||seq.length>found[0].length)found=[seq,name];}}
+ return found?found[1]:"Keine bekannte Eröffnung in der lokalen Kurz-Datenbank";
+}
+function tacticalExplanation(i,loss,bestMove){
+ const before=positions[i],after=positions[i+1],move=movesPlayed[i],piece=before.b[move[0]],target=before.b[move[1]];
+ const parts=[];if(move[3]==="ep")parts.push("Du schlägst en passant.");else if(target!==".")parts.push("Du schlägst eine gegnerische "+({p:"Bauer",n:"Springer",b:"Läufer",r:"Turm",q:"Dame"}[target.toLowerCase()]||"Figur")+".");
+ if(checked(after))parts.push(legal(after).length?"Der Zug setzt den gegnerischen König ins Schach.":"Das ist Schachmatt.");
+ if(loss>=95&&bestMove&&bestMove!=="(none)"&&bestMove!==notation(move)){
+  const m=uciLegal(before,bestMove);
+  if(m){const targetPiece=before.b[m[1]];if(targetPiece!==".")parts.push("Die bessere Fortsetzung "+bestMove+" schlägt eine "+({p:"Bauer",n:"Springer",b:"Läufer",r:"Turm",q:"Dame"}[targetPiece.toLowerCase()]||"Figur")+".");
+  else if(checked(apply(before,m)))parts.push("Die bessere Fortsetzung "+bestMove+" bietet Schach.");
+  else parts.push("Vergleiche "+notation(move)+" mit dem empfohlenen Zug "+bestMove+" und achte auf Drohungen und ungedeckte Figuren.");}
+ }
+ return parts.join(" ");
+}
 function describe(i,loss,bestMove){
- const actual=notation(movesPlayed[i]),better=bestMove&&bestMove!=="(none)"?bestMove:"";
- if(loss<45)return "Dieser Zug hält die Stellung weitgehend stabil. "+(better&&better!==actual?"Stockfish bevorzugt "+better+"; der Unterschied ist aber klein.":"");
- if(loss<95)return "Es gibt eine etwas genauere Fortsetzung."+(better?" Stockfish empfiehlt "+better+".":"");
- if(loss<170)return "Dieser Zug verschlechtert deine Stellung messbar. Prüfe vor dem Ziehen Drohungen, ungedeckte Figuren und mögliche Schachs."+(better?" Besser war "+better+".":"");
- if(loss<320)return "Hier verliert deine Stellung deutlich an Wert. Suche zuerst nach gegnerischen taktischen Möglichkeiten und prüfe Kandidatenzüge."+(better?" Die Engine bevorzugt "+better+".":"");
- return "Dieser Zug führt zu einem großen Bewertungsverlust. Überprüfe, ob eine Figur hängt, ein Mattangriff entsteht oder eine taktische Kombination möglich ist."+(better?" Stärker war "+better+".":"");
+ const tactical=tacticalExplanation(i,loss,bestMove);const actual=notation(movesPlayed[i]),better=bestMove&&bestMove!=="(none)"?bestMove:"";
+ if(loss<45)return (tactical?tactical+" ":"")+"Dieser Zug hält die Stellung weitgehend stabil. "+(better&&better!==actual?"Stockfish bevorzugt "+better+"; der Unterschied ist aber klein.":"");
+ if(loss<95)return (tactical?tactical+" ":"")+"Es gibt eine etwas genauere Fortsetzung."+(better?" Stockfish empfiehlt "+better+".":"");
+ if(loss<170)return (tactical?tactical+" ":"")+"Dieser Zug verschlechtert deine Stellung messbar. Prüfe vor dem Ziehen Drohungen, ungedeckte Figuren und mögliche Schachs."+(better?" Besser war "+better+".":"");
+ if(loss<320)return (tactical?tactical+" ":"")+"Hier verliert deine Stellung deutlich an Wert. Suche zuerst nach gegnerischen taktischen Möglichkeiten und prüfe Kandidatenzüge."+(better?" Die Engine bevorzugt "+better+".":"");
+ return (tactical?tactical+" ":"")+"Dieser Zug führt zu einem großen Bewertungsverlust. Überprüfe, ob eine Figur hängt, ein Mattangriff entsteht oder eine taktische Kombination möglich ist."+(better?" Stärker war "+better+".":"");
 }
 function drawReviewBoard(previous=-1){
  const board=$("reviewBoard");if(!board||!positions.length)return;
@@ -94,7 +130,7 @@ function playBestLine(){
  advance();
 }
 function stopReplay(){stopLine();if(playTimer){clearInterval(playTimer);playTimer=null;}const b=$("reviewPlay");if(b)b.textContent="▶ Abspielen";}
-function renderReview(){
+function renderReview(){ $("reviewOpening").textContent="Eröffnung: "+openingName();
  items.replaceChildren();let counts={best:0,good:0,inaccurate:0,mistake:0,blunder:0},losses=0;
  for(let i=0;i<movesPlayed.length;i++){
   const before=results[i],after=results[i+1];if(!before||!after||!Number.isFinite(before.cp)||!Number.isFinite(after.cp))continue;
@@ -116,7 +152,7 @@ function renderReview(){
  headline.textContent="Partieanalyse abgeschlossen";
 }
 
-function renderOverview(){
+function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openingName();
  const stats=[{},{}],losses=[[],[]],labels=["Bester Zug","Sehr gut","Gut","Ungenauigkeit","Fehler","Grober Fehler"];
  for(let i=0;i<movesPlayed.length;i++){if(!results[i]||!results[i+1])continue;
   const who=i%2,loss=Math.max(0,Math.round((results[i].cp-results[i+1].cp)*positions[i].t));
@@ -136,6 +172,7 @@ function renderOverview(){
  $("overviewProgress").textContent="Alle "+movesPlayed.length+" Halbzüge ausgewertet.";
  $("overviewCoach").textContent="Die Analyse ist bereit. Sieh dir an, welche Züge gut waren und wo du dich verbessern kannst.";
  $("overviewStart").disabled=false;
+ if(typeof window.schachnovaRecordReview==="function"){const errors=losses.flat().filter(v=>v>=170).length;window.schachnovaRecordReview({id:analysisKey,white:accuracy[0],black:accuracy[1],errors,opening:openingName()});}
 }
 function finish(){try{localStorage.setItem("schachnova.review.v3."+analysisKey,JSON.stringify({results,version:3}));}catch(e){console.warn("Analyse-Cache nicht gespeichert",e);}active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();drawReviewBoard();renderOverview();}
 function next(t){
