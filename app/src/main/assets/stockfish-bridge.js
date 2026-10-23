@@ -20,9 +20,9 @@ function startEngine(){
  }catch(e){setInfo("Engine-Start fehlgeschlagen: "+e.message);}
 }
 function sendPosition(){worker.postMessage("position startpos moves "+movesPlayed.slice(0,viewIndex).map(notation).join(" "));}
-function maybePlay(){if(!ready||busy||mode!=="bot"||current().t!==-1||ended||viewIndex!==history.length-1)return;
+function maybePlay(){if(mode==="bot"&&variantMode!=="standard"&&current().t===-1&&!ended&&viewIndex===history.length-1){const choices=legal(current());if(!choices.length)return;const m=choices[Math.floor(Math.random()*choices.length)];setInfo("Varianten-Testbot · legale Züge (ohne Engine-Bewertung)");setTimeout(()=>{if(mode==="bot"&&current().t===-1&&!ended&&legal(current()).some(x=>notation(x)===notation(m)))move(m);},250);return;}if(!ready||busy||mode!=="bot"||current().t!==-1||ended||viewIndex!==history.length-1)return;
  busy=true;pending="bot";worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");}
-bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="human")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
+bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
 try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&[...level.options].some(o=>o.value===saved))level.value=saved;}catch(e){}strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;
 level.addEventListener("change",()=>{strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;try{localStorage.setItem("schachnova.botStrength",level.value);}catch(e){}setInfo("Bot-Stärke eingestellt: "+level.selectedOptions[0].textContent);if(worker&&ready&&!busy)worker.postMessage("setoption name Skill Level value "+strength);});
 homeLevel?.addEventListener("change",()=>{level.value=homeLevel.value;level.dispatchEvent(new Event("change"));});
