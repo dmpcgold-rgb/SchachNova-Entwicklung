@@ -10,6 +10,9 @@ const opening=[
  {id:"sic",title:"Sizilianisch · Schwarz",side:-1,moves:["e2e4","c7c5","g1f3","d7d6","d2d4","c5d4","f3d4","g8f6"],notes:["Weiß eröffnet.","c5 greift d4 von der Seite an.","Weiß entwickelt.","Sichere e5 und kontrolliere das Zentrum.","Weiß öffnet das Zentrum.","Schwarz tauscht den c-Bauern.","Weiß zentralisiert.","Greife e4 mit dem Springer an."]},
  {id:"qgd",title:"Damengambit abgelehnt · Schwarz",side:-1,moves:["d2d4","d7d5","c2c4","e7e6","b1c3","g8f6","g1f3","f8e7","c1g5","e8g8"],notes:["Weiß eröffnet.","Besetze d5.","Weiß greift d5 an.","e6 stützt d5.","Weiß entwickelt.","Entwickle den Springer.","Weiß entwickelt.","Bereite die Rochade vor.","Weiß fesselt den Springer.","Rochiere früh für Königssicherheit."]}
 ];
+const additionalOpenings=[["Aljechin-Verteidigung","e4",-1,"e2e4 g8f6 e4e5 f6d5 d2d4 d7d6"],["Französische Verteidigung","e4",-1,"e2e4 e7e6 d2d4 d7d5 b1c3 g8f6"],["Königsgambit","e4",1,"e2e4 e7e5 f2f4 e5f4 g1f3"],["Königsindischer Angriff","e4",1,"g1f3 d7d5 g2g3 g8f6 f1g2"],["Pirc-Verteidigung","e4",-1,"e2e4 d7d6 d2d4 g8f6 b1c3 g7g6"],["Skandinavische Verteidigung","e4",-1,"e2e4 d7d5 e4d5 d8d5 b1c3"],["Schottische Partie","e4",1,"e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4"],["Sizilianisch · Alapin","e4",1,"e2e4 c7c5 c2c3 d7d5 e4d5 d8d5"],["Sizilianisch · Geschlossen","e4",1,"e2e4 c7c5 b1c3 b8c6 g2g3 g7g6"],["Wiener Partie","e4",1,"e2e4 e7e5 b1c3 g8f6 f2f4"],["Benko-Gambit","d4",-1,"d2d4 g8f6 c2c4 c7c5 d4d5 b7b5"],["Benoni-Verteidigung","d4",-1,"d2d4 g8f6 c2c4 c7c5 d4d5 e7e6"],["Bogo-Indisch","d4",-1,"d2d4 g8f6 c2c4 e7e6 g1f3 f8b4"],["Katalanische Eröffnung","d4",1,"d2d4 g8f6 c2c4 e7e6 g2g3 d7d5 f1g2"],["Holländische Verteidigung","d4",-1,"d2d4 f7f5 g2g3 g8f6 f1g2"],["Grünfeld-Verteidigung","d4",-1,"d2d4 g8f6 c2c4 g7g6 b1c3 d7d5"],["Königsindische Verteidigung","d4",-1,"d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6"],["Londoner System","d4",1,"d2d4 d7d5 c1f4 g8f6 e2e3"],["Nimzo-Indisch","d4",-1,"d2d4 g8f6 c2c4 e7e6 b1c3 f8b4"],["Damenindische Verteidigung","d4",-1,"d2d4 g8f6 c2c4 e7e6 g1f3 b7b6"],["Slawische Verteidigung","d4",-1,"d2d4 d7d5 c2c4 c7c6 b1c3 g8f6"],["Trompowsky-Angriff","d4",1,"d2d4 g8f6 c1g5 d7d5"],["Bird-Eröffnung","other",1,"f2f4 d7d5 g1f3 g8f6"],["Englische Eröffnung","other",1,"c2c4 e7e5 b1c3 g8f6"],["Nimzo-Larsen-Angriff","other",1,"b2b3 e7e5 c1b2 b8c6"],["Réti-Eröffnung","other",1,"g1f3 d7d5 c2c4"]];
+for(const [title,group,side,line] of additionalOpenings){opening.push({title,group,side,moves:line.split(' '),description:'Lerne die charakteristische Zugfolge und die wichtigsten Entwicklungszüge.',notes:line.split(' ').map(()=>'Achte auf Entwicklung, Zentrum und Königssicherheit.')});}
+for(const o of opening){if(!o.group)o.group=o.moves[0]==='e2e4'?'e4':o.moves[0]==='d2d4'?'d4':'other';if(!o.description)o.description='Übe die Hauptzüge und verstehe den Aufbau.';}
 const ends=[
  {title:"Dame mattsetzen",group:"Schachmatt",fen:"7k/8/5K2/8/4Q3/8/8/8 w - - 0 1",goal:"Setze Schwarz matt. Vermeide Patt.",kind:"mate"},
  {title:"Turm mattsetzen",group:"Schachmatt",fen:"7k/8/5K2/8/4R3/8/8/8 w - - 0 1",goal:"Dränge den König mit dem Turm an den Rand und setze matt.",kind:"mate"},
@@ -27,11 +30,25 @@ function label(t){$("trainingMessage").textContent=t;}
 function stopWorker(){if(worker){worker.terminate();worker=null;}busy=false;}
 function showMenu(group){
  stopWorker();active=null;$("trainingBoardArea").hidden=true;$("trainingList").hidden=false;
- $("trainingTitle").textContent=group==="home"?"🎯 Schachtraining":group==="openings"?"📚 Eröffnungen":"♟ Endspiele";
+ const names={home:"🎯 Schachtraining",openings:"📚 Eröffnungen",e4:"1. e4 · Eröffnungen",d4:"1. d4 · Eröffnungen",other:"Andere Eröffnungen",endgames:"♟ Endspiele"};
+ $("trainingTitle").textContent=names[group]||"Schachtraining";
  const root=$("trainingList");root.replaceChildren();
- const choices=group==="home"?[{title:"📚 Eröffnungen · Weiß und Schwarz",group:"openings"},{title:"♟ Endspiele · Matt und Bauern",group:"endgames"}]:group==="openings"?opening:ends;
- for(const item of choices){const b=document.createElement("button");b.className="training-card";b.textContent=item.title;b.onclick=()=>item.group?showMenu(item.group):start(item,group==="openings");root.append(b);}
- $("trainingBack").onclick=()=>{if(group==="home"){exit();}else showMenu("home");};
+ const choices=group==="home"?[{title:"📚 Eröffnungen · Weiß und Schwarz",group:"openings"},{title:"♟ Endspiele",group:"endgames"}]:group==="openings"?[{title:"1. e4 · Eröffnungen",group:"e4"},{title:"1. d4 · Eröffnungen",group:"d4"},{title:"Andere Eröffnungen",group:"other"}]:group==="endgames"?ends:opening.filter(o=>o.group===group);
+ for(const item of choices){
+  const b=document.createElement("button");b.className="training-card";
+  if(item.group&&["openings","endgames","e4","d4","other"].includes(item.group)&&!item.moves){b.textContent=item.title;b.onclick=()=>showMenu(item.group);}
+  else {
+   b.classList.add("training-opening-card");
+   const icon=document.createElement("span");icon.className="training-thumb";icon.textContent="♟";
+   const info=document.createElement("span");info.className="training-card-copy";
+   const title=document.createElement("strong");title.textContent=item.title;
+   const description=document.createElement("small");description.textContent=item.description||item.goal||"Interaktive Übung auf dem Schachbrett.";
+   info.append(title,description);b.append(icon,info);
+   b.onclick=()=>start(item,group!=="endgames");
+  }
+  root.append(b);
+ }
+ $("trainingBack").onclick=()=>group==="home"?exit():showMenu(["e4","d4","other"].includes(group)?"openings":"home");
 }
 function exit(){stopWorker();$("trainingScreen").hidden=true;$("homeScreen").hidden=false;active=null;}
 function renderTraining(){
@@ -46,7 +63,7 @@ function renderTraining(){
 function start(data,isOpening){
  stopWorker();active={data,opening:isOpening};ply=0;errors=0;selected=-1;state=isOpening?initial():fenState(data.fen);
  $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
- $("trainingBack").onclick=()=>showMenu(isOpening?"openings":"endgames");
+ $("trainingBack").onclick=()=>showMenu(isOpening?data.group:"endgames");
  $("trainingReset").onclick=()=>start(data,isOpening);
  $("trainingHint").onclick=()=>{if(isOpening){const next=data.moves[ply];label(next?"Hinweis: Suche den Zug "+next.slice(0,2)+" → "+next.slice(2,4)+". "+data.notes[ply]:"Übung abgeschlossen.");}else label(data.goal);};
  label(isOpening?"Übe die Eröffnung mit "+(data.side===1?"Weiß":"Schwarz")+". Ziehe die richtige Figur.":"Ziel: "+data.goal);
