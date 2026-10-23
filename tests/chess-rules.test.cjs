@@ -79,7 +79,7 @@ assert.equal(s.b[sq("d6")],".","En passant capturing pawn explodes");
 assert.equal(s.b[sq("d5")],".","En passant captured pawn removed");
 assert.equal(s.b[sq("e6")],".","Adjacent knight explodes");
 assert.equal(s.b[sq("c6")],".","Adjacent bishop explodes");
-s=position({d4:"K",e5:"P"},{h8:"k",d7:"p"},-1);
+s=position({c5:"K",e5:"P"},{h8:"k",d7:"p"},-1);
 s=play(s,"d7d5");
 assert(!legal(s).some(m=>uci(m)==="e5d6"),"Atomic en passant cannot explode own king");
 variantMode="standard";
