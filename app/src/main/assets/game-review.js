@@ -28,7 +28,7 @@ function describe(i,loss,bestMove){
  if(loss<320)return "Hier verliert deine Stellung deutlich an Wert. Suche zuerst nach gegnerischen taktischen Möglichkeiten und prüfe Kandidatenzüge."+(better?" Die Engine bevorzugt "+better+".":"");
  return "Dieser Zug führt zu einem großen Bewertungsverlust. Überprüfe, ob eine Figur hängt, ein Mattangriff entsteht oder eine taktische Kombination möglich ist."+(better?" Stärker war "+better+".":"");
 }
-function render(){
+function renderReview(){
  items.replaceChildren();let counts={best:0,good:0,inaccurate:0,mistake:0,blunder:0},losses=0;
  for(let i=0;i<movesPlayed.length;i++){
   const before=results[i],after=results[i+1];if(!before||!after)continue;
@@ -49,8 +49,8 @@ function render(){
  summary.textContent="Geschätzte Analysequalität: "+accuracy+"/100 · Beste Züge: "+counts.best+" · Gut: "+counts.good+" · Ungenauigkeiten: "+counts.inaccurate+" · Fehler: "+counts.mistake+" · Grobe Fehler: "+counts.blunder;
  headline.textContent="Partieanalyse abgeschlossen";
 }
-function renderBoardSafely(){if(typeof render==="function")render();}
-function finish(){active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";render();}
+function renderBoardSafely(){if(typeof window.render==="function")window.render();else if(typeof render==="function")render();}
+function finish(){active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();}
 function next(t){
  if(t!==token||!active)return;
  if(index>=positions.length){finish();return;}
