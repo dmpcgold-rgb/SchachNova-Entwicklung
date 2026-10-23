@@ -2,9 +2,11 @@
 "use strict";
 const path=require("node:path");
 const assert=require("node:assert/strict");
-const factory=require(path.resolve(process.argv[2]||"node_modules/fairy-stockfish-nnue.wasm/stockfish.js"));
+const {pathToFileURL}=require("node:url");
+const corePath=path.resolve(process.argv[2]||"node_modules/fairy-stockfish-nnue.wasm/stockfish.js");
+const factory=require(corePath);
 (async()=>{
- const engine=await factory();
+ const engine=await factory({locateFile:file=>pathToFileURL(path.join(path.dirname(corePath),file)).href});
  let output=[];
  engine.addMessageListener?.(line=>output.push(String(line)));
  const command=async(value,expected,timeout=30000)=>{
