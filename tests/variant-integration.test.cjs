@@ -13,4 +13,6 @@ assert.match(chess,/\["standard","hill","threecheck","antichess","atomic"\]\.inc
 assert.match(chess,/if\(variantMode==="atomic"\)\{const outcome=status\(\)/,"Finished atomic game must restore its result");
 assert.match(config,/atomic:\{label:"Atomschach",uci:"atomic",local:true,bot:false\}/,"Atomic must be local-only without bot");
 assert.match(bridge,/SchachNovaVariants\?\.\[variantMode\]\?\.bot===false/,"Engine bridge must enforce unsupported variant bots");
+assert.match(bridge,/if\(variantMode!=="standard"\)\{setInfo\("Stockfish-Analyse für diese Variante noch nicht freigegeben"\)/,"Standard Stockfish analysis must reject variants");
+assert.match(bridge,/coachEnabled&&variantMode==="standard"/,"Standard Stockfish coach must not analyze special variants");
 console.log("SchachNova: variant integration assertions passed");
