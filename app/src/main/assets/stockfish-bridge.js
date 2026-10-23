@@ -36,6 +36,7 @@ if(fairy)fairy.subscribe(event=>{
 function maybePlay(){
  if(mode!=="bot"||current().t!==-1||ended||viewIndex!==history.length-1)return;
  if(variantMode!=="standard"){
+  if(window.SchachNovaVariants?.[variantMode]?.bot===false){setInfo("Für diese Variante ist nur das lokale Spiel zu zweit freigegeben");return;}
   if(!fairy){setInfo("Fairy-Stockfish nicht verfügbar");return;}
   if(!fairyRequested){fairyRequested=true;try{fairy.start();}catch(e){setInfo("Fairy-Stockfish-Start fehlgeschlagen: "+e.message);}return;}
   if(!fairyReady)return;
