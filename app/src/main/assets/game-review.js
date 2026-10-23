@@ -154,7 +154,7 @@ function renderReview(){ $("reviewOpening").textContent="Eröffnung: "+openingNa
 
 function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openingName();
  const stats=[{},{}],losses=[[],[]],labels=["Bester Zug","Sehr gut","Gut","Ungenauigkeit","Fehler","Grober Fehler"];
- for(let i=0;i<movesPlayed.length;i++){if(!results[i]||!results[i+1])continue;
+ for(let i=0;i<movesPlayed.length;i++){if(!results[i]||!results[i+1]||!Number.isFinite(results[i].cp)||!Number.isFinite(results[i+1].cp))continue;
   const who=i%2,loss=Math.max(0,Math.round((results[i].cp-results[i+1].cp)*positions[i].t));
   const name=label(loss,false)[0];stats[who][name]=(stats[who][name]||0)+1;losses[who].push(loss);
  }
@@ -165,8 +165,8 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
   for(let k=0;k<2;k++){const v=document.createElement("span");v.className="stat-value";v.textContent=String(stats[k][labelName]||0);table.append(v);}
  }
  const chart=$("overviewChart");chart.replaceChildren();
- const values=results.map(r=>Math.max(-1000,Math.min(1000,r.cp??0))),w=600,h=110;
- if(values.length>1){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
+ const values=results.map(r=>Number.isFinite(r?.cp)?Math.max(-1000,Math.min(1000,r.cp)):null),w=600,h=110;
+ if(values.length>1&&values.every(Number.isFinite)){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
  const poly=document.createElementNS(ns,"polyline");poly.setAttribute("fill","none");poly.setAttribute("stroke","#d7edcb");poly.setAttribute("stroke-width","3");
  poly.setAttribute("points",values.map((v,i)=>(i/(values.length-1)*w).toFixed(1)+","+(h/2-v/1000*(h/2-8)).toFixed(1)).join(" "));svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);chart.append(svg);}
  $("overviewProgress").textContent="Alle "+movesPlayed.length+" Halbzüge ausgewertet.";
