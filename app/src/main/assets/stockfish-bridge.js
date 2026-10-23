@@ -15,7 +15,7 @@ function startEngine(){
      if(line.startsWith("info depth")&&line.includes(" score ")){const m=line.match(/score (cp|mate) (-?\d+)/);if(m){lastScore=m[1]==="cp"?(Number(m[2])/100).toFixed(2):"Matt in "+m[2];if(pending==="analysis")setInfo("Analyse · "+lastScore); }}
      if(line.startsWith("bestmove ")){busy=false;const u=line.split(" ")[1];if(pending==="bot"){pending=null;const match=legal(current()).find(m=>notation(m)===u);if(match&&current().t===-1&&!ended&&viewIndex===history.length-1)move(match);}else{pending=null;setInfo("Stockfish empfiehlt: "+u+(lastScore!==null?" · Bewertung "+lastScore:""));} }
    };
-   worker.onerror=()=>{ready=false;busy=false;setInfo("Engine konnte nicht geladen werden");};
+   worker.onerror=()=>{const failed=worker;worker=null;try{failed.terminate();}catch(_){}ready=false;busy=false;pending=null;setInfo("Engine konnte nicht geladen werden");};
    worker.postMessage("uci");
  }catch(e){setInfo("Engine-Start fehlgeschlagen: "+e.message);}
 }
