@@ -82,6 +82,15 @@ assert.equal(s.b[sq("c6")],".","Adjacent bishop explodes");
 s=position({c5:"K",e5:"P"},{h8:"k",d7:"p"},-1);
 s=play(s,"d7d5");
 assert(!legal(s).some(m=>uci(m)==="e5d6"),"Atomic en passant cannot explode own king");
+// Atomic: capturing a neighbour of the king is a win, even when the king is not on the target.
+s=position({a1:"K",d7:"R"},{e8:"k",d8:"r"},1);
+assert(legal(s).some(m=>uci(m)==="d7d8"),"Explosion of adjacent king must be a legal winning move");
+s=play(s,"d7d8");
+assert.equal(s.b[sq("e8")],".","Adjacent king must explode");
+assert.equal(s.b[sq("d8")],".","Capturer must also explode");
+// A capture is forbidden if the blast removes both kings.
+s=position({d6:"K",d4:"R"},{e6:"k",d5:"p"},1);
+assert(!legal(s).some(m=>uci(m)==="d4d5"),"Capture exploding both kings is illegal");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
