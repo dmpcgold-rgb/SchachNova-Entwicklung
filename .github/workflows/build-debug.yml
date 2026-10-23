@@ -39,9 +39,24 @@ jobs:
           cp "$LICENSE" app/src/main/assets/STOCKFISH-GPLv3.txt
           test -s app/src/main/assets/STOCKFISH-GPLv3.txt
           test -s app/src/main/assets/stockfish-19-lite-single.js && test -s app/src/main/assets/stockfish-19-lite-single.wasm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bundle Fairy-Stockfish variant engine
+        run: |
+          bash scripts/install-fairy-stockfish.sh
+          node scripts/test-fairy-uci.cjs "$PWD/app/src/main/assets/fairy-stockfish-core.js"
+          test -s app/src/main/assets/fairy-stockfish.js
+          test -s app/src/main/assets/stockfish.wasm
+          test -s app/src/main/assets/stockfish.worker.js
+          test -s app/src/main/assets/fairy-stockfish-Copying.txt
       - name: Check JavaScript syntax
         run: |
           node --check app/src/main/assets/chess.js
+          node --check app/src/main/assets/fairy-bridge.js
+          node --check app/src/main/assets/fairy-stockfish.js
+          node --check app/src/main/assets/online-client.js
+          node --check app/src/main/assets/variant-tests.js
           node --check app/src/main/assets/stockfish-bridge.js
           node --check app/src/main/assets/game-review.js
           node --check app/src/main/assets/progress-dashboard.js
