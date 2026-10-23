@@ -99,8 +99,8 @@ assert(!legal(s).some(m=>uci(m)==="e1g1"),"Atomic castling cannot finish beside 
 s=position({e1:"K",h1:"R",f2:"P"},{a8:"k",f8:"r"},1,1);
 assert(!legal(s).some(m=>uci(m)==="e1g1"),"Atomic castling cannot pass through an explosion threat");
 // An en-passant threat only exists when its capturing side has the move.
-s=position({c5:"K",e5:"P"},{h8:"k",d5:"p"},1);
-s.ep=sq("d6");
+s=position({c4:"K",d4:"P"},{h8:"k",e4:"p"},1);
+s.ep=sq("d3");
 assert(!atomicKingThreat(s,1),"Opponent cannot capture en passant when not to move");
 s={...s,t:-1};
 assert(atomicKingThreat(s,1),"En passant blast threatens adjacent king on capturer's turn");
