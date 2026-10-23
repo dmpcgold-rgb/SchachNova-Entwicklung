@@ -1,0 +1,34 @@
+name: Fairy-Stockfish assets
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/install-fairy-stockfish.sh'
+      - '.github/workflows/fairy-stockfish-assets.yml'
+jobs:
+  fetch-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download pinned upstream WASM release
+        run: bash scripts/install-fairy-stockfish.sh
+      - name: Check asset sizes and license
+        run: |
+          test -s app/src/main/assets/fairy-stockfish-core.js
+          test -s app/src/main/assets/stockfish.wasm
+          test -s app/src/main/assets/stockfish.worker.js
+          test -s app/src/main/assets/fairy-stockfish-Copying.txt
+          ls -lh app/src/main/assets/{fairy-stockfish-core.js,stockfish.wasm,stockfish.worker.js}
+      - name: Upload engine files for Android integration
+        uses: actions/upload-artifact@v4
+        with:
+          name: schachnova-fairy-stockfish-wasm
+          path: |
+            app/src/main/assets/fairy-stockfish-core.js
+            app/src/main/assets/stockfish.wasm
+            app/src/main/assets/stockfish.worker.js
+            app/src/main/assets/fairy-stockfish-Copying.txt
+            app/src/main/assets/fairy-stockfish-AUTHORS.txt
