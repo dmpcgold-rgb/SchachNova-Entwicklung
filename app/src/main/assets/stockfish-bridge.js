@@ -3,6 +3,7 @@
 "use strict";
 let worker=null,ready=false,busy=false,mode="human",strength=12,pending=null,coachEnabled=false,lastScore=null;
 const info=document.getElementById("engineInfo"),bot=document.getElementById("botMode"),level=document.getElementById("botLevel"),analysis=document.getElementById("analyzeButton");
+const homeLevel=document.getElementById("homeBotLevel");
 const notation=m=>"abcdefgh"[m[0]&7]+(8-(m[0]>>4))+"abcdefgh"[m[1]&7]+(8-(m[1]>>4))+(m[2]||"");
 const setInfo=t=>{if(info)info.textContent=t;};
 function startEngine(){
@@ -22,8 +23,9 @@ function sendPosition(){worker.postMessage("position startpos moves "+movesPlaye
 function maybePlay(){if(!ready||busy||mode!=="bot"||current().t!==-1||ended||viewIndex!==history.length-1)return;
  busy=true;pending="bot";worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");}
 bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="human")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
-try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&[...level.options].some(o=>o.value===saved))level.value=saved;}catch(e){}strength=Number(level.value);
-level.addEventListener("change",()=>{strength=Number(level.value);try{localStorage.setItem("schachnova.botStrength",level.value);}catch(e){}setInfo("Bot-Stärke eingestellt: "+level.selectedOptions[0].textContent);if(worker&&ready&&!busy)worker.postMessage("setoption name Skill Level value "+strength);});
+try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&[...level.options].some(o=>o.value===saved))level.value=saved;}catch(e){}strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;
+level.addEventListener("change",()=>{strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;try{localStorage.setItem("schachnova.botStrength",level.value);}catch(e){}setInfo("Bot-Stärke eingestellt: "+level.selectedOptions[0].textContent);if(worker&&ready&&!busy)worker.postMessage("setoption name Skill Level value "+strength);});
+homeLevel?.addEventListener("change",()=>{level.value=homeLevel.value;level.dispatchEvent(new Event("change"));});
 analysis.addEventListener("click",()=>{startEngine();if(!ready||busy){setInfo("Engine lädt oder ist beschäftigt");return;}busy=true;pending="analysis";sendPosition();worker.postMessage("go movetime 1100");setInfo("Stockfish analysiert …");});
 const baseMove=move;move=function(m){baseMove(m);if(coachEnabled&&mode==="human"&&ready&&!busy){busy=true;pending="analysis";lastScore=null;sendPosition();worker.postMessage("go movetime 800");}maybePlay();};
 const coachButton=document.getElementById("coachButton");coachButton.onclick=()=>{coachEnabled=!coachEnabled;coachButton.textContent=coachEnabled?"🟢 Coach an":"🔇 Coach";if(coachEnabled){startEngine();setInfo("Coach aktiv: Stellung nach jedem Zug analysieren");}else setInfo("Coach deaktiviert");};
