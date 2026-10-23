@@ -20,14 +20,42 @@ function startEngine(){
  }catch(e){setInfo("Engine-Start fehlgeschlagen: "+e.message);}
 }
 function sendPosition(){worker.postMessage("position startpos moves "+movesPlayed.slice(0,viewIndex).map(notation).join(" "));}
-function maybePlay(){if(mode==="bot"&&variantMode!=="standard"&&current().t===-1&&!ended&&viewIndex===history.length-1){const choices=legal(current());if(!choices.length)return;const m=choices[Math.floor(Math.random()*choices.length)];setInfo("Varianten-Testbot · legale Züge (ohne Engine-Bewertung)");setTimeout(()=>{if(mode==="bot"&&current().t===-1&&!ended&&legal(current()).some(x=>notation(x)===notation(m)))move(m);},250);return;}if(!ready||busy||mode!=="bot"||current().t!==-1||ended||viewIndex!==history.length-1)return;
- busy=true;pending="bot";worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");}
-bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
+let fairyReady=false,fairyVariant=null,fairyRequested=false,fairyGeneration=0;
+const fairy=window.SchachNovaFairy;
+if(fairy)fairy.subscribe(event=>{
+ if(event.type==="ready"){fairyReady=true;setInfo("Fairy-Stockfish bereit · offline");maybePlay();}
+ if(event.type==="error"){fairyReady=false;setInfo("Fairy-Stockfish: "+event.message);}
+ if(event.type==="bestmove"){
+  const req=event.request;
+  if(!req||mode!=="bot"||variantMode!==req.variant||current().t!==-1||ended||viewIndex!==history.length-1)return;
+  if(req.moves.join(" ")!==movesPlayed.map(notation).join(" "))return;
+  const match=legal(current()).find(m=>notation(m)===event.move);
+  if(match)move(match);else setInfo("Fairy-Stockfish-Zug nicht durch lokale Regeln bestätigt: "+event.move);
+ }
+});
+function maybePlay(){
+ if(mode!=="bot"||current().t!==-1||ended||viewIndex!==history.length-1)return;
+ if(variantMode!=="standard"){
+  if(!fairy){setInfo("Fairy-Stockfish nicht verfügbar");return;}
+  if(!fairyRequested){fairyRequested=true;try{fairy.start();}catch(e){setInfo("Fairy-Stockfish-Start fehlgeschlagen: "+e.message);}return;}
+  if(!fairyReady)return;
+  try{
+   if(fairyVariant!==variantMode){fairy.configure(variantMode);fairyVariant=variantMode;}
+   if(fairy.state.thinking)return;
+   fairy.search(movesPlayed.map(notation),Math.max(1,Math.min(16,Math.round(strength*.7)+2)));
+   setInfo("Fairy-Stockfish denkt · "+(window.SchachNovaVariants[variantMode]?.label||variantMode));
+  }catch(e){setInfo("Fairy-Stockfish: "+e.message);}
+  return;
+ }
+ if(!ready||busy)return;
+ busy=true;pending="bot";worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");
+}
+bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"&&fairy)fairy.stop();if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
 try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&[...level.options].some(o=>o.value===saved))level.value=saved;}catch(e){}strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;
 level.addEventListener("change",()=>{strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;try{localStorage.setItem("schachnova.botStrength",level.value);}catch(e){}setInfo("Bot-Stärke eingestellt: "+level.selectedOptions[0].textContent);if(worker&&ready&&!busy)worker.postMessage("setoption name Skill Level value "+strength);});
 homeLevel?.addEventListener("change",()=>{level.value=homeLevel.value;level.dispatchEvent(new Event("change"));});
 analysis.addEventListener("click",()=>{startEngine();if(!ready||busy){setInfo("Engine lädt oder ist beschäftigt");return;}busy=true;pending="analysis";sendPosition();worker.postMessage("go movetime 1100");setInfo("Stockfish analysiert …");});
 const baseMove=move;move=function(m){baseMove(m);if(coachEnabled&&mode==="human"&&ready&&!busy){busy=true;pending="analysis";lastScore=null;sendPosition();worker.postMessage("go movetime 800");}maybePlay();};
 const coachButton=document.getElementById("coachButton");coachButton.onclick=()=>{coachEnabled=!coachEnabled;coachButton.textContent=coachEnabled?"🟢 Coach an":"🔇 Coach";if(coachEnabled){startEngine();setInfo("Coach aktiv: Stellung nach jedem Zug analysieren");}else setInfo("Coach deaktiviert");};
-const baseNew=document.getElementById("newGame").onclick;document.getElementById("newGame").onclick=()=>{if(worker)worker.postMessage("stop");busy=false;pending=null;baseNew();maybePlay();};
+const baseNew=document.getElementById("newGame").onclick;document.getElementById("newGame").onclick=()=>{if(worker)worker.postMessage("stop");if(fairy)fairy.stop();fairyVariant=null;busy=false;pending=null;baseNew();maybePlay();};
 })();
