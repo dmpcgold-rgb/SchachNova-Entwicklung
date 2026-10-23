@@ -127,6 +127,13 @@ assert(legal(s).some(m=>uci(m)==="e1c1"),"Safe atomic queenside castling is lega
 s=play(s,"e1c1");
 assert.equal(s.b[sq("c1")],"K","Atomic queenside king destination");
 assert.equal(s.b[sq("d1")],"R","Atomic queenside rook destination");
+// En passant threat geometry is symmetric for both colours.
+s=position({c5:"K",d5:"P"},{h8:"k",e5:"p"},1,0,sq("d6"));
+assert(atomicKingThreat(s,-1)===false,"Black king is not threatened by white en passant far away");
+s=position({h1:"K",e5:"P"},{c6:"k",d5:"p"},1,0,sq("d6"));
+assert(atomicKingThreat(s,-1),"White en passant explosion threatens black king on c6");
+s={...s,t:-1};
+assert(!atomicKingThreat(s,-1),"White en passant is not available on black's turn");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
