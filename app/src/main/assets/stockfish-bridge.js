@@ -1,7 +1,7 @@
 /* Offline UCI bridge for Stockfish 19 Lite. The bundled engine is GPL-3.0. */
 (function(){
 "use strict";
-let worker=null,ready=false,busy=false,mode="human",strength=12,pending=null,coachEnabled=false,lastScore=null;
+let worker=null,ready=false,busy=false,mode="human",strength=12,pending=null,coachEnabled=false,lastScore=null,botPosition=null;
 const info=document.getElementById("engineInfo"),bot=document.getElementById("botMode"),level=document.getElementById("botLevel"),analysis=document.getElementById("analyzeButton");
 const homeLevel=document.getElementById("homeBotLevel");
 const notation=m=>"abcdefgh"[m[0]&7]+(8-(m[0]>>4))+"abcdefgh"[m[1]&7]+(8-(m[1]>>4))+(m[2]||"");
@@ -13,9 +13,9 @@ function startEngine(){
    worker.onmessage=e=>{const line=String(e.data);if(line==="uciok"){worker.postMessage("isready");}
      if(line==="readyok"){ready=true;setInfo("Stockfish 19 bereit · offline");maybePlay();}
      if(line.startsWith("info depth")&&line.includes(" score ")){const m=line.match(/score (cp|mate) (-?\d+)/);if(m){lastScore=m[1]==="cp"?(Number(m[2])/100).toFixed(2):"Matt in "+m[2];if(pending==="analysis")setInfo("Analyse · "+lastScore); }}
-     if(line.startsWith("bestmove ")){busy=false;const u=line.split(" ")[1];if(pending==="bot"){pending=null;const match=legal(current()).find(m=>notation(m)===u);if(match&&current().t===-1&&!ended&&viewIndex===history.length-1)move(match);}else{pending=null;setInfo("Stockfish empfiehlt: "+u+(lastScore!==null?" · Bewertung "+lastScore:""));} }
+     if(line.startsWith("bestmove ")){busy=false;const u=line.split(" ")[1];if(pending==="bot"){pending=null;const expected=botPosition;botPosition=null;if(expected!==movesPlayed.map(notation).join(" "))return;const match=legal(current()).find(m=>notation(m)===u);if(match&&current().t===-1&&!ended&&viewIndex===history.length-1)move(match);}else{pending=null;setInfo("Stockfish empfiehlt: "+u+(lastScore!==null?" · Bewertung "+lastScore:""));} }
    };
-   worker.onerror=()=>{const failed=worker;worker=null;try{failed.terminate();}catch(_){}ready=false;busy=false;pending=null;setInfo("Engine konnte nicht geladen werden");};
+   worker.onerror=()=>{const failed=worker;worker=null;try{failed.terminate();}catch(_){}ready=false;busy=false;pending=null;botPosition=null;setInfo("Engine konnte nicht geladen werden");};
    worker.postMessage("uci");
  }catch(e){setInfo("Engine-Start fehlgeschlagen: "+e.message);}
 }
@@ -49,7 +49,7 @@ function maybePlay(){
   return;
  }
  if(!ready||busy)return;
- busy=true;pending="bot";worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");
+ busy=true;pending="bot";botPosition=movesPlayed.map(notation).join(" ");worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");
 }
 bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"&&fairy)fairy.stop();if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
 try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&[...level.options].some(o=>o.value===saved))level.value=saved;}catch(e){}strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;
@@ -58,5 +58,5 @@ homeLevel?.addEventListener("change",()=>{level.value=homeLevel.value;level.disp
 analysis.addEventListener("click",()=>{if(variantMode!=="standard"){setInfo("Stockfish-Analyse für diese Variante noch nicht freigegeben");return;}startEngine();if(!ready||busy){setInfo("Engine lädt oder ist beschäftigt");return;}busy=true;pending="analysis";sendPosition();worker.postMessage("go movetime 1100");setInfo("Stockfish analysiert …");});
 const baseMove=move;move=function(m){baseMove(m);if(coachEnabled&&variantMode==="standard"&&mode==="human"&&ready&&!busy){busy=true;pending="analysis";lastScore=null;sendPosition();worker.postMessage("go movetime 800");}maybePlay();};
 const coachButton=document.getElementById("coachButton");coachButton.onclick=()=>{coachEnabled=!coachEnabled;coachButton.textContent=coachEnabled?"🟢 Coach an":"🔇 Coach";if(coachEnabled){if(variantMode==="standard"){startEngine();setInfo("Coach aktiv: Stellung nach jedem Zug analysieren");}else setInfo("Coach für diese Variante noch nicht freigegeben");}else setInfo("Coach deaktiviert");};
-const baseNew=document.getElementById("newGame").onclick;document.getElementById("newGame").onclick=()=>{if(worker)worker.postMessage("stop");if(fairy)fairy.stop();fairyVariant=null;busy=false;pending=null;baseNew();maybePlay();};
+const baseNew=document.getElementById("newGame").onclick;document.getElementById("newGame").onclick=()=>{if(worker)worker.postMessage("stop");if(fairy)fairy.stop();fairyVariant=null;busy=false;pending=null;botPosition=null;baseNew();maybePlay();};
 })();
