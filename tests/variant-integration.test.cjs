@@ -27,4 +27,5 @@ assert.match(fairy,/failed\.terminate\(\)/,"Failed Fairy worker must be terminat
 assert.match(bridge,/worker.onerror=\(\)=>\{const failed=worker;worker=null;/,"Classical Stockfish must release failed worker");
 assert.match(bridge,/botPosition=movesPlayed\.map\(notation\)\.join\(" "\)/,"Classical bot must snapshot position");
 assert.match(bridge,/if\(expected!==movesPlayed\.map\(notation\)\.join\(" "\)\)return;/,"Classical bot must reject stale result");
+assert.match(fairy,/catch\(e\)\{if\(worker\)\{try\{worker\.terminate\(\);\}/,"Fairy startup exception must terminate worker");
 console.log("SchachNova: variant integration assertions passed");
