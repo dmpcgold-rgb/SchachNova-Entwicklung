@@ -20,5 +20,5 @@ window.schachNovaVariantUciOptions=function(name){
  if(!variant)throw new Error("Unbekannte Schachvariante: "+name);
  return ["setoption name UCI_Variant value "+variant.uci,
          "setoption name UCI_Chess960 value "+(variant.uciChess960?"true":"false"),
-         "ucinewgame","isready"];
+         "ucinewgame"];
 };
