@@ -79,11 +79,32 @@ function renderReview(){
  headline.textContent="Partieanalyse abgeschlossen";
 }
 
-function finish(){active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();drawReviewBoard();}
+function renderOverview(){
+ const stats=[{},{}],losses=[[],[]],labels=["Bester Zug","Sehr gut","Gut","Ungenauigkeit","Fehler","Grober Fehler"];
+ for(let i=0;i<movesPlayed.length;i++){if(!results[i]||!results[i+1])continue;
+  const who=i%2,loss=Math.max(0,Math.round((results[i].cp-results[i+1].cp)*positions[i].t));
+  const name=label(loss,false)[0];stats[who][name]=(stats[who][name]||0)+1;losses[who].push(loss);
+ }
+ const accuracy=losses.map(a=>a.length?Math.round(100*Math.exp(-a.reduce((x,y)=>x+y,0)/a.length/240)):null);
+ $("overviewAccuracy").innerHTML=accuracy.map((v,i)=>"<div>"+(i?"Schwarz":"Weiß")+"<strong style='display:block'>"+(v===null?"–":v+"/100")+"</strong></div>").join("");
+ const table=$("overviewStats");table.replaceChildren();
+ for(const labelName of labels){const name=document.createElement("span");name.textContent=labelName;table.append(name);
+  for(let k=0;k<2;k++){const v=document.createElement("span");v.className="stat-value";v.textContent=String(stats[k][labelName]||0);table.append(v);}
+ }
+ const chart=$("overviewChart");chart.replaceChildren();
+ const values=results.map(r=>Math.max(-1000,Math.min(1000,r.cp))),w=600,h=110;
+ if(values.length>1){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
+ const poly=document.createElementNS(ns,"polyline");poly.setAttribute("fill","none");poly.setAttribute("stroke","#d7edcb");poly.setAttribute("stroke-width","3");
+ poly.setAttribute("points",values.map((v,i)=>(i/(values.length-1)*w).toFixed(1)+","+(h/2-v/1000*(h/2-8)).toFixed(1)).join(" "));svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);chart.append(svg);}
+ $("overviewProgress").textContent="Alle "+movesPlayed.length+" Halbzüge ausgewertet.";
+ $("overviewCoach").textContent="Die Analyse ist bereit. Sieh dir an, welche Züge gut waren und wo du dich verbessern kannst.";
+ $("overviewStart").disabled=false;
+}
+function finish(){active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();drawReviewBoard();renderOverview();}
 function next(t){
  if(t!==token||!active)return;
  if(index>=positions.length){finish();return;}
- score=null;best="";progress.textContent="Analysiere Stellung "+(index+1)+" von "+positions.length+" …";
+ score=null;best="";progress.textContent="Analysiere Stellung "+(index+1)+" von "+positions.length+" …";$("overviewProgress").textContent=progress.textContent;
  worker.postMessage("position fen "+fen(positions[index]));
  worker.postMessage("go depth 10");
 }
@@ -104,7 +125,9 @@ function start(){
  };worker.onerror=()=>{active=false;progress.textContent="Stockfish konnte nicht gestartet werden. Bitte die Offline-Engine prüfen.";};worker.postMessage("uci");}
  catch(e){active=false;progress.textContent="Analyse nicht verfügbar: "+e.message;}
 }
-launch.onclick=()=>{stopReplay();review.hidden=false;start();};
+launch.onclick=()=>{stopReplay();review.hidden=true;$("reviewOverview").hidden=false;$("overviewStart").disabled=true;$("overviewProgress").textContent="Stockfish analysiert deine Partie …";$("overviewResult").textContent=ended||"Partierückblick";start();};
+$("overviewStart").onclick=()=>{$("reviewOverview").hidden=true;review.hidden=false;selectReview(0);};
+$("overviewClose").onclick=()=>{$("reviewOverview").hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
 close.onclick=()=>{stopReplay();review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
 $("reviewAgain").onclick=start;
 $("reviewBack").onclick=()=>{stopReplay();review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
