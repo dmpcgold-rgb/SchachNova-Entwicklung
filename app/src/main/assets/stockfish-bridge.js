@@ -24,7 +24,7 @@ let fairyReady=false,fairyVariant=null,fairyRequested=false,fairyGeneration=0;
 const fairy=window.SchachNovaFairy;
 if(fairy)fairy.subscribe(event=>{
  if(event.type==="ready"){fairyReady=true;setInfo("Fairy-Stockfish bereit · offline");maybePlay();}
- if(event.type==="error"){fairyReady=false;setInfo("Fairy-Stockfish: "+event.message);}
+ if(event.type==="error"){fairyReady=false;fairyVariant=null;setInfo("Fairy-Stockfish: "+event.message);}
  if(event.type==="bestmove"){
   const req=event.request;
   if(!req||mode!=="bot"||variantMode!==req.variant||current().t!==-1||ended||viewIndex!==history.length-1)return;
@@ -38,7 +38,7 @@ function maybePlay(){
  if(variantMode!=="standard"){
   if(window.SchachNovaVariants?.[variantMode]?.bot===false){setInfo("Für diese Variante ist nur das lokale Spiel zu zweit freigegeben");return;}
   if(!fairy){setInfo("Fairy-Stockfish nicht verfügbar");return;}
-  if(!fairyRequested){fairyRequested=true;try{fairy.start();}catch(e){setInfo("Fairy-Stockfish-Start fehlgeschlagen: "+e.message);}return;}
+  if(!fairyRequested){fairyRequested=true;try{fairy.start();}catch(e){fairyRequested=false;setInfo("Fairy-Stockfish-Start fehlgeschlagen: "+e.message);}return;}
   if(!fairyReady)return;
   try{
    if(fairyVariant!==variantMode){fairy.configure(variantMode);fairyVariant=variantMode;return;}
