@@ -79,7 +79,7 @@ function start(data,isOpening){
  $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
  $("trainingBack").onclick=()=>showMenu(isOpening?data.group:"endgames");
  $("trainingReset").onclick=()=>start(data,isOpening);
- $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{const candidate=legal(state)[0];if(candidate)moveText=uci(candidate);}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();};
+ $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{label("Stockfish-Hinweise für freie Endspielstellungen sind noch nicht verfügbar. Ich zeige keinen zufälligen Zug als beste Lösung.");return;}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();};
  label(isOpening?"Übe die Eröffnung mit "+(data.side===1?"Weiß":"Schwarz")+". Ziehe die richtige Figur.":"Ziel: "+data.goal);
  renderTraining();if(isOpening)autoOpening();
 }
