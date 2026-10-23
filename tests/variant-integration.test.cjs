@@ -18,4 +18,5 @@ assert.match(bridge,/coachEnabled&&variantMode==="standard"/,"Standard Stockfish
 const fairy=fs.readFileSync("app/src/main/assets/fairy-bridge.js","utf8");
 assert.match(fairy,/ready=false;awaitingReady=true;for\(const cmd/,"Fairy must await variant configuration");
 assert.match(bridge,/fairy\.configure\(variantMode\);fairyVariant=variantMode;return;/,"Variant search must wait for readyok");
+assert.match(fairy,/for\(const cmd of window\.schachNovaVariantUciOptions\(name\)\)post\(cmd\);post\("isready"\);/,"Fairy must explicitly request readyok after variant options");
 console.log("SchachNova: variant integration assertions passed");
