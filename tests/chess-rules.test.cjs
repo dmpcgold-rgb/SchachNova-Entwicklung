@@ -91,6 +91,13 @@ assert.equal(s.b[sq("d8")],".","Capturer must also explode");
 // A capture is forbidden if the blast removes both kings.
 s=position({d6:"K",d4:"R"},{e6:"k",d5:"p"},1);
 assert(!legal(s).some(m=>uci(m)==="d4d5"),"Capture exploding both kings is illegal");
+// Atomic castling: a king may not pass through an explosion-threatened square.
+s=position({e1:"K",h1:"R"},{a8:"k"},1,1);
+assert(legal(s).some(m=>uci(m)==="e1g1"),"Safe atomic kingside castling is allowed");
+s=position({e1:"K",h1:"R",g2:"P"},{a8:"k",g8:"r"},1,1);
+assert(!legal(s).some(m=>uci(m)==="e1g1"),"Atomic castling cannot finish beside a capturable pawn");
+s=position({e1:"K",h1:"R",f2:"P"},{a8:"k",f8:"r"},1,1);
+assert(!legal(s).some(m=>uci(m)==="e1g1"),"Atomic castling cannot pass through an explosion threat");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
