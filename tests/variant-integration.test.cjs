@@ -22,4 +22,6 @@ assert.match(fairy,/for\(const cmd of window\.schachNovaVariantUciOptions\(name\
 assert.match(fairy,/const completed=request;request=null;if\(completed&&uciMove\(move\)\)notify\("bestmove"/,"Fairy request must be cleared before notifying listeners");
 assert.match(bridge,/catch\(e\)\{fairyRequested=false;setInfo\("Fairy-Stockfish-Start fehlgeschlagen:/,"Fairy startup failure must permit retry");
 assert.match(bridge,/if\(event.type==="error"\)\{fairyReady=false;fairyVariant=null;/,"Fairy errors must invalidate variant state");
+assert.match(fairy,/worker.onerror=e=>\{const failed=worker;worker=null;/,"Fairy worker errors must release failed worker");
+assert.match(fairy,/failed\.terminate\(\)/,"Failed Fairy worker must be terminated");
 console.log("SchachNova: variant integration assertions passed");
