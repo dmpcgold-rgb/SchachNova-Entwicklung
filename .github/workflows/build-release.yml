@@ -20,6 +20,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Generate launcher icons for Android densities
+        run: |
+          set -euo pipefail
+          SOURCE=app/src/main/res/mipmap-mdpi/ic_launcher.png
+          test -s "$SOURCE"
+          # Use the committed approved icon as the source. Replace with original
+          # high-resolution PNGs when available to avoid interpolation.
+          for spec in hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            density="${spec%%:*}"
+            pixels="${spec##*:}"
+            mkdir -p "app/src/main/res/mipmap-$density"
+            convert "$SOURCE" -filter Lanczos -resize "${pixels}x${pixels}" "app/src/main/res/mipmap-$density/ic_launcher.png"
+          done
       - name: Verify permanent release signing secrets
         env:
           KEYSTORE_BASE64: ${{ secrets.SCHACHNOVA_KEYSTORE_BASE64 }}
