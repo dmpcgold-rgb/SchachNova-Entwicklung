@@ -30,7 +30,7 @@ function posFen(s){let rows=[];for(let r=0;r<8;r++){let row="",n=0;for(let c=0;c
 function label(t){$("trainingMessage").textContent=t;}
 function stopWorker(){if(worker){worker.terminate();worker=null;}busy=false;}
 function showMenu(group){
- stopWorker();active=null;$("trainingBoardArea").hidden=true;$("trainingList").hidden=false;
+ trainingFinished=false;stopWorker();active=null;$("trainingBoardArea").hidden=true;$("trainingList").hidden=false;
  const names={home:"🎯 Schachtraining",openings:"📚 Eröffnungen",e4:"1. e4 · Eröffnungen",d4:"1. d4 · Eröffnungen",other:"Andere Eröffnungen",endgames:"♟ Endspiele"};
  $("trainingTitle").textContent=names[group]||"Schachtraining";
  const root=$("trainingList");root.replaceChildren();
@@ -51,7 +51,7 @@ function showMenu(group){
  }
  $("trainingBack").onclick=()=>group==="home"?exit():showMenu(["e4","d4","other"].includes(group)?"openings":"home");
 }
-function exit(){stopWorker();$("trainingScreen").hidden=true;$("homeScreen").hidden=false;active=null;if(previousVariantMode!==null){variantMode=previousVariantMode;previousVariantMode=null;}}
+function exit(){trainingFinished=false;stopWorker();$("trainingScreen").hidden=true;$("homeScreen").hidden=false;active=null;if(previousVariantMode!==null){variantMode=previousVariantMode;previousVariantMode=null;}}
 let hintStep=0,hintFrom=-1,hintTo=-1;
 function resetHint(){hintStep=0;hintFrom=-1;hintTo=-1;}
 function renderTraining(){
@@ -119,7 +119,7 @@ function requestEndgameHint(){
    if(line==="readyok"){w.postMessage("position fen "+posFen(snapshot));w.postMessage("go depth 12");return;}
    if(line.startsWith("bestmove ")){
     const moveText=line.split(/\s+/)[1],m=legal(snapshot).find(x=>uci(x)===moveText);
-    stopWorker();if(!active||state!==snapshot)return;
+    stopWorker();if(!active||trainingFinished||state!==snapshot)return;
     if(!m){label("Kein gültiger Hinweis verfügbar.");return;}
     hintStep=Math.min(2,hintStep+1);hintFrom=m[0];hintTo=hintStep===2?m[1]:-1;
     label(hintStep===1?"Hinweis 1/2: Die empfohlene Figur ist markiert.":"Hinweis 2/2: Der empfohlene Zug ist mit einem Pfeil markiert.");renderTraining();animateHint();
@@ -165,15 +165,15 @@ function click(i){
  engineReply();
 }
 function engineReply(){
- if(!active||active.opening||state.t!==-1)return;
+ if(!active||active.opening||trainingFinished||state.t!==-1)return;
  stopWorker();busy=true;label("Stockfish sucht die Verteidigung …");
  try{
   worker=new Worker("stockfish-19-lite-single.js");const w=worker;
   w.onmessage=e=>{
-   if(w!==worker)return;const line=String(e.data);
+   if(w!==worker||!active||trainingFinished)return;const line=String(e.data).trim();
    if(line==="uciok"){w.postMessage("isready");return;}
    if(line==="readyok"){w.postMessage("position fen "+posFen(state));w.postMessage("go depth 8");return;}
-   if(line.startsWith("bestmove ")){const moveText=line.split(" ")[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){applyTrainingMove(m);const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else {const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Kein gültiger Gegenzug gefunden.");}}
+   if(line.startsWith("bestmove ")){const moveText=line.split(/\s+/)[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){applyTrainingMove(m);const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else {const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Kein gültiger Gegenzug gefunden.");}}
   };
   w.onerror=()=>{stopWorker();label("Offline-Engine nicht verfügbar. Die Übung kann zurückgesetzt werden.");};
   w.postMessage("uci");
