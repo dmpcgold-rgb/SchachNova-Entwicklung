@@ -116,7 +116,7 @@ function animateMovedPiece(m){
  overlay.style.cssText="position:absolute;inset:0;pointer-events:none;z-index:50;overflow:visible;";
  const sprite=document.createElement("div");
  sprite.style.cssText="position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;will-change:transform;";
- sprite.style.left=(fr.left-br.left)+"px";sprite.style.top=(fr.top-br.top)+"px";
+ sprite.style.left=(tr.left-br.left)+"px";sprite.style.top=(tr.top-br.top)+"px";
  sprite.style.width=fr.width+"px";sprite.style.height=fr.height+"px";
  const piece=target.cloneNode(true);
  const isBlindDisk=target.classList.contains("blind-disk");
@@ -129,7 +129,19 @@ function animateMovedPiece(m){
   piece.style.setProperty("transition","none","important");
   piece.style.setProperty("transform","none","important");
  }else{
-  piece.style.cssText="display:block!important;width:96%!important;height:96%!important;max-width:96%!important;max-height:96%!important;object-fit:contain!important;";
+  // The original piece's blue/silver filter depends on its square's CSS class.
+  // Preserve the computed appearance before moving the clone into the overlay.
+  const computed=getComputedStyle(target);
+  piece.style.setProperty("display","block","important");
+  piece.style.setProperty("width",computed.width,"important");
+  piece.style.setProperty("height",computed.height,"important");
+  piece.style.setProperty("max-width","100%","important");
+  piece.style.setProperty("max-height","100%","important");
+  piece.style.setProperty("object-fit","contain","important");
+  piece.style.setProperty("filter",computed.filter,"important");
+  piece.style.setProperty("-webkit-filter",computed.filter,"important");
+  piece.style.setProperty("transition","none","important");
+  piece.style.setProperty("animation","none","important");
  }
  sprite.append(piece);overlay.append(sprite);
  board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
@@ -138,7 +150,7 @@ function animateMovedPiece(m){
  const duration=isBlindDisk?Math.min(360,Math.max(190,155+distance*27)):Math.min(330,Math.max(165,145+distance*26));
  let done=false,animation;
  const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;};
- animation=sprite.animate([{transform:"translate3d(0,0,0)"},{transform:"translate3d("+dx+"px,"+dy+"px,0)"}],{duration,easing:"cubic-bezier(.2,.7,.2,1)",fill:"forwards"});
+ animation=sprite.animate([{transform:"translate3d("+(-dx)+"px,"+(-dy)+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration,easing:"cubic-bezier(.2,.7,.2,1)",fill:"forwards"});
  activePieceAnimation=animation;animation.onfinish=cleanup;animation.oncancel=cleanup;
 }
 function choose(i){
