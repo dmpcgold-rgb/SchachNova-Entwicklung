@@ -105,7 +105,7 @@ function animateMovedPiece(m){
  const fromIndex=(flipped?7-fromRow:fromRow)*8+(flipped?7-fromCol:fromCol);
  const toIndex=(flipped?7-toRow:toRow)*8+(flipped?7-toCol:toCol);
  const fromCell=board.children[fromIndex],toCell=board.children[toIndex];
- const target=toCell?.querySelector(".piece-img");
+ const target=toCell?.querySelector(".piece-img, .blind-disk");
  if(!fromCell||!toCell||!target||!target.animate)return;
  if(activePieceAnimation){activePieceAnimation.finish();activePieceAnimation=null;}
  const br=board.getBoundingClientRect(),fr=fromCell.getBoundingClientRect(),tr=toCell.getBoundingClientRect();
@@ -119,7 +119,12 @@ function animateMovedPiece(m){
  sprite.style.left=(fr.left-br.left)+"px";sprite.style.top=(fr.top-br.top)+"px";
  sprite.style.width=fr.width+"px";sprite.style.height=fr.height+"px";
  const piece=target.cloneNode(true);
- piece.style.cssText="display:block!important;width:96%!important;height:96%!important;max-width:96%!important;max-height:96%!important;object-fit:contain!important;";
+ if(target.classList.contains("blind-disk")){
+  // Preserve the disc dimensions, gradient and border while moving it as one sprite.
+  piece.style.margin="auto";
+ }else{
+  piece.style.cssText="display:block!important;width:96%!important;height:96%!important;max-width:96%!important;max-height:96%!important;object-fit:contain!important;";
+ }
  sprite.append(piece);overlay.append(sprite);
  board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
  const dx=tr.left-fr.left,dy=tr.top-fr.top;
