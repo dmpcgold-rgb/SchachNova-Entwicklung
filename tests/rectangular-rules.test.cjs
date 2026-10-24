@@ -1,0 +1,30 @@
+"use strict";
+const assert=require("node:assert/strict");
+const rules=require("../app/src/main/assets/rectangular-rules.js");
+const geometry=require("../app/src/main/assets/board-geometry.js");
+for(const name of ["capablanca","janus"]){
+ const p=rules.initial(name),shape=geometry.geometry(name);
+ assert.equal(p.board.length,80);
+ assert.equal(p.board.filter(x=>x==="P").length,10);
+ assert.equal(p.board.filter(x=>x==="p").length,10);
+ assert.equal(p.board.filter(x=>x==="K").length,1);
+ assert.equal(p.board.filter(x=>x==="k").length,1);
+ assert.equal(p.board.filter(x=>x===".").length,40);
+ const pawn=geometry.parse("e2",shape);
+ const targets=rules.movesFrom(p,pawn).map(m=>m.to);
+ assert.ok(targets.includes(geometry.parse("e3",shape)));
+ assert.ok(targets.includes(geometry.parse("e4",shape)));
+ assert.ok(!targets.includes(geometry.parse("d3",shape)));
+}
+const p=rules.initial("capablanca"),shape=geometry.geometry("capablanca");
+for(const square of ["e4","f5","d4","e5"])p.board[geometry.parse(square,shape)]=".";
+const a=geometry.parse("e4",shape);p.board[a]="A";
+const destinations=rules.movesFrom(p,a).map(m=>m.to);
+assert.ok(destinations.includes(geometry.parse("f6",shape)),"Archbishop must jump like knight");
+assert.ok(destinations.includes(geometry.parse("g6",shape)),"Archbishop must slide like bishop");
+p.board[a]="C";
+const chancellor=rules.movesFrom(p,a).map(m=>m.to);
+assert.ok(chancellor.includes(geometry.parse("f6",shape)),"Chancellor must jump like knight");
+assert.ok(chancellor.includes(geometry.parse("e6",shape)),"Chancellor must slide like rook");
+assert.throws(()=>rules.initial("shogi"),RangeError,"Unimplemented games must not be enabled");
+console.log("SchachNova: rectangular movement tests passed");
