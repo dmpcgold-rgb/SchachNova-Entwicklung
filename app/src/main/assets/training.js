@@ -108,7 +108,7 @@ function requestEndgameHint(){
    if(line==="uciok"){w.postMessage("isready");return;}
    if(line==="readyok"){w.postMessage("position fen "+posFen(snapshot));w.postMessage("go depth 12");return;}
    if(line.startsWith("bestmove ")){
-    const moveText=line.split(/\\s+/)[1],m=legal(snapshot).find(x=>uci(x)===moveText);
+    const moveText=line.split(/\s+/)[1],m=legal(snapshot).find(x=>uci(x)===moveText);
     stopWorker();if(!active||state!==snapshot)return;
     if(!m){label("Kein gültiger Hinweis verfügbar.");return;}
     hintStep=Math.min(2,hintStep+1);hintFrom=m[0];hintTo=hintStep===2?m[1]:-1;
