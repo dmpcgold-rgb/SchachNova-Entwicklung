@@ -465,6 +465,17 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
 
 #reviewOverview .overview-chart-legend{position:absolute;left:6px;right:6px;bottom:4px;text-align:center;font-size:10px;color:#c6d9ee;pointer-events:none;letter-spacing:.01em;text-shadow:0 1px 2px #00152e}
 #reviewOverview #overviewChart{padding-bottom:18px!important}
+
+/* Android immersive WebView: reserve system-bar space and prevent header overlap. */
+html{scroll-padding-top:36px!important;overflow-anchor:none!important}
+body{padding-top:max(34px,env(safe-area-inset-top,0px))!important;padding-bottom:max(42px,env(safe-area-inset-bottom,0px))!important;overflow-anchor:none!important}
+.header{min-height:48px!important;position:relative!important;z-index:1!important}
+.header .brandline{min-width:0!important}
+.header h1{font-size:clamp(20px,5vw,30px)!important;white-space:nowrap!important}
+#gameScreen{overflow-anchor:none!important}
+#gameScreen .boardrow,#gameScreen .boardpanel{overflow-anchor:none!important}
+#gameScreen #board{width:100%!important;max-height:none!important;aspect-ratio:1/1!important;flex-shrink:0!important}
+#gameScreen #board>.sq{aspect-ratio:1/1!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
