@@ -14,7 +14,7 @@ for(const mode of ["torpedo","berolina","hoppelpoppel"]){
  if(mode==="torpedo"){
   b[68]="P";const moves=evaluate(mode,`const s=${JSON.stringify(base(b))};const ms=legal(s).filter(m=>m[0]===68);if(!ms.some(m=>m[1]===36))throw Error("Torpedo pawn must double-step from e4");`);
  }else if(mode==="berolina"){
-  b[100]="P";b[83]="p";
+  b[100]="P";b[84]="p";
   evaluate(mode,`const s=${JSON.stringify(base(b))};const ms=legal(s).filter(m=>m[0]===100);if(!ms.some(m=>m[1]===85))throw Error("Berolina pawn must move diagonally");if(!ms.some(m=>m[1]===84))throw Error("Berolina pawn must capture straight");`);
  }else{
   b[90]="B";b[91]="N";
