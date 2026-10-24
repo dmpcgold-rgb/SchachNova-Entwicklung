@@ -10,6 +10,9 @@ for(const script of ["board-geometry.js","rectangular-rules.js","rectangular-pre
 assert.ok(html.indexOf('src="board-geometry.js"')<html.indexOf('src="rectangular-rules.js"'));
 assert.ok(html.indexOf('src="rectangular-rules.js"')<html.indexOf('src="rectangular-preview.js"'));
 assert.match(html,/rectPreview\x22 class=\x22rect-preview-panel\x22 hidden/);
-assert.match(js,/board.replaceChildren\(\)/);
+assert.match(js,/board.replaceChildren\(fragment\)/);
+for(const id of ["rectPreviewUndo","rectPreviewFlip","rectPreviewRestart"])assert.ok(html.includes('id="'+id+'"'));
+assert.match(js,/rules.legalMoves\(position\)/);
+assert.match(js,/rules.apply\(position,move\)/);
 assert.doesNotMatch(js,/\b(?:localStorage|sessionStorage)\b/);
 console.log("SchachNova: 10x8 preview integration tests passed");
