@@ -291,12 +291,22 @@ const variantSelectEl=document.getElementById('variantSelect');
 const variantVsBotEl=document.getElementById('variantVsBot');
 function syncVariantBotChoice(){
  const unsupported=['atomic','antichess'].includes(variantSelectEl.value);
- if(unsupported){variantVsBotEl.checked=false;variantVsBotEl.disabled=true;}
- else variantVsBotEl.disabled=false;
+ const opponent=document.getElementById('variantOpponent');
+ const message=document.getElementById('variantModeAvailability');
+ if(unsupported){
+  variantVsBotEl.checked=false;
+  variantVsBotEl.disabled=true;
+  if(opponent&&opponent.value==='bot')opponent.value='local';
+ }else variantVsBotEl.disabled=false;
+ if(opponent&&opponent.value==='bot'&&!unsupported)variantVsBotEl.checked=true;
  const strength=document.getElementById('homeBotStrength');
  if(strength&&mode==='variants')strength.hidden=!variantVsBotEl.checked;
+ if(message&&mode==='variants'&&unsupported){
+  message.textContent='Diese Variante ist nur für zwei Personen am selben Gerät freigeschaltet. Computer- und Onlinepartien sind nicht verfügbar.';
+ }
 }
 variantSelectEl.addEventListener('change',syncVariantBotChoice);
+document.getElementById('variantOpponent').addEventListener('change',syncVariantBotChoice);
 variantVsBotEl.addEventListener('change',syncVariantBotChoice);
 document.getElementById('blindVsBot').addEventListener('change',()=>{if(mode==='blind')document.getElementById('homeBotStrength').hidden=!document.getElementById('blindVsBot').checked;});
 syncVariantBotChoice();
