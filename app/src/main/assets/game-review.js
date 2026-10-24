@@ -310,6 +310,11 @@ if(mistakeButton)mistakeButton.onclick=()=>{
  selectReview(mistakes.find(n=>n>reviewAt)||mistakes[0]);
  $("reviewExerciseStatus").textContent="Fehlerstelle "+reviewAt+" von "+movesPlayed.length+" Halbzügen.";
 };
+const detailControl=$("coachDetail");
+if(detailControl){
+ try{const saved=localStorage.getItem("schachnova.review.coachDetail");if(["basic","normal","advanced"].includes(saved))detailControl.value=saved;}catch(e){}
+ detailControl.addEventListener("change",()=>{try{localStorage.setItem("schachnova.review.coachDetail",detailControl.value);}catch(e){};drawReviewBoard();});
+}
 const speedControl=$("reviewSpeed");
 if(speedControl){
  try{const saved=localStorage.getItem("schachnova.review.speed");if(["450","900","1500"].includes(saved))speedControl.value=saved;}catch(e){}
