@@ -119,6 +119,29 @@ body[data-piece-skin="silverblue"] .board .sq.black-piece .piece-img{filter:sepi
 #homeScreen #novaGameSetup:not([hidden]) .nova-setup-title{margin-top:10px}
 #homeScreen .nova-premium-menu button{touch-action:manipulation}
 .board .piece-img{backface-visibility:hidden;transform:translateZ(0);transition:none!important}
+
+/* Consistent silver-blue visual system. Explicit !important overrides legacy green board styles. */
+:root{--bg:#061329;--edge:#317bc0;--muted:#a8c3e5;--green:#1766b3!important}
+html,body{background:radial-gradient(ellipse at 50% 0,#123e79 0%,#071932 46%,#030b1b 100%)!important;color:#eff7ff!important}
+.board .sq.light,.training-board>.sq.light,.sq.light{background:linear-gradient(135deg,#f8fcff 0%,#b8c9df 56%,#eaf4ff 100%)!important}
+.board .sq.dark,.training-board>.sq.dark,.sq.dark{background:linear-gradient(135deg,#1b62b4 0%,#082b66 57%,#114c9e 100%)!important}
+body[data-board-skin="classic"] .board .sq.light{background:#f0d9b5!important}
+body[data-board-skin="classic"] .board .sq.dark{background:#b58863!important}
+body[data-board-skin="wood"] .board .sq.light{background:repeating-linear-gradient(95deg,#e8c99e 0 6px,#dfbb8c 7px 13px)!important}
+body[data-board-skin="wood"] .board .sq.dark{background:repeating-linear-gradient(95deg,#95623e 0 6px,#855534 7px 13px)!important}
+body[data-board-skin="dark"] .board .sq.light{background:#8a9cad!important}
+body[data-board-skin="dark"] .board .sq.dark{background:#24364b!important}
+body[data-board-skin="marble"] .board .sq.light{background:linear-gradient(135deg,#fff,#ccd1da 50%,#f5f6f9)!important}
+body[data-board-skin="marble"] .board .sq.dark{background:linear-gradient(135deg,#4e586c,#202d40 55%,#5e6a7b)!important}
+.sq.lastmove:not(.selected){background:#61a4e7!important;box-shadow:inset 0 0 0 2px #b1ddff!important}
+.sq.selected{box-shadow:inset 0 0 0 3px #8bcaff!important}
+.sq.target:after{background:#4095e788!important}
+.sq.target:has(.piece-img):after{border-color:#62b6ffbb!important}
+.modal-box{background:linear-gradient(150deg,#0c3263,#071a38)!important;border:1px solid #5aa4e9!important;box-shadow:0 14px 45px #0009,0 0 18px #1676c444!important}
+.modal-box button,.review-controls button,.training-actions button,.time-options button,.home-grid button,button.primary,.custom-time,button.active{background:linear-gradient(145deg,#1a5b9e,#0b2a58)!important;border-color:#4d99e2!important;color:#f4faff!important}
+button.active,.time-options button.active{outline:2px solid #89c8ff!important;box-shadow:inset 0 0 13px #2c93ec!important}
+button{border-color:#3778b8;color:#eaf5ff}
+.sq.premove{box-shadow:inset 0 0 0 4px #2bb6ff!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
