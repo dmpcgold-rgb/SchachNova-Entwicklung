@@ -119,16 +119,22 @@ function animateMovedPiece(m){
  sprite.style.left=(fr.left-br.left)+"px";sprite.style.top=(fr.top-br.top)+"px";
  sprite.style.width=fr.width+"px";sprite.style.height=fr.height+"px";
  const piece=target.cloneNode(true);
- if(target.classList.contains("blind-disk")){
-  // Preserve the disc dimensions, gradient and border while moving it as one sprite.
-  piece.style.margin="auto";
+ const isBlindDisk=target.classList.contains("blind-disk");
+ if(isBlindDisk){
+  // Percent sizing in the grid cell does not survive reliably in an overlay. Freeze the actual disc size.
+  const discRect=target.getBoundingClientRect();
+  piece.style.setProperty("width",discRect.width+"px","important");
+  piece.style.setProperty("height",discRect.height+"px","important");
+  piece.style.setProperty("flex","0 0 auto","important");
+  piece.style.setProperty("transition","none","important");
+  piece.style.setProperty("transform","none","important");
  }else{
   piece.style.cssText="display:block!important;width:96%!important;height:96%!important;max-width:96%!important;max-height:96%!important;object-fit:contain!important;";
  }
  sprite.append(piece);overlay.append(sprite);
  board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
  const dx=tr.left-fr.left,dy=tr.top-fr.top;
- const duration=Math.min(430,Math.max(190,165+Math.hypot(toCol-fromCol,toRow-fromRow)*32));
+ const duration=isBlindDisk?Math.min(540,Math.max(270,210+Math.hypot(toCol-fromCol,toRow-fromRow)*48)):Math.min(430,Math.max(190,165+Math.hypot(toCol-fromCol,toRow-fromRow)*32));
  let done=false,animation;
  const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;};
  animation=sprite.animate([{transform:"translate3d(0,0,0)"},{transform:"translate3d("+dx+"px,"+dy+"px,0)"}],{duration,easing:"cubic-bezier(.32,.05,.24,1)",fill:"forwards"});
