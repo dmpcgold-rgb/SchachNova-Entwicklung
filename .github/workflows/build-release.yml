@@ -95,6 +95,7 @@ jobs:
           node tests/rectangular-rules.test.cjs
           node tests/rectangular-legality.test.cjs
           node tests/rectangular-special-moves.test.cjs
+          node tests/rectangular-castling.test.cjs
           node tests/memory-check-legality.test.cjs
           node tests/endgame-result.test.cjs
       - name: Synchronize visible version with Android versionName
