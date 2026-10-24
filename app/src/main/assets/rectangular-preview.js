@@ -108,6 +108,6 @@
   document.getElementById("rectPreviewClose")?.addEventListener("click",()=>{clearMotion();document.getElementById("rectPreview").hidden=true});
   document.getElementById("rectPreviewRestart")?.addEventListener("click",()=>{if(position)start(position.variant)});
   document.getElementById("rectPreviewFlip")?.addEventListener("click",()=>{clearMotion();flipped=!flipped;render()});
-  document.getElementById("rectPreviewUndo")?.addEventListener("click",()=>{if(history.length){clearMotion();const previous=history.pop();position=previous.position;lastMove=history.length>1?history[history.length-2].move:null;selected=null;legal=[];ended=false;render()}});
+  document.getElementById("rectPreviewUndo")?.addEventListener("click",()=>{if(history.length){clearMotion();const previous=history.pop();position=previous.position;lastMove=history.length?history[history.length-1].move:null;selected=null;legal=[];ended=false;render()}});
  });
 })();
