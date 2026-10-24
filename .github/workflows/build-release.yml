@@ -25,13 +25,34 @@ jobs:
           set -euo pipefail
           SOURCE=app/src/main/res/mipmap-mdpi/ic_launcher.png
           test -s "$SOURCE"
-          # Use the committed approved icon as the source. Replace with original
-          # high-resolution PNGs when available to avoid interpolation.
+          # Ubuntu runners may not provide ImageMagick's legacy 'convert'.
+          # Android SDK's bundled Java is available from setup-java.
+          cat > /tmp/SchachNovaResizeIcon.java <<'JAVA'
+          import java.awt.*;
+          import java.awt.image.BufferedImage;
+          import java.io.File;
+          import javax.imageio.ImageIO;
+          public class SchachNovaResizeIcon {
+            public static void main(String[] args) throws Exception {
+              BufferedImage src = ImageIO.read(new File(args[0]));
+              if (src == null) throw new IllegalArgumentException("Invalid launcher PNG");
+              int size = Integer.parseInt(args[2]);
+              BufferedImage dst = new BufferedImage(size,size,BufferedImage.TYPE_INT_ARGB);
+              Graphics2D g = dst.createGraphics();
+              g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+              g.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+              g.drawImage(src,0,0,size,size,null);
+              g.dispose();
+              ImageIO.write(dst,"png",new File(args[1]));
+            }
+          }
+          JAVA
+          javac /tmp/SchachNovaResizeIcon.java
           for spec in hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
             density="${spec%%:*}"
             pixels="${spec##*:}"
             mkdir -p "app/src/main/res/mipmap-$density"
-            convert "$SOURCE" -filter Lanczos -resize "${pixels}x${pixels}" "app/src/main/res/mipmap-$density/ic_launcher.png"
+            java -cp /tmp SchachNovaResizeIcon "$SOURCE" "app/src/main/res/mipmap-$density/ic_launcher.png" "$pixels"
           done
       - name: Verify permanent release signing secrets
         env:
