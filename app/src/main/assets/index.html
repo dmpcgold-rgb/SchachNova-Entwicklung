@@ -367,6 +367,24 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
  #trainingScreen #trainingMessage{height:76px!important;min-height:76px!important;max-height:76px!important;padding:8px 10px!important}
  #trainingScreen #trainingBoard{margin-top:5px!important;margin-bottom:7px!important}
 }
+
+/* Partierückblick: two clear player columns and colored move-quality categories. */
+#reviewOverview{background:#061529!important;color:#f1f7ff!important}
+#reviewOverview .review-coach,#reviewOverview .overview-accuracy>div,#reviewOverview .overview-stats{background:linear-gradient(150deg,#18365c,#0d2442)!important;border:1px solid #447fb9!important;color:#f1f7ff!important}
+#reviewOverview .overview-players{display:grid!important;grid-template-columns:1fr 1fr!important;text-align:center!important;gap:10px!important}
+#reviewOverview .overview-accuracy{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+#reviewOverview .overview-accuracy>div{text-align:center!important;font-size:17px!important;border-radius:12px!important;padding:12px 5px!important}
+#reviewOverview .overview-accuracy strong{font-size:clamp(25px,7vw,37px)!important;font-variant-numeric:tabular-nums!important}
+#reviewOverview .overview-stats{display:grid!important;grid-template-columns:minmax(0,1fr) 62px 72px!important;gap:0 5px!important;padding:12px 9px!important}
+#reviewOverview .overview-stats>*{min-width:0!important;align-self:center!important}
+#reviewOverview .overview-stat-heading{text-align:center!important;font-size:clamp(12px,3.6vw,17px)!important;padding:8px 0!important}
+#reviewOverview .overview-stat-heading:first-child{text-align:left!important}
+#reviewOverview .overview-grade-name{position:relative!important;padding:12px 4px 12px 16px!important;border-bottom:1px solid #ffffff0d!important}
+#reviewOverview .overview-grade-name:before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);height:17px;width:5px;border-radius:4px;background:var(--grade-color)}
+#reviewOverview .overview-stats .stat-value{text-align:center!important;font-weight:800!important;font-size:clamp(17px,4.5vw,22px)!important;font-variant-numeric:tabular-nums!important;border-bottom:1px solid #ffffff0d!important}
+#reviewOverview .overview-chart{background:#11253e!important;border-radius:14px!important}
+#reviewOverview #overviewStart{background:linear-gradient(145deg,#3174b9,#15518d)!important;border:1px solid #7db8ef!important;color:white!important}
+@media(max-width:380px){#reviewOverview .overview-stats{grid-template-columns:minmax(0,1fr) 48px 57px!important}#reviewOverview .overview-grade-name{font-size:13px!important}}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
