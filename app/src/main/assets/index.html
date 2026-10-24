@@ -239,6 +239,41 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
  #gameScreen .premove-actions{gap:4px!important}
  #gameScreen .premove-actions button{min-height:32px!important;padding:4px!important}
 }
+
+/* Reference gameplay layout: board first, no square reflow or piece flashes. */
+@media(max-width:659px){
+ #gameScreen .boardpanel,#trainingScreen .training-board-area{min-width:0!important}
+ #gameScreen .board,#trainingScreen .training-board{
+  width:100%!important;max-width:100%!important;height:auto!important;
+  aspect-ratio:1/1!important;box-sizing:border-box!important;
+  display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;
+  grid-template-rows:repeat(8,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;gap:0!important;border-radius:0!important;
+  margin-left:auto!important;margin-right:auto!important;
+ }
+ #trainingScreen{padding:4px 0!important}
+ #trainingScreen .training-top{gap:5px!important}
+ #trainingScreen .training-top h2{font-size:clamp(15px,4vw,19px)!important;min-width:0!important;text-align:center}
+ #trainingScreen .training-top button{padding:7px 9px!important;white-space:nowrap}
+ #trainingScreen .training-board{margin-top:5px!important;margin-bottom:7px!important}
+ #trainingScreen .training-message{min-height:0!important;padding:8px 10px!important;margin:5px 0!important}
+ #trainingScreen .training-actions{gap:5px!important}
+ #trainingScreen .training-actions button{padding:9px 5px!important}
+ #gameScreen .board>.sq,#trainingScreen .training-board>.sq{
+  display:grid!important;place-items:center!important;
+  padding:0!important;margin:0!important;border:0!important;
+  min-width:0!important;min-height:0!important;overflow:hidden!important;
+  transition:none!important;animation:none!important;
+ }
+ #gameScreen .board .piece-img,#trainingScreen .training-board .piece-img{
+  animation:none!important;transition:none!important;
+  backface-visibility:hidden!important;
+ }
+}
+/* Stable overlays: avoid repainting the entire square when a piece is selected. */
+#gameScreen .board>.sq.lastmove:not(.selected){background-image:linear-gradient(#ffd94a36,#ffd94a36)!important}
+#gameScreen .board>.sq.target:after{background:#1d4b9b66!important}
+#gameScreen .board>.sq.target:has(.piece-img):after{background:transparent!important;border-color:#58a9f2aa!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
