@@ -30,7 +30,17 @@
     const img=document.createElement("img");img.className="rect-piece-svg";img.alt="";img.draggable=false;
     img.src="pieces/"+(piece===piece.toUpperCase()?"w":"b")+piece.toUpperCase()+".svg";
     square.append(img);
-   }else square.textContent=glyphs[piece]||"";
+   }else if(piece!=="."){
+    const parts=piece.toUpperCase()==="C"?["R","N"]:["B","N"];
+    const wrap=document.createElement("span");wrap.className="rect-compound-svg";
+    for(const kind of parts){
+     const icon=document.createElement("img");
+     icon.className="rect-compound-svg-icon";icon.alt="";icon.draggable=false;
+     icon.src="pieces/"+(piece===piece.toUpperCase()?"w":"b")+kind+".svg";
+     wrap.append(icon);
+    }
+    square.append(wrap);
+   }
    square.title=geo.algebraic(x,y,shape)+(piece==="."?"":": "+piece);
    square.setAttribute("aria-label",square.title);
    square.addEventListener("click",()=>tap(idx));
