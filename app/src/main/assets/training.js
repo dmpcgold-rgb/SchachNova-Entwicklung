@@ -86,12 +86,45 @@ function animateTrainingMove(m,piece){
  target.animate([{transform:"translate3d("+dx+"px,"+dy+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration:210,easing:"cubic-bezier(.32,.05,.24,1)"});
 }
 function applyTrainingMove(m){const piece=state.b[m[0]];state=apply(state,m);renderTraining();animateTrainingMove(m,piece);}
+function endgameResult(){
+ const moves=legal(state);
+ if(!moves.length)return checked(state)?(state.t===-1?"Übung geschafft: Schwarz ist schachmatt.":"Übung verloren: Weiß ist schachmatt."):"Übung beendet: Patt – kein Sieg möglich.";
+ if(insufficient(state))return "Übung verloren: Remis wegen unzureichenden Materials.";
+ if(state.half>=150)return "Übung beendet: Remis nach der 75-Züge-Regel.";
+ if(active?.data.kind==="promotion"&&!state.b.includes("P")&&!state.b.includes("Q"))return "Übung verloren: Der Freibauer ist nicht mehr vorhanden.";
+ if(active?.data.kind==="promotion"&&state.b.includes("Q"))return "Geschafft: Der Bauer wurde umgewandelt!";
+ return "";
+}
+function requestEndgameHint(){
+ if(!active||active.opening||busy||state.t!==1)return;
+ const result=endgameResult();if(result){label(result);return;}
+ const snapshot=state;busy=true;label("Stockfish analysiert die Endspielstellung …");
+ try{
+  stopWorker();busy=true;
+  worker=new Worker("stockfish-19-lite-single.js");const w=worker;
+  w.onmessage=e=>{
+   if(w!==worker)return;
+   const line=String(e.data).trim();
+   if(line==="uciok"){w.postMessage("isready");return;}
+   if(line==="readyok"){w.postMessage("position fen "+posFen(snapshot));w.postMessage("go depth 12");return;}
+   if(line.startsWith("bestmove ")){
+    const moveText=line.split(/\\s+/)[1],m=legal(snapshot).find(x=>uci(x)===moveText);
+    stopWorker();if(!active||state!==snapshot)return;
+    if(!m){label("Kein gültiger Hinweis verfügbar.");return;}
+    hintStep=Math.min(2,hintStep+1);hintFrom=m[0];hintTo=hintStep===2?m[1]:-1;
+    label(hintStep===1?"Hinweis 1/2: Die empfohlene Figur ist markiert.":"Hinweis 2/2: Der empfohlene Zug ist mit einem Pfeil markiert.");renderTraining();
+   }
+  };
+  w.onerror=()=>{stopWorker();label("Stockfish-Hinweis derzeit nicht verfügbar.");};
+  w.postMessage("uci");
+ }catch(_){stopWorker();label("Stockfish-Hinweis derzeit nicht verfügbar.");}
+}
 function start(data,isOpening){
  stopWorker();if(previousVariantMode===null)previousVariantMode=variantMode;variantMode="standard";active={data,opening:isOpening};ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
  $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
  $("trainingBack").onclick=()=>showMenu(isOpening?data.group:"endgames");
  $("trainingReset").onclick=()=>start(data,isOpening);
- $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{label("Stockfish-Hinweise für freie Endspielstellungen sind noch nicht verfügbar. Ich zeige keinen zufälligen Zug als beste Lösung.");return;}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();};
+ $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{requestEndgameHint();return;}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();};
  label(isOpening?"Übe die Eröffnung mit "+(data.side===1?"Weiß":"Schwarz")+". Ziehe die richtige Figur.":"Ziel: "+data.goal);
  renderTraining();if(isOpening)autoOpening();
 }
@@ -118,8 +151,7 @@ function click(i){
   resetHint();applyTrainingMove(m);ply++;label("Richtig! "+active.data.notes[ply-1]);autoOpening();return;
  }
  resetHint();applyTrainingMove(m);
- if(!legal(state).length){label(checked(state)?"Schachmatt! "+(state.t===-1?"Weiß":"Schwarz")+" gewinnt.":"Patt – versuche die Übung erneut.");return;}
- if(active.data.kind==="promotion"&&state.b.some(p=>p==="Q")){label("Geschafft: Der Bauer wurde umgewandelt!");return;}
+ const outcome=endgameResult();if(outcome){label(outcome);return;}
  engineReply();
 }
 function engineReply(){
@@ -131,7 +163,7 @@ function engineReply(){
    if(w!==worker)return;const line=String(e.data);
    if(line==="uciok"){w.postMessage("isready");return;}
    if(line==="readyok"){w.postMessage("position fen "+posFen(state));w.postMessage("go depth 8");return;}
-   if(line.startsWith("bestmove ")){const moveText=line.split(" ")[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){applyTrainingMove(m);label("Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else label("Kein gültiger Gegenzug gefunden.");}
+   if(line.startsWith("bestmove ")){const moveText=line.split(" ")[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){applyTrainingMove(m);const outcome=endgameResult();label(outcome||"Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else label(endgameResult()||"Kein gültiger Gegenzug gefunden.");}
   };
   w.onerror=()=>{stopWorker();label("Offline-Engine nicht verfügbar. Die Übung kann zurückgesetzt werden.");};
   w.postMessage("uci");
