@@ -162,6 +162,7 @@ function animateMovedPiece(m){
  const distance=Math.hypot(toCol-fromCol,toRow-fromRow);
  const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
  const duration=reducedMotion?0:isBlindDisk?Math.min(370,Math.max(185,150+distance*29)):Math.min(355,Math.max(175,155+distance*27));
+ if(reducedMotion){overlay.remove();target.style.visibility="";return;}
  let done=false,animation;
  const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;if(activePieceCleanup===cleanup)activePieceCleanup=null;};
  animation=sprite.animate([{transform:"translate3d("+(-dx)+"px,"+(-dy)+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration,easing:"cubic-bezier(.22,.72,.19,1)",fill:"forwards"});
