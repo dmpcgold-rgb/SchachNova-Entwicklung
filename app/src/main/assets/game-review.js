@@ -187,7 +187,7 @@ function renderReview(){ $("reviewOpening").textContent="Eröffnung: "+openingNa
  const analyzed=items.children.length;
  const avg=analyzed?losses/analyzed:0;
  const accuracies=[];for(let i=0;i<movesPlayed.length;i++){const score=moveAccuracy(results[i]?.cp,results[i+1]?.cp,positions[i].t);if(score!==null)accuracies.push(score);}const accuracy=accuracyAverage(accuracies);
- summary.textContent="Geschätzte Analysequalität: "+(accuracy===null?"–":accuracy+"/100") · Beste Züge: "+counts.best+" · Gut: "+counts.good+" · Ungenauigkeiten: "+counts.inaccurate+" · Fehler: "+counts.mistake+" · Grobe Fehler: "+counts.blunder;
+ summary.textContent="Geschätzte Analysequalität: "+(accuracy===null?"–":accuracy+"/100")+" · Beste Züge: "+counts.best+" · Gut: "+counts.good+" · Ungenauigkeiten: "+counts.inaccurate+" · Fehler: "+counts.mistake+" · Grobe Fehler: "+counts.blunder;
  headline.textContent="Partieanalyse abgeschlossen";
 }
 
