@@ -210,6 +210,15 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
 #gameScreen .board .sq.selected,#trainingScreen .training-board .sq.selected{box-shadow:inset 0 0 0 3px #a5e1ff!important}
 #gameScreen .board .sq.check,#trainingScreen .training-board .sq.check{background:#d64c60!important}
 #novaGameSetup button.start,#novaGameSetup #startBtn,#novaGameSetup #startGame{background:linear-gradient(155deg,#55b2ff,#1765b6)!important;border-color:#b5e4ff!important}
+
+/* No duplicate variant controls outside variant games. */
+#variantInfoCatalog[hidden],#variantPlayModes[hidden]{display:none!important}
+#homeScreen.nova-setup-mode .nova-back-home{display:block!important}
+#homeScreen.nova-setup-mode #novaPlaySection,#homeScreen.nova-setup-mode #novaTrainingSection,#homeScreen.nova-setup-mode #novaAnalysisSection,#homeScreen.nova-setup-mode #novaProfileSection{display:none!important}
+#homeScreen.nova-setup-mode #novaGameSetup{display:block!important}
+#homeScreen.nova-setup-mode #novaDesignPicker{display:block!important}
+#homeScreen.nova-setup-mode .nova-main-nav{display:none!important}
+#launchGame{background:linear-gradient(180deg,#61b4f5,#1266b4)!important;border:1px solid #a9dfff!important;color:#fff!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
@@ -367,5 +376,31 @@ document.addEventListener('DOMContentLoaded',()=>{
  const showSetup=()=>{if(!setup.hidden){home.classList.add('nova-submenu','nova-setup-mode');home.classList.remove('nova-show-design');}};
  document.querySelectorAll('#novaPlaySection [data-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(showSetup,50)));
  document.getElementById('novaBackHome')?.addEventListener('click',()=>{home.classList.remove('nova-setup-mode');setup.hidden=true;});
+});
+</script><script>
+/* Navigation state machine: only one visible menu layer at a time. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup'),back=document.getElementById('novaBackHome'),play=document.getElementById('novaPlaySection');
+ if(!home||!setup||!back||!play)return;
+ const clear=()=>{home.classList.remove('nova-setup-mode');};
+ const prepare=()=>{
+  if(setup.hidden)return;
+  home.classList.add('nova-submenu','nova-setup-mode');
+  home.classList.remove('nova-show-design');
+  const variant=document.getElementById('variantChooser');
+  const isVariant=variant&&!variant.hidden;
+  for(const id of ['variantInfoCatalog','variantPlayModes']){
+   const e=document.getElementById(id);
+   if(e)e.hidden=!isVariant;
+  }
+ };
+ play.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>setTimeout(prepare,0)));
+ back.addEventListener('click',clear);
+ document.querySelectorAll('.nova-main-nav .nova-nav,[data-nova-jump]').forEach(b=>b.addEventListener('click',()=>{
+  if(!setup.hidden)setTimeout(prepare,0);else clear();
+ }));
+ // The design picker is part of the pre-game form, not a duplicate home menu.
+ const picker=document.getElementById('novaDesignPicker');
+ if(picker&&picker.parentElement!==setup)setup.insertBefore(picker,document.getElementById('timeChooser')||setup.firstChild);
 });
 </script></body></html>
