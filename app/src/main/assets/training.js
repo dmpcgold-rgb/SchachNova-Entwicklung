@@ -89,13 +89,13 @@ function applyTrainingMove(m){const piece=state.b[m[0]];state=apply(state,m);ren
 function endgameResult(){
  const moves=legal(state);
  if(!moves.length)return checked(state)?(state.t===-1?"Übung geschafft: Schwarz ist schachmatt.":"Übung verloren: Weiß ist schachmatt."):"Übung beendet: Patt – kein Sieg möglich.";
- if(insufficient(state))return "Übung verloren: Remis wegen unzureichenden Materials.";
+ if(insufficient(state))return "Übung beendet: Remis wegen unzureichenden Materials – das Trainingsziel ist nicht mehr erreichbar.";
  if(state.half>=150)return "Übung beendet: Remis nach der 75-Züge-Regel.";
  if(active?.data.kind==="promotion"&&!state.b.includes("P")&&!state.b.includes("Q"))return "Übung verloren: Der Freibauer ist nicht mehr vorhanden.";
  if(active?.data.kind==="promotion"&&state.b.includes("Q"))return "Geschafft: Der Bauer wurde umgewandelt!";
  return "";
 }
-function finishTraining(message){trainingFinished=true;selected=-1;stopWorker();label(message);renderTraining();}
+function finishTraining(message){trainingFinished=true;selected=-1;resetHint();stopWorker();label(message);renderTraining();}
 function animateHint(){
  const board=$("trainingBoard");if(!board||hintFrom<0)return;
  const flipped=active.opening&&active.data.side===-1;
@@ -119,7 +119,7 @@ function requestEndgameHint(){
    if(line==="readyok"){w.postMessage("position fen "+posFen(snapshot));w.postMessage("go depth 12");return;}
    if(line.startsWith("bestmove ")){
     const moveText=line.split(/\s+/)[1],m=legal(snapshot).find(x=>uci(x)===moveText);
-    stopWorker();if(!active||trainingFinished||state!==snapshot)return;
+    stopWorker();if(!active||active.opening||trainingFinished||state!==snapshot)return;
     if(!m){label("Kein gültiger Hinweis verfügbar.");return;}
     hintStep=Math.min(2,hintStep+1);hintFrom=m[0];hintTo=hintStep===2?m[1]:-1;
     label(hintStep===1?"Hinweis 1/2: Die empfohlene Figur ist markiert.":"Hinweis 2/2: Der empfohlene Zug ist mit einem Pfeil markiert.");renderTraining();animateHint();
