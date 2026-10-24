@@ -167,7 +167,7 @@ function renderReview(){ $("reviewOpening").textContent="Eröffnung: "+openingNa
   const num=Math.floor(i/2)+1+(i%2?"…":".");
   row.innerHTML="<strong>"+num+" "+notation(movesPlayed[i])+"</strong><span style='color:"+color+"'>"+name+"</span><small>−"+(delta/100).toFixed(2)+" Bauerneinheiten</small>";
   const explanation=document.createElement("p");explanation.textContent=describe(i,delta,before.best);explanation.hidden=true;
-  row.append(explanation);row.onclick=()=>{explanation.hidden=!explanation.hidden;selectReview(i+1);review.scrollTo({top:0,behavior:"smooth"});};
+  row.append(explanation);row.onclick=()=>{explanation.hidden=!explanation.hidden;selectReview(i+1);/* Keep the board fixed: do not scroll the entire analysis panel on move selection. */};
   items.append(row);
  }
  const analyzed=items.children.length;
