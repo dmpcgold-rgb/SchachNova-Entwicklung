@@ -31,4 +31,7 @@ assert.match(html,/\.rect-preview-piece-motion\{[^}]*background:transparent!impo
 assert.match(js,/rect-compound-svg/);
 assert.match(js,/parts=piece.toUpperCase\(\)==="C"\?\["R","N"\]:\["B","N"\]/);
 assert.match(html,/\.rect-preview-motion-target \.rect-compound-svg\{visibility:hidden\}/);
+assert.match(js,/origin.querySelector\("\.rect-piece-svg, \.rect-compound-svg"\)/);
+assert.match(js,/moving.append\(pieceNode.cloneNode\(true\)\)/);
+assert.match(html,/\.rect-preview-piece-motion>\.rect-compound-svg/);
 console.log("SchachNova: 8x8 and 10x8 piece-only animation and cleanup tests passed");
