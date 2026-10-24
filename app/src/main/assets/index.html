@@ -453,6 +453,13 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
 #reviewPanel .review-controls button{min-width:0!important;white-space:normal!important;line-height:1.2!important}
 #reviewPanel .review-board.hide-review-arrows .review-arrow-overlay{display:none!important}
 #reviewPanel .review-board.hide-review-arrows .review-move-badge{display:none!important}
+
+/* Game layout stability: keep board square and avoid scroll anchoring during moves. */
+#gameScreen,#gameScreen .board,#gameScreen #board,#gameScreen #rankLabels,#gameScreen #fileLabels{overflow-anchor:none!important}
+#gameScreen #board{aspect-ratio:1/1!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;grid-template-rows:repeat(8,minmax(0,1fr))!important;contain:layout style!important}
+#gameScreen #board>.sq{min-width:0!important;min-height:0!important;box-sizing:border-box!important}
+#gameScreen #board>.sq .piece-img{max-width:100%!important;max-height:100%!important}
+#gameEndNotice{display:none!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
