@@ -193,6 +193,23 @@ button.primary,button[style*="green"],button[style*="#6"]{
 #trainingScreen .training-list{gap:9px!important}
 #trainingScreen .training-card{min-height:60px!important;background:linear-gradient(180deg,#174b80,#092a52)!important;border:1px solid #5695c9!important;border-radius:10px!important;box-shadow:0 2px 6px #0005!important}
 #trainingScreen .training-top button,#trainingScreen .training-actions button{background:linear-gradient(180deg,#1b568f,#0b305a)!important;border:1px solid #5e9bd4!important}
+
+/* SchachNova blue/silver final consistency layer, no new piece set. */
+:root{--green:#236dc0!important;--edge:#519bdf!important}
+.nova-nav.active,.nova-menu-grid button,.nova-menu-grid button.active,
+.training-card,.training-list button,.training-top button,.training-actions button,
+#trainingScreen button,#trainingScreen .training-message,
+#novaGameSetup .custom-time,#novaGameSetup .custom-time summary,
+#novaGameSetup .custom-time-fields input,#novaGameSetup .custom-time-fields button,
+#gameScreen button,#reviewScreen button,.modal-box,.modal-box button{
+background:linear-gradient(155deg,#174d88,#0a274e)!important;
+border-color:#5b9bd6!important;color:#f1f7ff!important
+}
+#gameScreen .board .sq.light,#trainingScreen .training-board .sq.light{background:linear-gradient(135deg,#f6faff,#b9c9dd 55%,#eaf2ff)!important}
+#gameScreen .board .sq.dark,#trainingScreen .training-board .sq.dark{background:linear-gradient(135deg,#2065b7,#092c69 58%,#104b94)!important}
+#gameScreen .board .sq.selected,#trainingScreen .training-board .sq.selected{box-shadow:inset 0 0 0 3px #a5e1ff!important}
+#gameScreen .board .sq.check,#trainingScreen .training-board .sq.check{background:#d64c60!important}
+#novaGameSetup button.start,#novaGameSetup #startBtn,#novaGameSetup #startGame{background:linear-gradient(155deg,#55b2ff,#1765b6)!important;border-color:#b5e4ff!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
@@ -341,23 +358,6 @@ window.schachNovaGoBack=function(){
  if(setup&&!setup.hidden){setup.hidden=true;return true}
  return false;
 };
-</script><script>
-document.addEventListener('DOMContentLoaded',function(){
- const home=document.getElementById('homeScreen');
- const setup=document.getElementById('novaGameSetup');
- if(!home||!setup)return;
- document.querySelectorAll('#novaPlaySection button[data-mode]').forEach(function(button){
-  button.addEventListener('click',function(){
-   setTimeout(function(){if(!setup.hidden){home.classList.add('nova-setup-mode');setup.scrollIntoView({block:'start'});}},0);
-  });
- });
- document.getElementById('novaBackHome')?.addEventListener('click',function(){home.classList.remove('nova-setup-mode');});
- const previous=window.schachNovaGoBack;
- window.schachNovaGoBack=function(){
-  if(home.classList.contains('nova-setup-mode')){home.classList.remove('nova-setup-mode');setup.hidden=true;return true;}
-  return typeof previous==='function'?previous():false;
- };
-});
 </script><script>
 document.addEventListener('DOMContentLoaded',()=>{
  const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup'),picker=document.getElementById('novaDesignPicker');
