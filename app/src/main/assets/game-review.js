@@ -56,7 +56,7 @@ const openingLines=[
 function openingName(){
  const moves=movesPlayed.map(notation).join(" ");let found=null;
  for(const [seq,name] of openingLines){if(moves===seq||moves.startsWith(seq+" ")){if(!found||seq.length>found[0].length)found=[seq,name];}}
- return found?found[1]:"Keine bekannte Eröffnung in der lokalen Kurz-Datenbank";
+ return found?found[1]:"Unbekannte Eröffnung";
 }
 function tacticalExplanation(i,loss,bestMove){
  const before=positions[i],after=positions[i+1],move=movesPlayed[i],piece=before.b[move[0]],target=before.b[move[1]];
@@ -198,6 +198,8 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
   const name=label(loss,false)[0];stats[who][name]=(stats[who][name]||0)+1;losses[who].push(loss);const value=moveAccuracy(results[i].cp,results[i+1].cp,positions[i].t);if(value!==null)accuracies[who].push(value);
  }
  const accuracy=accuracies.map(accuracyAverage);
+ // Preserve a meaningful accuracy display when one side has no valid evaluations.
+ const accuracyElement=$("overviewAccuracy");accuracyElement.setAttribute("aria-label","Geschätzte Zuggenauigkeit, getrennt nach Weiß und Schwarz");
  $("overviewAccuracy").innerHTML=accuracy.map((v,i)=>"<div>"+(i?"Schwarz":"Weiß")+"<strong style='display:block'>"+(v===null?"–":v+"/100")+"</strong></div>").join("");
  const table=$("overviewStats");table.replaceChildren();
  for(const title of ["Zugbewertung","Weiß","Schwarz"]){const heading=document.createElement("strong");heading.textContent=title;heading.className="overview-stat-heading";table.append(heading);}
