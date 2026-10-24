@@ -255,9 +255,12 @@ function next(t){
 function start(){
  if(!history||history.length<2){const msg="Noch keine Züge vorhanden.";progress.textContent=msg;$("overviewProgress").textContent=msg;$("overviewStart").disabled=true;return;}
  const variant=variantMode!=="standard";
- if(variant&&!window.SchachNovaVariants?.[variantMode]){
-  const msg="Diese Variante wird von der vorhandenen Engine nicht unterstützt.";
-  progress.textContent=msg;$("overviewProgress").textContent=msg;$("overviewStart").disabled=true;return;
+ if(variant&&!window.SchachNovaVariantStatus?.(variantMode)?.analysisEligible){
+  const status=window.SchachNovaVariantStatus?.(variantMode);
+  const msg=(status?.label||variantMode)+": "+(status?.reason||"Die Variantenregeln sind noch nicht implementiert.");
+  progress.textContent=msg;$("overviewProgress").textContent=msg;
+  $("overviewCoach").textContent="Die Variante ist im SchachNova-Katalog dokumentiert, aber eine regelkonforme Partieanalyse ist erst nach vollständiger Integration möglich.";
+  $("overviewStart").disabled=true;return;
  }
  if(worker)worker.terminate();token++;const t=token;
  positions=history.slice();results=[];index=0;reviewAt=0;active=true;drawReviewBoard();items.replaceChildren();summary.textContent="";headline.textContent="Stockfish analysiert deine Partie";
