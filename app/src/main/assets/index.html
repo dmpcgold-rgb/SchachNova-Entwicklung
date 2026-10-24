@@ -342,6 +342,31 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
 #reviewPanel .review-arrow-overlay{contain:strict!important}
 #reviewPanel{overflow-anchor:none!important}
 #reviewPanel .review-summary,#reviewPanel .review-coach{overflow-anchor:none!important}
+
+/* Training board must not jump when hints or feedback change length. */
+#trainingScreen .training-top{min-height:56px!important}
+#trainingScreen #trainingTitle{line-height:1.15!important;max-height:2.3em!important;overflow:hidden!important}
+#trainingScreen #trainingBoardArea{width:100%!important;min-width:0!important;overflow-anchor:none!important}
+#trainingScreen #trainingMessage{
+ box-sizing:border-box!important;
+ height:clamp(68px,10vh,92px)!important;
+ min-height:68px!important;max-height:92px!important;
+ overflow-y:auto!important;overscroll-behavior:contain!important;
+ scrollbar-width:thin!important;overflow-anchor:none!important;
+ line-height:1.35!important;
+}
+#trainingScreen #trainingBoard{
+ flex:none!important;min-width:0!important;min-height:0!important;
+ aspect-ratio:1/1!important;height:auto!important;
+ overflow-anchor:none!important;contain:layout style!important;
+}
+#trainingScreen .training-actions{min-height:47px!important}
+#trainingScreen .training-actions button{min-height:43px!important}
+@media(max-width:659px){
+ #trainingScreen .training-top{min-height:52px!important}
+ #trainingScreen #trainingMessage{height:76px!important;min-height:76px!important;max-height:76px!important;padding:8px 10px!important}
+ #trainingScreen #trainingBoard{margin-top:5px!important;margin-bottom:7px!important}
+}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
