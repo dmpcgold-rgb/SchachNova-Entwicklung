@@ -107,6 +107,11 @@ if(premove&&current().t===1&&!ended&&document.getElementById("botMode").value===
  setTimeout(()=>{if(ended||current().t!==1)return;const legalPremove=legal(current()).find(x=>x[0]===queued[0]&&x[1]===queued[1]);if(legalPremove)move(legalPremove);else{premoveQueue=[];render();}},120);
 }}
 let activePieceAnimation=null;
+let activePieceCleanup=null;
+function stopPieceAnimation(){
+ if(activePieceCleanup)activePieceCleanup();
+ if(activePieceAnimation){activePieceAnimation.cancel();activePieceAnimation=null;}
+}
 function animateMovedPiece(m){
  const board=document.getElementById("board");if(!board)return;
  const fromRow=m[0]>>4,fromCol=m[0]&7,toRow=m[1]>>4,toCol=m[1]&7;
@@ -115,7 +120,7 @@ function animateMovedPiece(m){
  const fromCell=board.children[fromIndex],toCell=board.children[toIndex];
  const target=toCell?.querySelector(".piece-img, .blind-disk");
  if(!fromCell||!toCell||!target||!target.animate)return;
- if(activePieceAnimation){activePieceAnimation.finish();activePieceAnimation=null;}
+ stopPieceAnimation();
  const br=board.getBoundingClientRect(),fr=fromCell.getBoundingClientRect(),tr=toCell.getBoundingClientRect();
  // Use a dedicated square-sized overlay. Never append a raw piece image directly
  // to the grid: that creates an extra grid item and can enlarge it dramatically.
@@ -158,9 +163,10 @@ function animateMovedPiece(m){
  const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
  const duration=reducedMotion?0:isBlindDisk?Math.min(370,Math.max(185,150+distance*29)):Math.min(355,Math.max(175,155+distance*27));
  let done=false,animation;
- const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;};
+ const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;if(activePieceCleanup===cleanup)activePieceCleanup=null;};
  animation=sprite.animate([{transform:"translate3d("+(-dx)+"px,"+(-dy)+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration,easing:"cubic-bezier(.22,.72,.19,1)",fill:"forwards"});
- activePieceAnimation=animation;animation.onfinish=cleanup;animation.oncancel=cleanup;
+ activePieceAnimation=animation;activePieceCleanup=cleanup;animation.onfinish=cleanup;animation.oncancel=cleanup;
+ setTimeout(cleanup,duration+180);
 }
 function choose(i){
  if(ended||viewIndex!==history.length-1)return;
