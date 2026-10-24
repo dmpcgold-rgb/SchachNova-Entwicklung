@@ -15,4 +15,7 @@ for(const id of ["rectPreviewUndo","rectPreviewFlip","rectPreviewRestart"])asser
 assert.match(js,/rules.legalMoves\(position\)/);
 assert.match(js,/rules.apply\(position,move\)/);
 assert.doesNotMatch(js,/\b(?:localStorage|sessionStorage)\b/);
-console.log("SchachNova: 10x8 preview integration tests passed");
+assert.match(js,/if\(motion&&motion.to===idx\)square.style.visibility="hidden"/);
+assert.match(js,/function clearMotion\(\)/);
+assert.match(js,/motion.animation=animation/);
+console.log("SchachNova: 10x8 preview integration and animation cleanup tests passed");
