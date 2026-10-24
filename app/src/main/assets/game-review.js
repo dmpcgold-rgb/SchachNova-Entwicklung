@@ -11,6 +11,20 @@ function fen(s){
  const castle=(s.c&1?"K":"")+(s.c&2?"Q":"")+(s.c&4?"k":"")+(s.c&8?"q":"");
  return rows.join("/")+" "+(s.t===1?"w":"b")+" "+(castle||"-")+" "+(s.ep>=0?coord(s.ep):"-")+" "+s.half+" "+s.full;
 }
+// Estimated move accuracy uses change in win probability, reducing excessive
+// penalties in already decided positions. This is not a Chess.com accuracy score.
+function winChance(cp,side){
+ const value=Math.max(-1600,Math.min(1600,cp*side));
+ return 1/(1+Math.exp(-value/260));
+}
+function moveAccuracy(before,after,side){
+ if(!Number.isFinite(before)||!Number.isFinite(after))return null;
+ const lost=Math.max(0,winChance(before,side)-winChance(after,side));
+ return Math.max(0,Math.min(100,Math.round(100*Math.exp(-3.5*lost))));
+}
+function accuracyAverage(values){
+ return values.length?Math.round(values.reduce((a,b)=>a+b,0)/values.length):null;
+}
 function label(loss,book){
  if(book)return ["Eröffnungszug","#b8b8b8"];
  if(loss<15)return ["Bester Zug","#88c85a"];
@@ -172,18 +186,18 @@ function renderReview(){ $("reviewOpening").textContent="Eröffnung: "+openingNa
  }
  const analyzed=items.children.length;
  const avg=analyzed?losses/analyzed:0;
- const accuracy=Math.max(0,Math.min(100,Math.round(100*Math.exp(-avg/240))));
- summary.textContent="Geschätzte Analysequalität: "+accuracy+"/100 · Beste Züge: "+counts.best+" · Gut: "+counts.good+" · Ungenauigkeiten: "+counts.inaccurate+" · Fehler: "+counts.mistake+" · Grobe Fehler: "+counts.blunder;
+ const accuracies=[];for(let i=0;i<movesPlayed.length;i++){const score=moveAccuracy(results[i]?.cp,results[i+1]?.cp,positions[i].t);if(score!==null)accuracies.push(score);}const accuracy=accuracyAverage(accuracies);
+ summary.textContent="Geschätzte Analysequalität: "+(accuracy===null?"–":accuracy+"/100") · Beste Züge: "+counts.best+" · Gut: "+counts.good+" · Ungenauigkeiten: "+counts.inaccurate+" · Fehler: "+counts.mistake+" · Grobe Fehler: "+counts.blunder;
  headline.textContent="Partieanalyse abgeschlossen";
 }
 
 function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openingName();
- const stats=[{},{}],losses=[[],[]],labels=["Bester Zug","Sehr gut","Gut","Ungenauigkeit","Fehler","Grober Fehler"];
+ const stats=[{},{}],losses=[[],[]],accuracies=[[],[]],labels=["Bester Zug","Sehr gut","Gut","Ungenauigkeit","Fehler","Grober Fehler"];
  for(let i=0;i<movesPlayed.length;i++){if(!results[i]||!results[i+1]||!Number.isFinite(results[i].cp)||!Number.isFinite(results[i+1].cp))continue;
   const who=i%2,loss=Math.max(0,Math.round((results[i].cp-results[i+1].cp)*positions[i].t));
-  const name=label(loss,false)[0];stats[who][name]=(stats[who][name]||0)+1;losses[who].push(loss);
+  const name=label(loss,false)[0];stats[who][name]=(stats[who][name]||0)+1;losses[who].push(loss);const value=moveAccuracy(results[i].cp,results[i+1].cp,positions[i].t);if(value!==null)accuracies[who].push(value);
  }
- const accuracy=losses.map(a=>a.length?Math.round(100*Math.exp(-a.reduce((x,y)=>x+y,0)/a.length/240)):null);
+ const accuracy=accuracies.map(accuracyAverage);
  $("overviewAccuracy").innerHTML=accuracy.map((v,i)=>"<div>"+(i?"Schwarz":"Weiß")+"<strong style='display:block'>"+(v===null?"–":v+"/100")+"</strong></div>").join("");
  const table=$("overviewStats");table.replaceChildren();
  for(const title of ["Zugbewertung","Weiß","Schwarz"]){const heading=document.createElement("strong");heading.textContent=title;heading.className="overview-stat-heading";table.append(heading);}
@@ -210,7 +224,8 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  svg.addEventListener("click",e=>{const rect=svg.getBoundingClientRect();if(rect.width>0)choose(Math.round((e.clientX-rect.left)/rect.width*movesPlayed.length));});
  svg.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","Home","End","Enter"].includes(e.key))return;e.preventDefault();let v=Number(svg.getAttribute("aria-valuenow"))||0;v=e.key==="Home"?0:e.key==="End"?movesPlayed.length:v+(e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0);v=Math.max(0,Math.min(movesPlayed.length,v));svg.setAttribute("aria-valuenow",String(v));if(e.key==="Enter")choose(v);});
  chart.title="Tippe auf die Kurve, um einen Zug auf dem Brett anzusehen.";chart.append(svg);}
- $("overviewProgress").textContent="Alle "+movesPlayed.length+" Halbzüge ausgewertet · Genauigkeit ist eine Schätzung.";
+ const evaluated=accuracies[0].length+accuracies[1].length;
+ $("overviewProgress").textContent=evaluated+" von "+movesPlayed.length+" Halbzügen bewertet · Genauigkeit geschätzt (Gewinnwahrscheinlichkeit).";
  const errors=[];
  for(let i=0;i<movesPlayed.length;i++){
   const before=results[i],after=results[i+1];
