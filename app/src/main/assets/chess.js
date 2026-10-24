@@ -129,16 +129,25 @@ function animateMovedPiece(m){
  animation=sprite.animate([{transform:"translate3d(0,0,0)"},{transform:"translate3d("+dx+"px,"+dy+"px,0)"}],{duration,easing:"cubic-bezier(.32,.05,.24,1)",fill:"forwards"});
  activePieceAnimation=animation;animation.onfinish=cleanup;animation.oncancel=cleanup;
 }
-function choose(i){if(ended||viewIndex!==history.length-1)return;const s=current();
-// Im Bot-Modus darf Weiß während der gegnerischen Bedenkzeit genau einen Zug vormerken.
-if(s.t===(window.schachNovaBotColor===1?1:-1)&&document.getElementById("botMode").value==="bot"){return;}
- const previous=s;
- if(premoveFrom<0){if(previous&&side(previous.b[i])===1){premoveFrom=i;}else{premoveFrom=-1;}render();return;}
- if(i===premoveFrom){premoveFrom=-1;render();return;}
- if(previous&&side(previous.b[i])===1){premoveFrom=i;render();return;}
- if(premove){premoveQueue.push([premoveFrom,i]);}else{premove=[premoveFrom,i];}premoveFrom=-1;render();return;
+function choose(i){
+ if(ended||viewIndex!==history.length-1)return;
+ const s=current();
+ const botPlaying=document.getElementById("botMode").value==="bot";
+ const botColor=window.schachNovaBotColor===1?1:-1;
+ // A human may not move the computer's pieces.
+ if(botPlaying&&s.t===botColor)return;
+ const moves=legal(s);
+ if(side(s.b[i])===s.t){selected=selected===i?-1:i;render();return;}
+ const choices=moves.filter(m=>m[0]===selected&&m[1]===i);
+ if(choices.length){
+  const m=choices[0];
+  if(choices.length>1){
+   showPromotion(q=>{const promotion=choices.find(x=>x[2]===q)||m;move(promotion);});
+   return;
+  }
+  move(m);
+ }else{selected=-1;render();}
 }
-const moves=legal(s);if(side(s.b[i])===s.t){selected=selected===i?-1:i;render();return;}const choices=moves.filter(m=>m[0]===selected&&m[1]===i);if(choices.length){let m=choices[0];if(choices.length>1){showPromotion(q=>{const promotion=choices.find(x=>x[2]===q)||choices[0];move(promotion);});return;}move(m);}else{selected=-1;render();}}
 function render(){const b=document.getElementById("board");const s=history[viewIndex],checkKing=(variantMode==="atomic"?atomicKingThreat(s,s.t):variantMode==="antichess"?false:checked(s))?s.b.indexOf(s.t===1?"K":"k"):-1,lastMove=movesPlayed[viewIndex-1],targets=viewIndex===history.length-1?legal(s).filter(m=>m[0]===selected).map(m=>m[1]):[];for(let r=0;r<8;r++)for(let c=0;c<8;c++){const i=flipped?(7-r)*16+(7-c):r*16+c,el=b.children[r*8+c]||document.createElement("button");el.style.removeProperty("background-color");el.style.removeProperty("box-shadow");el.className="sq "+((r+c)%2?"dark":"light")+(lastMove&&(lastMove[0]===i||lastMove[1]===i)?" lastmove":"")+(selected===i||premoveFrom===i?" selected":"")+(targets.includes(i)?" target":"")+(((premove&&(premove[0]===i||premove[1]===i))||premoveQueue.some(q=>q[0]===i||q[1]===i))?" premove":"");if(i===checkKing){el.style.setProperty("background-color","#ef3340","important");el.style.setProperty("box-shadow","inset 0 0 0 4px #ffd0d0, inset 0 0 24px #970000","important");}const piece=s.b[i];const hiddenPiece=blindLevel>0&&piece!=="."&&(blindLevel===1?/[nN]/.test(piece):blindLevel===2?/[nNbB]/.test(piece):blindLevel===3?/[rRnNbBqQ]/.test(piece):blindLevel===4?/[rRnNbBqQkK]/.test(piece):true);const disk=hiddenPiece&&blindLevel<5;const nextPieceMarkup=piece==="."?"":disk?`<span class="blind-disk ${side(piece)===1?"blind-white":"blind-black"}" aria-hidden="true"></span>`:hiddenPiece?"":`<img class="piece-img" draggable="false" alt="" src="pieces/${side(piece)===1?"w":"b"}${piece.toUpperCase()}.svg">`;if(el.innerHTML!==nextPieceMarkup)el.innerHTML=nextPieceMarkup;el.classList.add(side(s.b[i])===1?"white-piece":"black-piece");el.setAttribute("aria-label",String.fromCharCode(97+(i&7))+(8-(i>>4)));el.onclick=()=>choose(i);el.draggable=side(s.b[i])!==0;el.ondragstart=e=>{e.dataTransfer.setData("text/plain",String(i));};el.ondragover=e=>e.preventDefault();el.ondrop=e=>{e.preventDefault();const from=Number(e.dataTransfer.getData("text/plain"));if(Number.isInteger(from)&&on(from)){selected=from;choose(i);}};if(!el.parentElement)b.append(el);}document.getElementById("rankLabels").innerHTML=(flipped?[1,2,3,4,5,6,7,8]:[8,7,6,5,4,3,2,1]).map(n=>"<span>"+n+"</span>").join("");document.getElementById("fileLabels").innerHTML=(flipped?"hgfedcba":"abcdefgh").split("").map(n=>"<span>"+n+"</span>").join("");const mh=document.getElementById("moveHistory");if(mh)mh.textContent=movesPlayed.length?movesPlayed.map((m,j)=>`${Math.floor(j/2)+1}${j%2?"...":"."} ${"abcdefgh"[m[0]&7]}${8-(m[0]>>4)}–${"abcdefgh"[m[1]&7]}${8-(m[1]>>4)}`).join("  ·  "):"Noch keine Züge";renderClocks();}
 document.getElementById("newGame").onclick=()=>{if(activePieceAnimation){activePieceAnimation.finish();activePieceAnimation=null;}history=[initial()];movesPlayed=[];viewIndex=0;selected=-1;premove=null;premoveFrom=-1;premoveQueue=[];lastEndShown="";warnedClock=false;clock=[Number(document.getElementById("timeSelect").value),Number(document.getElementById("timeSelect").value)];clockHistory=[clock.slice()];checksGiven=[0,0];running=false;ended="";last=performance.now();render();saveGame();};
 
