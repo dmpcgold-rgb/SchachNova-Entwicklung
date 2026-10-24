@@ -71,6 +71,10 @@ jobs:
           echo "SCHACHNOVA_STORE_PASSWORD=$STORE_PASSWORD" >> "$GITHUB_ENV"
           echo "SCHACHNOVA_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
           echo "SCHACHNOVA_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+      - name: Bundle Fairy-Stockfish for variant analysis and bot
+        run: |
+          bash scripts/install-fairy-stockfish.sh
+          node scripts/test-fairy-uci.cjs "$PWD/app/src/main/assets/fairy-stockfish-core.js"
       - name: Bundle Stockfish 19 offline
         run: |
           npm pack stockfish@19.0.0 --pack-destination /tmp
