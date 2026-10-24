@@ -165,6 +165,26 @@ assert(!atomicKingThreat(s,1),"No en passant threat without the captured pawn");
 // An enemy king in the blast radius makes the attacking capture illegal.
 s=position({c4:"K",d4:"P"},{e2:"k",e4:"p"},-1,0,sq("d3"));
 assert(!atomicKingThreat(s,1),"En passant cannot explode both kings");
+// End-state and move legality regressions for standard and special variants.
+variantMode="standard";
+s=position({h1:"K"},{f2:"k",g2:"q"},1);
+assert.equal(legal(s).length,0,"Stalemate has no legal moves");
+assert(!checked(s),"Stalemate is not check");
+s=position({h1:"K"},{f3:"k",g2:"q"},1);
+assert.equal(legal(s).length,0,"Checkmate has no legal moves");
+assert(checked(s),"Checkmate must be check");
+s=position({e1:"K",e2:"R"},{a8:"k",e8:"r"},1);
+assert(legal(s).some(m=>uci(m)==="e2e8"),"Pinned rook may capture the checking rook");
+assert(!legal(s).some(m=>uci(m)==="e2d2"),"Pinned rook cannot abandon king");
+variantMode="hill";
+s=position({e1:"K"},{e8:"k"},1);
+assert(legal(s).some(m=>uci(m)==="e1e2"),"Hill variant allows normal king moves");
+variantMode="threecheck";
+s=position({e1:"K",e2:"R"},{a8:"k"},1);
+assert(legal(s).some(m=>uci(m)==="e2e8"),"Three-check allows checking rook moves");
+variantMode="antichess";
+s=position({a1:"K",b2:"P"},{h8:"k",c3:"p"},1);
+assert(legal(s).every(m=>uci(m)==="b2c3"),"Capture obligation applies even when king could move");
 variantMode="standard";
 console.log("SchachNova: chess rule regression assertions passed");
 `;
