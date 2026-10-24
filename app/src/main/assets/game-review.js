@@ -83,6 +83,31 @@ function drawReviewBoard(previous=-1){
   if(img){const dx=((from%8)-(to%8))*100,dy=(Math.floor(from/8)-Math.floor(to/8))*100;
    img.animate([{transform:"translate("+dx+"%, "+dy+"%)"},{transform:"translate(0,0)"}],{duration:360,easing:"cubic-bezier(.2,.75,.25,1)"});}
  }
+ // Chess-review overlay: move arrow and category badge, without adding a grid cell.
+ const oldOverlay=board.querySelector(".review-arrow-overlay");if(oldOverlay)oldOverlay.remove();
+ const oldBadges=board.querySelectorAll(".review-move-badge");oldBadges.forEach(el=>el.remove());
+ if(move&&reviewAt>0){
+  const index=reviewAt-1,pre=results[index],post=results[index+1];
+  const loss=pre&&post&&Number.isFinite(pre.cp)&&Number.isFinite(post.cp)
+   ?Math.max(0,Math.round((pre.cp-post.cp)*positions[index].t)):null;
+  const grade=loss===null?null:label(loss,false)[0];
+  const gradeInfo={"Bester Zug":["★","#44b874"],"Sehr gut":["✓","#36bca7"],"Gut":["✓","#5ca7e5"],"Ungenauigkeit":["?!","#e6b84e"],"Fehler":["?","#e99348"],"Grober Fehler":["??","#e65a67"]};
+  const badgeData=gradeInfo[grade];
+  const from=(move[0]>>4)*8+(move[0]&7),to=(move[1]>>4)+(move[1]&7);
+  const end=board.children[(move[1]>>4)*8+(move[1]&7)];
+  if(end&&badgeData){const badge=document.createElement("span");badge.className="review-move-badge";badge.textContent=badgeData[0];badge.style.background=badgeData[1];badge.title=grade;end.append(badge);}
+  const arrow=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  arrow.setAttribute("viewBox","0 0 800 800");arrow.setAttribute("preserveAspectRatio","none");arrow.classList.add("review-arrow-overlay");
+  const line=document.createElementNS("http://www.w3.org/2000/svg","line");
+  const center=n=>[50+(n&7)*100,50+(n>>4)*100];
+  const a=center(move[0]),b=center(move[1]);
+  for(const [k,v] of Object.entries({x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:badgeData?.[1]||"#4ea8e9","stroke-width":18,"stroke-linecap":"round",opacity:.73}))line.setAttribute(k,v);
+  const defs=document.createElementNS("http://www.w3.org/2000/svg","defs");
+  const marker=document.createElementNS("http://www.w3.org/2000/svg","marker");
+  for(const [k,v] of Object.entries({id:"review-arrowhead",markerWidth:5,markerHeight:5,refX:3,refY:2.5,orient:"auto",markerUnits:"strokeWidth"}))marker.setAttribute(k,v);
+  const head=document.createElementNS("http://www.w3.org/2000/svg","path");head.setAttribute("d","M0 0 L5 2.5 L0 5 Z");head.setAttribute("fill",badgeData?.[1]||"#4ea8e9");
+  marker.append(head);defs.append(marker);arrow.append(defs);line.setAttribute("marker-end","url(#review-arrowhead)");arrow.append(line);board.append(arrow);
+ }
  $("reviewStep").textContent=reviewAt+" / "+movesPlayed.length;
  const i=reviewAt-1, before=results[i],after=results[i+1];
  let message="Wähle einen Zug oder starte die animierte Wiedergabe.";
