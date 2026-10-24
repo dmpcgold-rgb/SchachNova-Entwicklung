@@ -14,6 +14,8 @@ import android.webkit.WebViewClient
 import androidx.webkit.WebViewAssetLoader
 
 class MainActivity : Activity() {
+    private lateinit var chessWebView: WebView
+
     inner class Haptics {
         @JavascriptInterface
         fun vibrate(pattern: String) {
@@ -49,7 +51,24 @@ class MainActivity : Activity() {
                 return request?.url?.let { loader.shouldInterceptRequest(it) }
             }
         }
+        chessWebView = view
         setContentView(view)
         view.loadUrl("https://appassets.androidplatform.net/assets/index.html")
     }
+    @Deprecated("Use AndroidX OnBackPressedDispatcher when migrating from Activity")
+    override fun onBackPressed() {
+        if (!::chessWebView.isInitialized) {
+            super.onBackPressed()
+            return
+        }
+        chessWebView.evaluateJavascript(
+            "(function(){return typeof window.schachNovaGoBack==='function' && window.schachNovaGoBack()===true})()"
+        ) { result ->
+            if (result != "true") {
+                // At the root screen, keep the app open rather than closing it unexpectedly.
+                chessWebView.evaluateJavascript("window.scrollTo({top:0,behavior:'smooth'})", null)
+            }
+        }
+    }
 }
+
