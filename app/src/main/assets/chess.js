@@ -155,10 +155,11 @@ function animateMovedPiece(m){
  board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
  const dx=tr.left-fr.left,dy=tr.top-fr.top;
  const distance=Math.hypot(toCol-fromCol,toRow-fromRow);
- const duration=isBlindDisk?Math.min(360,Math.max(190,155+distance*27)):Math.min(330,Math.max(165,145+distance*26));
+ const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+ const duration=reducedMotion?0:isBlindDisk?Math.min(370,Math.max(185,150+distance*29)):Math.min(355,Math.max(175,155+distance*27));
  let done=false,animation;
  const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;};
- animation=sprite.animate([{transform:"translate3d("+(-dx)+"px,"+(-dy)+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration,easing:"cubic-bezier(.2,.7,.2,1)",fill:"forwards"});
+ animation=sprite.animate([{transform:"translate3d("+(-dx)+"px,"+(-dy)+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration,easing:"cubic-bezier(.22,.72,.19,1)",fill:"forwards"});
  activePieceAnimation=animation;animation.onfinish=cleanup;animation.oncancel=cleanup;
 }
 function choose(i){
