@@ -161,6 +161,7 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  const accuracy=losses.map(a=>a.length?Math.round(100*Math.exp(-a.reduce((x,y)=>x+y,0)/a.length/240)):null);
  $("overviewAccuracy").innerHTML=accuracy.map((v,i)=>"<div>"+(i?"Schwarz":"Weiß")+"<strong style='display:block'>"+(v===null?"–":v+"/100")+"</strong></div>").join("");
  const table=$("overviewStats");table.replaceChildren();
+ for(const title of ["Zugbewertung","Weiß","Schwarz"]){const heading=document.createElement("strong");heading.textContent=title;heading.className="overview-stat-heading";table.append(heading);}
  for(const labelName of labels){const name=document.createElement("span");name.textContent=labelName;table.append(name);
   for(let k=0;k<2;k++){const v=document.createElement("span");v.className="stat-value";v.textContent=String(stats[k][labelName]||0);table.append(v);}
  }
@@ -169,7 +170,7 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  if(values.length>1&&values.every(Number.isFinite)){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
  const poly=document.createElementNS(ns,"polyline");poly.setAttribute("fill","none");poly.setAttribute("stroke","#d7edcb");poly.setAttribute("stroke-width","3");
  poly.setAttribute("points",values.map((v,i)=>(i/(values.length-1)*w).toFixed(1)+","+(h/2-v/1000*(h/2-8)).toFixed(1)).join(" "));svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);chart.append(svg);}
- $("overviewProgress").textContent="Alle "+movesPlayed.length+" Halbzüge ausgewertet.";
+ $("overviewProgress").textContent="Alle "+movesPlayed.length+" Halbzüge ausgewertet · Genauigkeit ist eine Schätzung.";
  $("overviewCoach").textContent="Die Analyse ist bereit. Sieh dir an, welche Züge gut waren und wo du dich verbessern kannst.";
  $("overviewStart").disabled=false;
  if(typeof window.schachnovaRecordReview==="function"){const errors=losses.flat().filter(v=>v>=170).length;window.schachnovaRecordReview({id:analysisKey,white:accuracy[0],black:accuracy[1],errors,opening:openingName()});}
