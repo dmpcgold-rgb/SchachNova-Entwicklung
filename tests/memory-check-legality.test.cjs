@@ -18,7 +18,7 @@ const cases=[
  ['bishop check: unrelated pawn blocked','4k3/8/8/8/1b6/8/P7/4K3 w','a2a3'],
  ['knight check: unrelated pawn blocked','4k3/8/8/8/8/5n2/P7/4K3 w','a2a3'],
  ['queen check: unrelated pawn blocked','4k3/8/8/8/8/8/P3q3/4K3 w','a2a3'],
- ['pawn check: unrelated pawn blocked','4k3/8/8/8/8/3p4/P7/4K3 w','a2a3'],
+ ['pawn check: unrelated pawn blocked','4k3/8/8/8/8/8/P2p4/4K3 w','a2a3'],
 ];
 for(const [name,fen,illegal] of cases){const s=position(fen);assert(checked(s),name+' check not detected');assert(!moves(s).includes(illegal),name+' illegal move allowed');}
 const free=position('4k3/8/8/8/8/8/P7/4K3 w');
