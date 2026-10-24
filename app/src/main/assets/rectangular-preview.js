@@ -23,7 +23,7 @@
    square.className="rect-preview-square "+((x+y)%2?"rect-preview-dark":"rect-preview-light");
    if(idx===selected)square.classList.add("rect-preview-selected");
    if(lastMove&&(idx===lastMove.from||idx===lastMove.to))square.classList.add("rect-preview-lastmove");
-   if(motion&&motion.to===idx)square.style.visibility="hidden";
+   if(motion&&motion.to===idx)square.classList.add("rect-preview-motion-target");
    if(legal.some(m=>m.to===idx))square.classList.add("rect-preview-target");
    if(["a","c","j"].includes(piece.toLowerCase()))square.classList.add("rect-preview-compound");
    if(piece!=="."&&"KQRBNP kqrbnp".includes(piece)&&piece!==" "){
@@ -44,7 +44,7 @@
   const old=motion;motion=null;
   old.animation?.cancel();old.sprite.remove();
   const board=document.getElementById("rectPreviewBoard");
-  if(board&&position){const shape=geo.geometry(position.variant);const idx=flipped?shape.squares-1-old.to:old.to;board.children[idx]?.style.removeProperty("visibility");}
+  if(board&&position){const shape=geo.geometry(position.variant);const idx=flipped?shape.squares-1-old.to:old.to;board.children[idx]?.classList.remove("rect-preview-motion-target");}
  }
  function animateMove(from,to){
   clearMotion();
@@ -54,6 +54,7 @@
   const cellIndex=n=>flipped?shape.squares-1-n:n;
   const origin=board.children[cellIndex(from)],destination=board.children[cellIndex(to)];
   if(!origin||!destination||!origin.animate)return;
+  if(origin.querySelector(".rect-piece-svg")?.complete===false)return;
   const a=origin.getBoundingClientRect(),b=destination.getBoundingClientRect();
   const moving=origin.cloneNode(true);
   moving.removeAttribute("id");moving.setAttribute("aria-hidden","true");
