@@ -289,6 +289,31 @@ $("overviewClose").onclick=()=>{$("reviewOverview").hidden=true;active=false;tok
 close.onclick=()=>{stopReplay();review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
 $("reviewAgain").onclick=start;
 $("reviewBack").onclick=()=>{stopReplay();review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
+const arrowsButton=$("reviewToggleArrows");
+if(arrowsButton)arrowsButton.onclick=()=>{
+ const board=$("reviewBoard"),hidden=board.classList.toggle("hide-review-arrows");
+ arrowsButton.setAttribute("aria-pressed",String(!hidden));
+ arrowsButton.textContent=hidden?"↗ Pfeile: Aus":"↗ Pfeile: An";
+};
+const mistakeButton=$("reviewNextMistake");
+if(mistakeButton)mistakeButton.onclick=()=>{
+ stopReplay();
+ const mistakes=[];
+ for(let i=0;i<movesPlayed.length;i++){
+  const before=results[i],after=results[i+1];
+  if(!Number.isFinite(before?.cp)||!Number.isFinite(after?.cp))continue;
+  const loss=(before.cp-after.cp)*positions[i].t;
+  if(loss>=170)mistakes.push(i+1);
+ }
+ if(!mistakes.length){$("reviewExerciseStatus").textContent="Keine größeren Fehler in der analysierten Partie gefunden.";return;}
+ selectReview(mistakes.find(n=>n>reviewAt)||mistakes[0]);
+ $("reviewExerciseStatus").textContent="Fehlerstelle "+reviewAt+" von "+movesPlayed.length+" Halbzügen.";
+};
+const speedControl=$("reviewSpeed");
+if(speedControl){
+ try{const saved=localStorage.getItem("schachnova.review.speed");if(["450","900","1500"].includes(saved))speedControl.value=saved;}catch(e){}
+ speedControl.addEventListener("change",()=>{try{localStorage.setItem("schachnova.review.speed",speedControl.value);}catch(e){}});
+}
 $("reviewPrevious").onclick=()=>{stopReplay();selectReview(reviewAt-1)};
 $("reviewNext").onclick=()=>{stopReplay();selectReview(reviewAt+1)};
 $("reviewPlay").onclick=()=>{if(playTimer){stopReplay();return;}if(reviewAt>=movesPlayed.length)selectReview(0);$("reviewPlay").textContent="⏸ Pause";playTimer=setInterval(()=>{if(reviewAt>=movesPlayed.length){stopReplay();return;}selectReview(reviewAt+1);},Number($("reviewSpeed")?.value||900));};
