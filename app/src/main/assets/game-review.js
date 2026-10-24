@@ -249,29 +249,25 @@ function next(t){
  if(t!==token||!active)return;
  if(index>=positions.length){finish();return;}
  score=null;best="";principal=[];engineDepth=0;progress.textContent="Analysiere Stellung "+(index+1)+" von "+positions.length+" …";$("overviewProgress").textContent=progress.textContent;
- worker.postMessage("position fen "+fen(positions[index]));
+ worker.postMessage(variant?"position startpos"+(index?" moves "+movesPlayed.slice(0,index).map(notation).join(" "):""):"position fen "+fen(positions[index]));
  worker.postMessage("go depth 10");
 }
 function start(){
  if(!history||history.length<2){const msg="Noch keine Züge vorhanden.";progress.textContent=msg;$("overviewProgress").textContent=msg;$("overviewStart").disabled=true;return;}
- if(variantMode!=="standard"){
-  const names={"threecheck":"Drei-Schach","three-check":"Drei-Schach","3check":"Drei-Schach","atomic":"Atomschach","kingofthehill":"König des Hügels","horde":"Horde","antichess":"Räuberschach"};
-  const name=names[variantMode]||"Diese Schachvariante";
-  const msg=name+": Die vorhandene Stockfish-Engine unterstützt derzeit nur klassisches Schach. Eine Bewertung dieser Variante wäre nicht zuverlässig.";
-  progress.textContent=msg;$("overviewProgress").textContent=msg;
-  $("overviewCoach").textContent="Die Partie kann weiterhin gespielt werden. Für eine korrekte Variantenanalyse wird eine Engine mit den passenden Variantenregeln benötigt.";
-  $("overviewStart").disabled=true;
-  return;
+ const variant=variantMode!=="standard";
+ if(variant&&!window.SchachNovaVariants?.[variantMode]){
+  const msg="Diese Variante wird von der vorhandenen Engine nicht unterstützt.";
+  progress.textContent=msg;$("overviewProgress").textContent=msg;$("overviewStart").disabled=true;return;
  }
  if(worker)worker.terminate();token++;const t=token;
  positions=history.slice();results=[];index=0;reviewAt=0;active=true;drawReviewBoard();items.replaceChildren();summary.textContent="";headline.textContent="Stockfish analysiert deine Partie";
- analysisKey=movesPlayed.map(notation).join("_");
+ analysisKey=variantMode+"_"+movesPlayed.map(notation).join("_");
  try{const cached=JSON.parse(localStorage.getItem("schachnova.review.v3."+analysisKey)||"null");
  if(cached?.version===3&&Array.isArray(cached.results)&&cached.results.length===positions.length&&cached.results.every(r=>r.cp===null||Number.isFinite(r.cp))){results=cached.results;active=false;progress.textContent="Gespeicherte Analyse geladen.";renderReview();drawReviewBoard();renderOverview();return;}}catch(e){console.warn("Analyse-Cache beschädigt",e);}
  
- try{worker=new Worker("stockfish-19-lite-single.js");worker.onmessage=e=>{
+ try{worker=new Worker(variant?"fairy-stockfish.js":"stockfish-19-lite-single.js");worker.onmessage=e=>{
   if(t!==token||!active)return;const line=String(e.data);
-  if(line==="uciok"){worker.postMessage("isready");return;}
+  if(line==="uciok"){if(variant){for(const cmd of window.schachNovaVariantUciOptions(variantMode))worker.postMessage(cmd);}worker.postMessage("isready");return;}
   if(line==="readyok"){next(t);return;}
   if(line.startsWith("info ")&&line.includes(" score ")){
    const m=line.match(/score (cp|mate) (-?\d+)/);
