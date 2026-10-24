@@ -6,10 +6,10 @@ const chess=fs.readFileSync("app/src/main/assets/chess.js","utf8");
 const config=fs.readFileSync("app/src/main/assets/variant-config.js","utf8");
 const bridge=fs.readFileSync("app/src/main/assets/stockfish-bridge.js","utf8");
 assert.match(html,/<option value="atomic">Atomschach \(lokal, 2 Spieler\)<\/option>/,"Atomschach must be selectable");
-assert.match(html,/\['atomic','antichess','fivecheck'\]\.includes\(variantSelectEl\.value\)/,"Unsupported variant bots must be blocked");
+assert.match(html,/\['atomic','antichess','fivecheck','hoppelpoppel'\]\.includes\(variantSelectEl\.value\)/,"Unsupported variant bots must be blocked");
 assert.match(html,/variantVsBotEl\.disabled=true/,"Unsupported variant bot checkbox must be disabled");
-assert.match(chess,/\["standard","hill","threecheck","fivecheck","antichess","atomic"\]\.includes\(d\.variantMode\)/,"Atomic save restore must be allowed");
-assert.match(chess,/\["standard","hill","threecheck","fivecheck","antichess","atomic"\]\.includes\(v\)/,"Atomic mode setter must be allowed");
+assert.match(chess,/\["standard","hill","threecheck","fivecheck","hoppelpoppel","antichess","atomic"\]\.includes\(d\.variantMode\)/,"Atomic save restore must be allowed");
+assert.match(chess,/\["standard","hill","threecheck","fivecheck","hoppelpoppel","antichess","atomic"\]\.includes\(v\)/,"Atomic mode setter must be allowed");
 assert.match(chess,/if\(variantMode==="atomic"\)\{const outcome=status\(\)/,"Finished atomic game must restore its result");
 assert.match(config,/atomic:\{label:"Atomschach",uci:"atomic",local:true,bot:false\}/,"Atomic must be local-only without bot");
 assert.match(bridge,/SchachNovaVariants\?\.\[variantMode\]\?\.bot===false/,"Engine bridge must enforce unsupported variant bots");
@@ -59,3 +59,8 @@ console.log("SchachNova: all documented variant statuses and analysis routing ch
 
 assert.match(html,/<option value="fivecheck">Fünf-Schach \(lokal, 2 Spieler\)<\/option>/,"Five-check must be selectable");
 assert.match(chess,/variantMode==="fivecheck"\?5:3/,"Five-check must end after five checks");
+
+assert.match(html,/<option value="hoppelpoppel">Hoppel-Poppel \(lokal, 2 Spieler\)<\/option>/);
+assert.match(chess,/variantMode==="hoppelpoppel"&&p==="b"\?dirs\.n/);
+assert.equal(context.window.SchachNovaVariantStatus("hoppelpoppel").localRules,true);
+assert.equal(context.window.SchachNovaVariantStatus("hoppelpoppel").analysisEligible,false,"No unverified Fairy analysis");
