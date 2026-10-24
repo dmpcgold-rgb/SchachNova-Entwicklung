@@ -608,8 +608,13 @@ body{padding-top:max(34px,env(safe-area-inset-top,0px))!important;padding-bottom
 .rect-preview-piece-motion>.rect-compound-svg{display:flex;align-items:center;justify-content:center;width:94%;height:94%;pointer-events:none}
 .rect-preview-piece-motion .rect-compound-svg-icon{display:block;width:54%;height:86%;min-width:0;object-fit:contain;filter:drop-shadow(0 2px 2px #071a3677)}
 .rect-preview-piece-motion .rect-compound-svg-icon+.rect-compound-svg-icon{margin-left:-15%}
+
+/* Equal-size square cells on all 10x8 boards. */
+#rectPreviewBoard{width:min(100%,720px)!important;max-width:720px!important;aspect-ratio:10 / 8!important;grid-template-columns:repeat(10,minmax(0,1fr))!important;grid-template-rows:repeat(8,minmax(0,1fr))!important;align-content:stretch!important;justify-content:stretch!important}
+#rectPreviewBoard>.rect-preview-square{box-sizing:border-box!important;min-width:0!important;min-height:0!important;width:100%!important;height:100%!important;aspect-ratio:1 / 1!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;overflow:hidden!important}
+#rectPreviewBoard .rect-piece-svg{max-width:86%;max-height:86%;object-fit:contain}
 </style></head><body><main>
-<header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
+<header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
 <button type="button" data-nova-jump="play"><b class="nova-menu-icon">♟</b><span><strong>Spielen</strong><small>Gegen KI, zu zweit oder online</small></span><i>›</i></button>
 <button type="button" data-nova-jump="online"><b class="nova-menu-icon">◎</b><span><strong>Online</strong><small>Spieler, Rangliste, Turniere</small></span><i>›</i></button>
