@@ -90,6 +90,7 @@ jobs:
         run: |
           node tests/chess-rules.test.cjs
           node tests/variant-integration.test.cjs
+          node tests/variant-moves.test.cjs
           node tests/memory-check-legality.test.cjs
           node tests/endgame-result.test.cjs
       - name: Synchronize visible version with Android versionName
