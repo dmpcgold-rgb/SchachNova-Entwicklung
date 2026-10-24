@@ -505,6 +505,29 @@ body{padding-top:max(34px,env(safe-area-inset-top,0px))!important;padding-bottom
 .rect-preview-light{background:#f2e8d1;color:#222d28}
 .rect-preview-dark{background:#79917c;color:#142019}
  .rect-preview-controls{display:flex;gap:7px;margin:10px 0;flex-wrap:wrap}.rect-preview-controls button{flex:1;min-height:39px;border:1px solid #7b997f;border-radius:10px;background:#274434;color:#f3f7ef;font-weight:650}.rect-preview-controls button:disabled{opacity:.45}.rect-preview-square{border:0;padding:0;cursor:pointer;touch-action:manipulation}.rect-preview-square:focus-visible{outline:3px solid #ffd866;outline-offset:-3px;z-index:2}.rect-preview-selected{box-shadow:inset 0 0 0 3px #ffd866}.rect-preview-target{box-shadow:inset 0 0 0 3px #243f29,inset 0 0 0 5px #e9f4d355}.rect-preview-compound{font-size:clamp(13px,3.5vw,29px);letter-spacing:-.16em;padding-right:.16em}
+
+/* SchachNova refined luxury chess finish: visual-only; no square sizing changes. */
+:root{--board-frame:#d4b77e;--board-light:#f5eddb;--board-dark:#77917f}
+.boardpanel{border:1px solid #9a9e78;background:linear-gradient(140deg,#2c4239 0%,#14251e 60%,#1a2b23 100%);box-shadow:0 14px 35px #0007,inset 0 1px #ffffff25}
+.board{border:3px solid #d4b77e;box-shadow:0 0 0 2px #25352a,0 0 0 4px #8c7954,0 12px 26px #000a}
+.sq.light{background:linear-gradient(145deg,#fff5e4,#f0e4ce)}
+.sq.dark{background:linear-gradient(145deg,#8ba28e,#708875)}
+.sq.lastmove{background:linear-gradient(145deg,#f0d987,#b9b866)!important}
+.sq.selected{box-shadow:inset 0 0 0 3px #ffd66b,inset 0 0 0 5px #765b20,inset 0 0 15px #ffdc7b66}
+.sq.target{box-shadow:inset 0 0 0 3px #234f36,inset 0 0 0 5px #d9e8b699}
+.piece-img{width:95%;height:95%;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 1px 1px #0009) drop-shadow(0 3px 2px #0006)}
+.rect-preview-panel{border:1px solid #ad9b73;background:linear-gradient(155deg,#294035,#13241d 72%);box-shadow:0 18px 42px #0008,inset 0 1px #ffffff1a}
+.rect-preview-board{border:3px solid #d4b77e;box-shadow:0 0 0 2px #23392b,0 0 0 4px #8a7551,0 10px 30px #000a}
+.rect-preview-light{background:linear-gradient(145deg,#fff4df,#eee1c9);color:#273129}
+.rect-preview-dark{background:linear-gradient(145deg,#8ca391,#728b7b);color:#16241b}
+.rect-preview-square{font-family:"Noto Sans Symbols 2","Segoe UI Symbol","DejaVu Sans",serif;text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased;transition:filter 110ms ease,box-shadow 110ms ease}
+.rect-preview-square:not(:empty){text-shadow:0 1px 1px #ffffff45,0 3px 3px #0007}
+.rect-preview-square:active{filter:brightness(1.1)}
+.rect-preview-selected{box-shadow:inset 0 0 0 3px #ffd36d,inset 0 0 0 5px #5c4928}
+.rect-preview-target{box-shadow:inset 0 0 0 3px #204a31,inset 0 0 0 5px #e4efccaa}
+.rect-preview-controls button{background:linear-gradient(160deg,#3b604a,#244332);border-color:#b09b70;box-shadow:inset 0 1px #ffffff19,0 2px 5px #0004}
+.rect-preview-header strong{letter-spacing:.2px;color:#f8e5bb}
+@media(prefers-reduced-motion:reduce){.rect-preview-square{transition:none}}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
