@@ -196,9 +196,33 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  const values=results.map(r=>Number.isFinite(r?.cp)?Math.max(-1000,Math.min(1000,r.cp)):null),w=600,h=110;
  if(values.length>1&&values.every(Number.isFinite)){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
  const poly=document.createElementNS(ns,"polyline");poly.setAttribute("fill","none");poly.setAttribute("stroke","#d7edcb");poly.setAttribute("stroke-width","3");
- poly.setAttribute("points",values.map((v,i)=>(i/(values.length-1)*w).toFixed(1)+","+(h/2-v/1000*(h/2-8)).toFixed(1)).join(" "));svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);chart.append(svg);}
+ poly.setAttribute("points",values.map((v,i)=>(i/(values.length-1)*w).toFixed(1)+","+(h/2-v/1000*(h/2-8)).toFixed(1)).join(" "));svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);
+ // Interactive evaluation chart: open the corresponding half-move in the review.
+ svg.setAttribute("role","slider");svg.setAttribute("tabindex","0");
+ svg.setAttribute("aria-label","Bewertungsverlauf: Zug auswählen");
+ svg.setAttribute("aria-valuemin","0");svg.setAttribute("aria-valuemax",String(movesPlayed.length));
+ svg.setAttribute("aria-valuenow","0");
+ const choose=(n)=>{
+  const move=Math.max(0,Math.min(movesPlayed.length,n));
+  $("reviewOverview").hidden=true;review.hidden=false;selectReview(move);
+  const board=$("reviewBoard");if(board)requestAnimationFrame(()=>board.scrollIntoView({block:"center",behavior:"instant"}));
+ };
+ svg.addEventListener("click",e=>{const rect=svg.getBoundingClientRect();if(rect.width>0)choose(Math.round((e.clientX-rect.left)/rect.width*movesPlayed.length));});
+ svg.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","Home","End","Enter"].includes(e.key))return;e.preventDefault();let v=Number(svg.getAttribute("aria-valuenow"))||0;v=e.key==="Home"?0:e.key==="End"?movesPlayed.length:v+(e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0);v=Math.max(0,Math.min(movesPlayed.length,v));svg.setAttribute("aria-valuenow",String(v));if(e.key==="Enter")choose(v);});
+ chart.title="Tippe auf die Kurve, um einen Zug auf dem Brett anzusehen.";chart.append(svg);}
  $("overviewProgress").textContent="Alle "+movesPlayed.length+" Halbzüge ausgewertet · Genauigkeit ist eine Schätzung.";
- $("overviewCoach").textContent="Die Analyse ist bereit. Sieh dir an, welche Züge gut waren und wo du dich verbessern kannst.";
+ const errors=[];
+ for(let i=0;i<movesPlayed.length;i++){
+  const before=results[i],after=results[i+1];
+  if(!Number.isFinite(before?.cp)||!Number.isFinite(after?.cp))continue;
+  const loss=Math.max(0,Math.round((before.cp-after.cp)*positions[i].t));
+  if(loss>=170)errors.push({i,loss,best:before.best});
+ }
+ errors.sort((a,b)=>b.loss-a.loss);
+ const top=errors.slice(0,3).map(e=>(Math.floor(e.i/2)+1)+(e.i%2?"…":".")+" "+notation(movesPlayed[e.i])+(e.best?" (besser: "+e.best+")":""));
+ $("overviewCoach").textContent=top.length
+  ?"Deine wichtigsten Trainingsstellen: "+top.join(" · ")+". Tippe auf die Bewertungskurve oder öffne die Analyse, um die Züge zu prüfen."
+  :"Die Analyse ist bereit. Keine größeren Fehler in den auswertbaren Zügen gefunden.";
  $("overviewStart").disabled=false;
  if(typeof window.schachnovaRecordReview==="function"){const errors=losses.flat().filter(v=>v>=170).length;window.schachnovaRecordReview({id:analysisKey,white:accuracy[0],black:accuracy[1],errors,opening:openingName()});}
 }
