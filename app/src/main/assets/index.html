@@ -580,6 +580,10 @@ body{padding-top:max(34px,env(safe-area-inset-top,0px))!important;padding-bottom
 .rect-preview-motion-target>.rect-piece-svg{visibility:hidden}
 .rect-preview-motion-target{color:transparent!important;text-shadow:none!important}
 .rect-preview-motion-target::before{content:none!important}
+
+/* The flying sprite must never carry a board square or alter grid geometry. */
+.rect-preview-piece-motion{display:flex;align-items:center;justify-content:center;background:transparent!important;box-shadow:none!important;overflow:visible;font-size:clamp(20px,5vw,42px);line-height:1;color:#e5efff;will-change:transform}
+.rect-preview-piece-motion>.rect-piece-svg{display:block;width:84%;height:84%;object-fit:contain;pointer-events:none}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
