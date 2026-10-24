@@ -61,7 +61,63 @@
   }
   return out;
  }
- const api=Object.freeze({initial,movesFrom,layouts});
+ function attacked(position,square,byWhite){
+  const shape=geometry.geometry(position.variant);
+  const board=position.board;
+  const targetX=square%shape.width,targetY=Math.floor(square/shape.width);
+  for(let from=0;from<board.length;from++){
+   const piece=board[from];if(piece==="."||upper(piece)!==byWhite)continue;
+   const x=from%shape.width,y=Math.floor(from/shape.width),type=piece.toLowerCase();
+   if(type==="p"){if(targetY===y+(byWhite?-1:1)&&Math.abs(targetX-x)===1)return true;continue;}
+   const dirs=type==="q"?[...pieceMoves.b,...pieceMoves.r]:type==="a"||type==="j"?[...pieceMoves.b,...pieceMoves.n]:type==="c"?[...pieceMoves.r,...pieceMoves.n]:pieceMoves[type];
+   if(!dirs)throw Error("Unbekannte Figur");
+   for(const [dx,dy] of dirs){
+    const jump=type==="n"||((type==="a"||type==="j"||type==="c")&&pieceMoves.n.some(([a,b])=>a===dx&&b===dy));
+    let nx=x+dx,ny=y+dy;
+    while(inside(nx,ny,shape)){
+     const at=geometry.index(nx,ny,shape);
+     if(at===square)return true;
+     if(board[at]!=="."||jump||type==="k")break;
+     nx+=dx;ny+=dy;
+    }
+   }
+  }
+  return false;
+ }
+ function inCheck(position,white){
+  const king=position.board.indexOf(white?"K":"k");
+  if(king<0)throw Error("König fehlt");
+  return attacked(position,king,!white);
+ }
+ function apply(position,move){
+  const shape=geometry.geometry(position.variant);
+  const board=position.board.slice(),piece=board[move.from];
+  if(!piece||piece===".")throw Error("Ungültiger Ausgangspunkt");
+  const capture=board[move.to];
+  board[move.from]=".";
+  const rank=Math.floor(move.to/shape.width),promotion=piece.toLowerCase()==="p"&&(rank===0||rank===shape.height-1);
+  board[move.to]=promotion?(upper(piece)?"Q":"q"):piece;
+  return {...position,board,turn:position.turn==="w"?"b":"w",enPassant:null,
+   halfmove:piece.toLowerCase()==="p"||capture!=="."?0:position.halfmove+1,
+   fullmove:position.fullmove+(position.turn==="b"?1:0)};
+ }
+ function legalMoves(position){
+  const white=position.turn==="w",out=[];
+  for(let from=0;from<position.board.length;from++){
+   const piece=position.board[from];
+   if(piece==="."||upper(piece)!==white)continue;
+   for(const move of movesFrom(position,from)){
+    if(!inCheck(apply(position,move),white))out.push(move);
+   }
+  }
+  return out;
+ }
+ function status(position){
+  const white=position.turn==="w",moves=legalMoves(position);
+  if(moves.length)return {ended:false,check:inCheck(position,white),legalMoves:moves.length};
+  return {ended:true,result:inCheck(position,white)?"checkmate":"stalemate",winner:inCheck(position,white)?(white?"b":"w"):null};
+ }
+ const api=Object.freeze({initial,movesFrom,attacked,inCheck,apply,legalMoves,status,layouts});
  root.SchachNovaRectangularRules=api;
  if(typeof module!=="undefined"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
