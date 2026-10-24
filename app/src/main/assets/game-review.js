@@ -210,7 +210,7 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  const values=results.map(r=>Number.isFinite(r?.cp)?Math.max(-1000,Math.min(1000,r.cp)):null),w=600,h=110;
  if(values.length>1&&values.some(Number.isFinite)){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
  const poly=document.createElementNS(ns,"polyline");poly.setAttribute("fill","none");poly.setAttribute("stroke","#d7edcb");poly.setAttribute("stroke-width","3");
- poly.setAttribute("points",values.map((v,i)=>(i/(values.length-1)*w).toFixed(1)+","+(h/2-(Number.isFinite(v)?v:0)/1000*(h/2-8)).toFixed(1)).join(" "));svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);
+ const segments=[];let segment=[];for(let i=0;i<values.length;i++){const v=values[i];if(!Number.isFinite(v)){if(segment.length>1)segments.push(segment);segment=[];continue;}segment.push((i/(values.length-1)*w).toFixed(1)+","+(h/2-v/1000*(h/2-8)).toFixed(1));}if(segment.length>1)segments.push(segment);poly.setAttribute("points",segments.length===1?segments[0].join(" "):"");svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);if(segments.length>1){for(const points of segments){const part=document.createElementNS(ns,"polyline");part.setAttribute("fill","none");part.setAttribute("stroke","#d7edcb");part.setAttribute("stroke-width","3");part.setAttribute("points",points.join(" "));svg.append(part);}}
  // Interactive evaluation chart: open the corresponding half-move in the review.
  svg.setAttribute("role","slider");svg.setAttribute("tabindex","0");
  svg.setAttribute("aria-label","Bewertungsverlauf: Zug auswählen");
