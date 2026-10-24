@@ -208,9 +208,9 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  }
  const chart=$("overviewChart");chart.replaceChildren();
  const values=results.map(r=>Number.isFinite(r?.cp)?Math.max(-1000,Math.min(1000,r.cp)):null),w=600,h=110;
- if(values.length>1&&values.every(Number.isFinite)){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
+ if(values.length>1&&values.some(Number.isFinite)){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
  const poly=document.createElementNS(ns,"polyline");poly.setAttribute("fill","none");poly.setAttribute("stroke","#d7edcb");poly.setAttribute("stroke-width","3");
- poly.setAttribute("points",values.map((v,i)=>(i/(values.length-1)*w).toFixed(1)+","+(h/2-v/1000*(h/2-8)).toFixed(1)).join(" "));svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);
+ poly.setAttribute("points",values.map((v,i)=>(i/(values.length-1)*w).toFixed(1)+","+(h/2-(Number.isFinite(v)?v:0)/1000*(h/2-8)).toFixed(1)).join(" "));svg.setAttribute("viewBox","0 0 600 110");svg.append(poly);
  // Interactive evaluation chart: open the corresponding half-move in the review.
  svg.setAttribute("role","slider");svg.setAttribute("tabindex","0");
  svg.setAttribute("aria-label","Bewertungsverlauf: Zug auswählen");
@@ -223,7 +223,8 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  };
  svg.addEventListener("click",e=>{const rect=svg.getBoundingClientRect();if(rect.width>0)choose(Math.round((e.clientX-rect.left)/rect.width*movesPlayed.length));});
  svg.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","Home","End","Enter"].includes(e.key))return;e.preventDefault();let v=Number(svg.getAttribute("aria-valuenow"))||0;v=e.key==="Home"?0:e.key==="End"?movesPlayed.length:v+(e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0);v=Math.max(0,Math.min(movesPlayed.length,v));svg.setAttribute("aria-valuenow",String(v));if(e.key==="Enter")choose(v);});
- chart.title="Tippe auf die Kurve, um einen Zug auf dem Brett anzusehen.";chart.append(svg);}
+ chart.title="Tippe auf die Kurve, um einen Zug auf dem Brett anzusehen.";chart.append(svg);
+ const legend=document.createElement("div");legend.className="overview-chart-legend";legend.textContent="↖ Vorteil Weiß  ·  Mitte ausgeglichen  ·  Vorteil Schwarz ↘";chart.append(legend);}
  const evaluated=accuracies[0].length+accuracies[1].length;
  $("overviewProgress").textContent=evaluated+" von "+movesPlayed.length+" Halbzügen bewertet · Genauigkeit geschätzt (Gewinnwahrscheinlichkeit).";
  const errors=[];
