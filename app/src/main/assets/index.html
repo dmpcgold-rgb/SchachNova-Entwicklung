@@ -274,6 +274,37 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
 #gameScreen .board>.sq.lastmove:not(.selected){background-image:linear-gradient(#ffd94a36,#ffd94a36)!important}
 #gameScreen .board>.sq.target:after{background:#1d4b9b66!important}
 #gameScreen .board>.sq.target:has(.piece-img):after{background:transparent!important;border-color:#58a9f2aa!important}
+
+/* Match analysis and replay to SchachNova's approved blue/silver design. */
+#reviewPanel{background:#061529!important;color:#f0f7ff!important;box-sizing:border-box!important}
+#reviewPanel .review-summary,#reviewPanel .review-coach,#reviewPanel .review-move,
+#overviewScreen .overview-stats,#overviewScreen .overview-accuracy>div{
+ background:linear-gradient(145deg,#142e51,#0c2040)!important;
+ border:1px solid #3c75b4!important;color:#eef6ff!important;
+}
+#reviewPanel button,#overviewScreen button{
+ background:linear-gradient(145deg,#245f9f,#123c70)!important;
+ border:1px solid #68a6e1!important;color:#fff!important
+}
+#reviewPanel .review-board{width:100%!important;max-width:650px!important;aspect-ratio:1/1!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;grid-template-rows:repeat(8,minmax(0,1fr))!important;margin:auto!important;border-radius:4px!important}
+#reviewPanel .review-square{min-width:0!important;min-height:0!important;overflow:hidden!important}
+#reviewPanel .review-light{background:#d7e3f1!important}
+#reviewPanel .review-dark{background:#2864a5!important}
+#reviewPanel .review-highlight.review-light{background:#a5d9ff!important}
+#reviewPanel .review-highlight.review-dark{background:#438fd4!important}
+#reviewPanel .review-piece{animation:none!important;transition:none!important;filter:drop-shadow(0 2px 2px #06132988)}
+#overviewScreen{background:#061529!important;color:#f0f7ff!important}
+#overviewScreen .overview-stats{grid-template-columns:minmax(0,1fr) minmax(45px,auto) minmax(45px,auto)!important;column-gap:12px!important}
+#overviewScreen .overview-stats .stat-value{font-variant-numeric:tabular-nums!important}
+#overviewScreen .overview-chart{background:#11263e!important}
+@media(max-width:659px){
+ #reviewPanel{padding:9px 6px 24px!important}
+ #reviewPanel .review-top h2{font-size:clamp(19px,5vw,26px)!important}
+ #reviewPanel .review-top button{padding:8px!important}
+ #reviewPanel .review-board-wrap{width:100%!important;max-width:100%!important;margin:5px auto!important}
+ #reviewPanel .review-coach{padding:8px!important;margin:7px auto!important}
+ #overviewScreen{padding-left:8px!important;padding-right:8px!important}
+}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
