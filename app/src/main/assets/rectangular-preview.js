@@ -23,7 +23,11 @@
    if(idx===selected)square.classList.add("rect-preview-selected");
    if(legal.some(m=>m.to===idx))square.classList.add("rect-preview-target");
    if(["a","c","j"].includes(piece.toLowerCase()))square.classList.add("rect-preview-compound");
-   square.textContent=glyphs[piece]||"";
+   if(piece!=="."&&"KQRBNP kqrbnp".includes(piece)&&piece!==" "){
+    const img=document.createElement("img");img.className="rect-piece-svg";img.alt="";img.draggable=false;
+    img.src="pieces/"+(piece===piece.toUpperCase()?"w":"b")+piece.toUpperCase()+".svg";
+    square.append(img);
+   }else square.textContent=glyphs[piece]||"";
    square.title=geo.algebraic(x,y,shape)+(piece==="."?"":": "+piece);
    square.setAttribute("aria-label",square.title);
    square.addEventListener("click",()=>tap(idx));
