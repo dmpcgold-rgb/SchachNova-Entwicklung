@@ -173,6 +173,26 @@ button.primary,button[style*="green"],button[style*="#6"]{
 .board>.sq.target,.training-board>.sq.target{box-shadow:inset 0 0 0 4px #3bb4ff!important}
 #homeScreen.nova-setup-mode .nova-main-nav{display:none!important}
 #homeScreen .nova-main-nav{z-index:5}
+
+/* Reference-video layout: compact flat blue/silver menus, preserved native functions. */
+.nova-premium-menu{gap:8px!important}
+.nova-premium-menu>button{min-height:61px!important;grid-template-columns:44px 1fr 20px!important;border-radius:11px!important;padding:7px 12px!important;background:linear-gradient(180deg,#174678,#0a2449)!important;border:1px solid #5a8bb9!important;box-shadow:0 2px 5px #0005!important}
+.nova-menu-icon{width:42px!important;height:42px!important;border-radius:9px!important;font-size:25px!important;color:#e9f4ff!important;background:linear-gradient(160deg,#316da8,#133960)!important;box-shadow:inset 0 1px 3px #e1f5ff65!important}
+.nova-premium-menu strong{font-size:16px!important}.nova-premium-menu small{font-size:12px!important}
+#novaPlaySection .home-grid{display:grid!important;grid-template-columns:1fr!important;gap:9px!important}
+#novaPlaySection .home-grid button{min-height:58px!important;padding:12px 16px!important;text-align:left!important;font-size:16px!important;border-radius:11px!important;background:linear-gradient(180deg,#1b518b,#0a284f)!important}
+#novaGameSetup .time-group{background:linear-gradient(180deg,#0e2f5c,#0b2245)!important;border-radius:12px!important;padding:12px!important}
+#novaGameSetup .time-options{gap:7px!important}
+#novaGameSetup .time-options button{min-height:48px!important;border-radius:10px!important;font-size:15px!important}
+#novaGameSetup .home-start,#launchGame{display:block!important;width:100%!important;min-height:62px!important;border-radius:12px!important;background:linear-gradient(180deg,#65b5f7,#1766b4)!important;color:#fff!important;border:1px solid #c1e8ff!important;font-size:20px!important;font-weight:800!important;box-shadow:0 3px 9px #0006!important}
+#novaDesignPicker{background:linear-gradient(180deg,#10345f,#071c39)!important;border:1px solid #4b91ce!important;border-radius:12px!important;padding:12px!important}
+#novaDesignPicker select,#novaGameSetup select{width:100%;background:#0d2b53!important;color:#f0f7ff!important;border:1px solid #569bd8!important;border-radius:9px;padding:11px}
+#homeScreen.nova-setup-mode .nova-main-nav{display:none!important}
+#homeScreen.nova-setup-mode #novaPlaySection{display:none!important}
+#homeScreen.nova-setup-mode #novaDesignPicker{display:block!important}
+#trainingScreen .training-list{gap:9px!important}
+#trainingScreen .training-card{min-height:60px!important;background:linear-gradient(180deg,#174b80,#092a52)!important;border:1px solid #5695c9!important;border-radius:10px!important;box-shadow:0 2px 6px #0005!important}
+#trainingScreen .training-top button,#trainingScreen .training-actions button{background:linear-gradient(180deg,#1b568f,#0b305a)!important;border:1px solid #5e9bd4!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
@@ -337,5 +357,15 @@ document.addEventListener('DOMContentLoaded',function(){
   if(home.classList.contains('nova-setup-mode')){home.classList.remove('nova-setup-mode');setup.hidden=true;return true;}
   return typeof previous==='function'?previous():false;
  };
+});
+</script><script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup'),picker=document.getElementById('novaDesignPicker');
+ if(!home||!setup||!picker)return;
+ // One consolidated pre-game screen: time, strength, variants and visual theme.
+ if(picker.parentElement!==setup){setup.insertBefore(picker,document.getElementById('timeChooser')||setup.firstChild);}
+ const showSetup=()=>{if(!setup.hidden){home.classList.add('nova-submenu','nova-setup-mode');home.classList.remove('nova-show-design');}};
+ document.querySelectorAll('#novaPlaySection [data-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(showSetup,50)));
+ document.getElementById('novaBackHome')?.addEventListener('click',()=>{home.classList.remove('nova-setup-mode');setup.hidden=true;});
 });
 </script></body></html>
