@@ -58,7 +58,7 @@ function renderTraining(){
  const board=$("trainingBoard");board.replaceChildren();const flipped=active.opening&&active.data.side===-1;
  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
   const i=flipped?(7-r)*16+(7-c):r*16+c,p=state.b[i],btn=document.createElement("button");
-  btn.className="sq "+((r+c)%2?"dark":"light")+(selected===i?" selected":"")+(hintFrom===i?" hint-origin":"")+(hintTo===i?" hint-destination":"");
+  btn.className="sq "+((r+c)%2?"dark":"light")+(selected===i?" selected":"")+(selected>=0&&legal(state).some(m=>m[0]===selected&&m[1]===i)?" target":"")+(hintFrom===i?" hint-origin":"")+(hintTo===i?" hint-destination":"");
   if(p!==".")btn.innerHTML='<img class="piece-img" draggable="false" alt="" src="pieces/'+(side(p)===1?"w":"b")+p.toUpperCase()+'.svg">';
   btn.onclick=()=>click(i);board.append(btn);
  }
@@ -83,7 +83,7 @@ function animateTrainingMove(m,piece){
  const target=to.querySelector(".piece-img");if(!target||!target.animate)return;
  const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
  const dx=a.left-b.left,dy=a.top-b.top;
- target.animate([{transform:"translate3d("+dx+"px,"+dy+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration:210,easing:"cubic-bezier(.32,.05,.24,1)"});
+ target.animate([{transform:"translate3d("+dx+"px,"+dy+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration:Math.min(430,Math.max(190,165+Math.hypot((m[1]&7)-(m[0]&7),(m[1]>>4)-(m[0]>>4))*32)),easing:"cubic-bezier(.32,.05,.24,1)"});
 }
 function applyTrainingMove(m){const piece=state.b[m[0]];state=apply(state,m);renderTraining();animateTrainingMove(m,piece);}
 function endgameResult(){
@@ -152,7 +152,7 @@ function autoOpening(){
 function uci(m){return "abcdefgh"[m[0]&7]+(8-(m[0]>>4))+"abcdefgh"[m[1]&7]+(8-(m[1]>>4))+(m[2]||"");}
 function click(i){
  if(!active||busy||trainingFinished)return;
- if(side(state.b[i])===state.t){selected=i;renderTraining();return;}
+ if(side(state.b[i])===state.t){selected=selected===i?-1:i;renderTraining();return;}
  const m=legal(state).find(m=>m[0]===selected&&m[1]===i&&(m[2]===""||m[2]==="q"));selected=-1;
  if(!m){renderTraining();return;}
  if(active.opening){
