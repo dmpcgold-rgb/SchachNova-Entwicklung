@@ -476,6 +476,23 @@ body{padding-top:max(34px,env(safe-area-inset-top,0px))!important;padding-bottom
 #gameScreen .boardrow,#gameScreen .boardpanel{overflow-anchor:none!important}
 #gameScreen #board{width:100%!important;max-height:none!important;aspect-ratio:1/1!important;flex-shrink:0!important}
 #gameScreen #board>.sq{aspect-ratio:1/1!important}
+
+/* Premium board rendering: paint-only enhancements, no geometry or event changes. */
+:root{--board-frame:#c5a777;--board-light:#f2e8d1;--board-dark:#79917c}
+.boardpanel{background:linear-gradient(145deg,#263c33,#15271f 58%,#102019);border-color:#667a62;box-shadow:0 10px 28px #0004,inset 0 1px #ffffff12}
+.board{border:2px solid var(--board-frame);border-radius:5px;box-shadow:0 0 0 2px #101b16,0 8px 24px #0009;isolation:isolate}
+.sq.light{background:var(--board-light)}
+.sq.dark{background:var(--board-dark)}
+.sq{position:relative;transition:background-color 90ms ease,box-shadow 90ms ease;outline-offset:-3px}
+.sq:focus-visible{outline:3px solid #f7d776;z-index:2}
+.piece-img{width:94%;height:94%;image-rendering:auto;filter:drop-shadow(0 1px 1px #0008) drop-shadow(0 2px 2px #0004);transform:translateZ(0);backface-visibility:hidden}
+.sq.white-piece{text-shadow:0 1px 1px #000b,0 3px 3px #0006}
+.sq.black-piece{text-shadow:0 1px 1px #000b,0 3px 3px #0008}
+.sq.selected{box-shadow:inset 0 0 0 3px #ffd66b,inset 0 0 12px #fbd56d77}
+.sq.target{box-shadow:inset 0 0 0 3px #1c3725}
+.turnpanel{box-shadow:inset 0 1px #ffffff0b,0 4px 12px #0003}
+.iconbutton,.side button{transition:background-color 120ms ease,border-color 120ms ease}
+@media(prefers-reduced-motion:reduce){.sq,.iconbutton,.side button{transition:none}}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
