@@ -29,3 +29,30 @@ assert.match(bridge,/botPosition=movesPlayed\.map\(notation\)\.join\(" "\)/,"Cla
 assert.match(bridge,/if\(expected!==movesPlayed\.map\(notation\)\.join\(" "\)\)return;/,"Classical bot must reject stale result");
 assert.match(fairy,/catch\(e\)\{if\(worker\)\{try\{worker\.terminate\(\);\}/,"Fairy startup exception must terminate worker");
 console.log("SchachNova: variant integration assertions passed");
+
+
+const vm=require("node:vm");
+const catalog=fs.readFileSync("app/src/main/assets/variant-catalog.js","utf8");
+const review=fs.readFileSync("app/src/main/assets/game-review.js","utf8");
+const context={window:{}};
+vm.runInNewContext(catalog,context);
+vm.runInNewContext(config,context);
+const all=context.window.SchachNovaAllVariantStatuses();
+const documented=context.window.SchachNovaVariantCatalog;
+assert.equal(documented.length,30,"All 30 documented variants must remain available in the catalog");
+for(const item of documented){
+ const status=context.window.SchachNovaVariantStatus(item.id);
+ assert.equal(status.documented,true,item.id+" must remain documented");
+ assert.equal(status.analysisEligible,Boolean(status.localRules&&status.engineConfigured),item.id+" cannot be marked ready without rules and engine");
+}
+for(const id of ["standard","hill","threecheck","antichess","atomic"]){
+ assert.equal(context.window.SchachNovaVariantStatus(id).analysisEligible,true,id+" must have a local rules/engine configuration");
+}
+for(const id of ["shogi","xiangqi","janggi","capablanca","crazyhouse","horde","racingkings"]){
+ assert.equal(context.window.SchachNovaVariantStatus(id).analysisEligible,false,id+" must not be presented as fully playable yet");
+}
+assert.ok(all.length>=30,"Status API must cover the complete catalog");
+assert.match(review,/SchachNovaVariantStatus\?\.\(variantMode\)\?\.analysisEligible/,"Review must check variant capability before analysis");
+assert.match(review,/variant\?"fairy-stockfish\.js":"stockfish-19-lite-single\.js"/,"Review must select Fairy engine for supported variants");
+assert.match(review,/Fairy-Stockfish init error/,"Review must surface missing engine assets");
+console.log("SchachNova: all documented variant statuses and analysis routing checked");
