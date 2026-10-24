@@ -113,17 +113,23 @@
    const piece=position.board[from];
    if(piece==="."||upper(piece)!==white)continue;
    for(const move of movesFrom(position,from)){
-    if(!inCheck(apply(position,move),white))out.push(move);
+    if(!inCheck(apply(position,move),white))out.push(...promotions(position,move));
    }
   }
   return out;
+ }
+ function promotions(position,move){
+  const shape=geometry.geometry(position.variant),piece=position.board[move.from];
+  const rank=Math.floor(move.to/shape.width);
+  if(!piece||piece.toLowerCase()!=="p"||(rank!==0&&rank!==shape.height-1))return [move];
+  return ["q","r","b","n","a","c"].map(promotion=>({...move,promotion}));
  }
  function status(position){
   const white=position.turn==="w",moves=legalMoves(position);
   if(moves.length)return {ended:false,check:inCheck(position,white),legalMoves:moves.length};
   return {ended:true,result:inCheck(position,white)?"checkmate":"stalemate",winner:inCheck(position,white)?(white?"b":"w"):null};
  }
- const api=Object.freeze({initial,movesFrom,attacked,inCheck,apply,legalMoves,status,layouts});
+ const api=Object.freeze({initial,movesFrom,attacked,inCheck,apply,legalMoves,promotions,status,layouts});
  root.SchachNovaRectangularRules=api;
  if(typeof module!=="undefined"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
