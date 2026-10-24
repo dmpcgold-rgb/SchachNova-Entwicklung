@@ -6,10 +6,10 @@ const chess=fs.readFileSync("app/src/main/assets/chess.js","utf8");
 const config=fs.readFileSync("app/src/main/assets/variant-config.js","utf8");
 const bridge=fs.readFileSync("app/src/main/assets/stockfish-bridge.js","utf8");
 assert.match(html,/<option value="atomic">Atomschach \(lokal, 2 Spieler\)<\/option>/,"Atomschach must be selectable");
-assert.match(html,/\['atomic','antichess'\]\.includes\(variantSelectEl\.value\)/,"Unsupported variant bots must be blocked");
+assert.match(html,/\['atomic','antichess','fivecheck'\]\.includes\(variantSelectEl\.value\)/,"Unsupported variant bots must be blocked");
 assert.match(html,/variantVsBotEl\.disabled=true/,"Unsupported variant bot checkbox must be disabled");
-assert.match(chess,/\["standard","hill","threecheck","antichess","atomic"\]\.includes\(d\.variantMode\)/,"Atomic save restore must be allowed");
-assert.match(chess,/\["standard","hill","threecheck","antichess","atomic"\]\.includes\(v\)/,"Atomic mode setter must be allowed");
+assert.match(chess,/\["standard","hill","threecheck","fivecheck","antichess","atomic"\]\.includes\(d\.variantMode\)/,"Atomic save restore must be allowed");
+assert.match(chess,/\["standard","hill","threecheck","fivecheck","antichess","atomic"\]\.includes\(v\)/,"Atomic mode setter must be allowed");
 assert.match(chess,/if\(variantMode==="atomic"\)\{const outcome=status\(\)/,"Finished atomic game must restore its result");
 assert.match(config,/atomic:\{label:"Atomschach",uci:"atomic",local:true,bot:false\}/,"Atomic must be local-only without bot");
 assert.match(bridge,/SchachNovaVariants\?\.\[variantMode\]\?\.bot===false/,"Engine bridge must enforce unsupported variant bots");
@@ -56,3 +56,6 @@ assert.match(review,/SchachNovaVariantStatus\?\.\(variantMode\)\?\.analysisEligi
 assert.match(review,/variant\?"fairy-stockfish\.js":"stockfish-19-lite-single\.js"/,"Review must select Fairy engine for supported variants");
 assert.match(review,/Fairy-Stockfish init error/,"Review must surface missing engine assets");
 console.log("SchachNova: all documented variant statuses and analysis routing checked");
+
+assert.match(html,/<option value="fivecheck">Fünf-Schach \(lokal, 2 Spieler\)<\/option>/,"Five-check must be selectable");
+assert.match(chess,/variantMode==="fivecheck"\?5:3/,"Five-check must end after five checks");
