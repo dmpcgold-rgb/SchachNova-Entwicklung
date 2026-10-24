@@ -30,7 +30,7 @@ Stand: 24. Oktober 2026. Dieses Dokument ist die technische Übergabe für die W
 - Standardbrett: Silber-Blau; weitere auswählbare Brettdesigns: Klassisch, Dunkel, Holz und Marmor.
 - Originalfiguren bleiben als Alternative verfügbar.
 - Die UI verwendet gespeicherte Optionen `schachnova_board_skin` und `schachnova_piece_skin` im lokalen Speicher.
-- Neuer plastisch wirkender Silber-Blau-SVG-Figurensatz wird dynamisch in `index.html` erzeugt. Dies sind **2D-SVGs mit Tiefeneffekt**, keine echten 3D-Modelle.
+- **Aktuelle Nutzerentscheidung:** Kein neuer echter 3D-Figurensatz. Die Figuren aus der bestätigten Videovorlage beibehalten; vorhandene auswählbare Figurenstile nicht ohne Zustimmung ersetzen.
 - Das gewünschte Silber-Blau-App-Icon ist unter `app/src/main/res/mipmap-mdpi/ic_launcher.png` hinterlegt und im Manifest als `@mipmap/ic_launcher` eingetragen. Hochauflösende Dichtevarianten sind noch nachzuliefern.
 - Das Icon soll dem vom Nutzer ausgewählten Motiv entsprechen; nicht eigenmächtig durch ein anderes Bild ersetzen.
 
@@ -45,14 +45,20 @@ Stand: 24. Oktober 2026. Dieses Dokument ist die technische Übergabe für die W
 
 ## Noch offen / verifizieren
 - Hochauflösende Icon-Dateien für alle Android-mipmap-Dichten aus dem **original ausgewählten Motiv** integrieren.
-- Darstellung des Silber-Blau-Figurensatzes auf einem echten Android-Gerät prüfen (inklusive Schachtraining und Varianten).
+- Darstellung der bestehenden Vorbild-Figuren auf einem echten Android-Gerät prüfen (inklusive Schachtraining und Varianten).
 - Prüfen, dass die Auswahl der alten Brettdesigns tatsächlich funktioniert und die Schachbrettdarstellung in allen Modi konsistent ist.
 - Zuganimation, Brettgeometrie, Spielregeln, Schachuhr, Bot und Varianten regressionsprüfen.
 - GitHub Actions Build erfolgreich durchlaufen lassen, signierte APK installieren und Update über vorherige Version testen.
-- Falls ein **echtes 3D-Modell** gefordert ist: gesonderte 3D-Assets und Renderer implementieren; der bisherige SVG-Satz ist nicht 3D.
+- **Kein Auftrag für echte 3D-Figuren.** Vorrang: Vorbildtreue, Silber-Blau-Farben, Menüs, flüssige Animationen, Regeln und updatefähige APK.
 
 ## Vorgehen bei der nächsten Bearbeitung
 1. Zuerst aktuelle Dateien, `main`-HEAD und Actions-Status aus GitHub lesen.
 2. Vorhandene Implementierung prüfen; nicht blind anhand alter Chat-Aussagen als fertig behandeln.
 3. Kleine nachvollziehbare Commits erstellen und vorhandene Optionen erhalten.
 4. APK-Link erst als erfolgreiches Ergebnis bezeichnen, wenn Build-Artefakt tatsächlich vorhanden ist.
+
+## Weiterentwicklung am 24.10.2026
+- `c74a794`: weitere Blau-Silber-Farbkorrekturen und Entfernung eines doppelten Menü-Handlers.
+- `1f87e62`: Partievorbereitung und Varianten-Einstellungen zusammengeführt; GitHub Actions Build erfolgreich.
+- `7a07b56`: doppelte Partievorbereitungs-Handler entfernt und Android-Zurück-Navigation korrigiert; APK-Build noch prüfen.
+- Vorgabe für **alle App-Projekte**: Änderungen soweit möglich selbstständig implementieren, testen, Build prüfen, Fehler beheben und Projektinformationen in GitHub pflegen. Keine unbestätigten Erfolge melden; nicht im Hintergrund weiterarbeiten.
