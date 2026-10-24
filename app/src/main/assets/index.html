@@ -219,6 +219,26 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
 #homeScreen.nova-setup-mode #novaDesignPicker{display:block!important}
 #homeScreen.nova-setup-mode .nova-main-nav{display:none!important}
 #launchGame{background:linear-gradient(180deg,#61b4f5,#1266b4)!important;border:1px solid #a9dfff!important;color:#fff!important}
+
+/* Mobile playing surface: reference-video proportions, stable square grid. */
+@media(max-width:659px){
+ #gameScreen{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+ #gameScreen .game{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:7px!important}
+ #gameScreen .boardpanel{width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:1px!important;border-radius:3px!important;overflow:visible!important}
+ #gameScreen .boardrow{display:grid!important;grid-template-columns:11px minmax(0,1fr)!important;gap:1px!important;min-width:0}
+ #gameScreen .board{width:100%!important;max-width:100%!important;height:auto!important;aspect-ratio:1/1!important;display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;grid-template-rows:repeat(8,minmax(0,1fr))!important;gap:0!important;overflow:hidden!important;contain:layout paint;box-sizing:border-box}
+ #gameScreen .board>.sq{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;box-sizing:border-box!important;aspect-ratio:auto!important;overflow:hidden!important;transition:none!important}
+ #gameScreen .board>.piece-motion-overlay{overflow:visible!important;contain:none!important}
+ #gameScreen .board .piece-img{animation:none!important;transition:none!important}
+ #gameScreen .files{margin-left:12px!important}
+ #gameScreen .headline{margin:4px 0 5px!important}
+ #gameScreen .turnpanel{padding:5px 8px!important}
+ #gameScreen .coach{min-height:39px!important}
+ #gameScreen .side{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important}
+ #gameScreen .side button{min-height:36px!important;padding:5px 2px!important;font-size:clamp(9px,2.6vw,12px)!important;border-radius:7px!important}
+ #gameScreen .premove-actions{gap:4px!important}
+ #gameScreen .premove-actions button{min-height:32px!important;padding:4px!important}
+}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
