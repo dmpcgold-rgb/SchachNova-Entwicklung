@@ -92,6 +92,21 @@ jobs:
           node tests/variant-integration.test.cjs
           node tests/memory-check-legality.test.cjs
           node tests/endgame-result.test.cjs
+      - name: Synchronize visible version with Android versionName
+        run: |
+          set -euo pipefail
+          VERSION=$(sed -nE 's/.*versionName[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' app/build.gradle.kts | head -1)
+          test -n "$VERSION" || { echo "::error::Cannot read Android versionName"; exit 1; }
+          VERSION="$VERSION" python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path("app/src/main/assets/index.html")
+          html=p.read_text()
+          import re
+          html,n=re.subn(r'(<span id="schachnovaVersion">)[^<]*(</span>)',lambda m:m.group(1)+os.environ["VERSION"]+m.group(2),html)
+          if n!=1: raise SystemExit("Version label missing or duplicated")
+          p.write_text(html)
+          PY
       - name: Assemble signed release APK
         run: gradle :app:assembleRelease --no-daemon
       - name: Verify release APK signature
