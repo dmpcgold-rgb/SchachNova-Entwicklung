@@ -178,7 +178,7 @@ function click(i){
  if(active.opening){
   const expected=active.data.moves[ply];
   if(uci(m)!==expected){errors++;label("Nicht die gesuchte Fortsetzung. Überlege, wie du das Zentrum kontrollierst und deine Figuren entwickelst. Tipp zeigt den erwarteten Zug.");renderTraining();return;}
-  resetHint();await applyTrainingMove(m);ply++;label("Richtig! "+active.data.notes[ply-1]);autoOpening();return;
+  resetHint();busy=true;applyTrainingMove(m).then(()=>{if(!active||trainingFinished)return;ply++;label("Richtig! "+active.data.notes[ply-1]);return autoOpening();}).finally(()=>{busy=false;});return;
  }
  resetHint();applyTrainingMove(m);
  const outcome=endgameResult();if(outcome){finishTraining(outcome);return;}
