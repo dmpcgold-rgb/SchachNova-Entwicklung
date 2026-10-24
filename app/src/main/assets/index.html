@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  const home=document.getElementById('homeScreen'),back=document.getElementById('novaBackHome'),picker=document.getElementById('novaDesignPicker');
  if(!home||!back)return;
  const enter=()=>{home.classList.add('nova-submenu');window.scrollTo({top:0,behavior:'smooth'});};
- const reset=()=>{home.classList.remove('nova-submenu','nova-show-design');document.getElementById('novaGameSetup')?.setAttribute('hidden','');document.querySelector('.nova-nav[data-section="play"]')?.click();window.scrollTo({top:0,behavior:'smooth'});};
+ const reset=()=>{home.classList.remove('nova-submenu','nova-show-design','nova-setup-mode');document.querySelectorAll('#novaPlaySection [data-mode].active').forEach(b=>b.classList.remove('active'));document.getElementById('novaGameSetup')?.setAttribute('hidden','');document.querySelector('.nova-nav[data-section="play"]')?.click();window.scrollTo({top:0,behavior:'smooth'});};
  back.addEventListener('click',reset);
  document.querySelectorAll('[data-nova-jump]').forEach(button=>button.addEventListener('click',()=>{
   if(button.dataset.novaJump==='settings'){
@@ -360,47 +360,37 @@ window.schachNovaGoBack=function(){
  if(visible('trainingScreen'))return click('trainingBack')||click('trainingExit');
  if(visible('gameScreen'))return click('backHome');
  const home=document.getElementById('homeScreen');
- if(home&&home.classList.contains('nova-submenu'))return click('novaBackHome');
- if(home&&home.classList.contains('nova-show-design')){home.classList.remove('nova-show-design');return true}
- if(visible('reviewScreen'))return click('reviewBack');
  const setup=document.getElementById('novaGameSetup');
+ if(home&&home.classList.contains('nova-setup-mode')){
+  home.classList.remove('nova-setup-mode');
+  if(setup)setup.hidden=true;
+  document.querySelectorAll('#novaPlaySection [data-mode].active').forEach(b=>b.classList.remove('active'));
+  return true;
+ }
+ if(home&&home.classList.contains('nova-show-design')){home.classList.remove('nova-show-design');return true}
+ if(home&&home.classList.contains('nova-submenu'))return click('novaBackHome');
+ if(visible('reviewScreen'))return click('reviewBack');
  if(setup&&!setup.hidden){setup.hidden=true;return true}
  return false;
 };
 </script><script>
+/* Single pre-game navigation handler: avoids duplicate listeners and stale setup state. */
 document.addEventListener('DOMContentLoaded',()=>{
- const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup'),picker=document.getElementById('novaDesignPicker');
- if(!home||!setup||!picker)return;
- // One consolidated pre-game screen: time, strength, variants and visual theme.
- if(picker.parentElement!==setup){setup.insertBefore(picker,document.getElementById('timeChooser')||setup.firstChild);}
- const showSetup=()=>{if(!setup.hidden){home.classList.add('nova-submenu','nova-setup-mode');home.classList.remove('nova-show-design');}};
- document.querySelectorAll('#novaPlaySection [data-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(showSetup,50)));
- document.getElementById('novaBackHome')?.addEventListener('click',()=>{home.classList.remove('nova-setup-mode');setup.hidden=true;});
-});
-</script><script>
-/* Navigation state machine: only one visible menu layer at a time. */
-document.addEventListener('DOMContentLoaded',()=>{
- const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup'),back=document.getElementById('novaBackHome'),play=document.getElementById('novaPlaySection');
- if(!home||!setup||!back||!play)return;
- const clear=()=>{home.classList.remove('nova-setup-mode');};
- const prepare=()=>{
-  if(setup.hidden)return;
-  home.classList.add('nova-submenu','nova-setup-mode');
-  home.classList.remove('nova-show-design');
-  const variant=document.getElementById('variantChooser');
-  const isVariant=variant&&!variant.hidden;
-  for(const id of ['variantInfoCatalog','variantPlayModes']){
-   const e=document.getElementById(id);
-   if(e)e.hidden=!isVariant;
-  }
- };
- play.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>setTimeout(prepare,0)));
- back.addEventListener('click',clear);
- document.querySelectorAll('.nova-main-nav .nova-nav,[data-nova-jump]').forEach(b=>b.addEventListener('click',()=>{
-  if(!setup.hidden)setTimeout(prepare,0);else clear();
+ const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup'),play=document.getElementById('novaPlaySection'),picker=document.getElementById('novaDesignPicker');
+ if(!home||!setup||!play||!picker)return;
+ if(picker.parentElement!==setup)setup.insertBefore(picker,document.getElementById('timeChooser')||setup.firstChild);
+ play.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{
+  setTimeout(()=>{
+   if(setup.hidden)return;
+   home.classList.add('nova-submenu','nova-setup-mode');
+   home.classList.remove('nova-show-design');
+   const variant=document.getElementById('variantChooser');
+   for(const id of ['variantInfoCatalog','variantPlayModes']){
+    const element=document.getElementById(id);
+    if(element)element.hidden=!variant||variant.hidden;
+   }
+   setup.scrollIntoView({block:'start',behavior:'smooth'});
+  },0);
  }));
- // The design picker is part of the pre-game form, not a duplicate home menu.
- const picker=document.getElementById('novaDesignPicker');
- if(picker&&picker.parentElement!==setup)setup.insertBefore(picker,document.getElementById('timeChooser')||setup.firstChild);
 });
 </script></body></html>
