@@ -62,7 +62,7 @@
   motion={to,sprite:moving,animation:null};
   const animation=moving.animate([
    {transform:"translate3d(0,0,0) scale(1)",filter:"brightness(1)"},
-   {transform:"translate3d("+(b.left-a.left)*.55+"px,"+(b.top-a.top)*.55+"px,0) scale(1.07)",filter:"brightness(1.13)",offset:.55},
+   {transform:"translate3d("+(b.left-a.left)*.55+"px,"+(b.top-a.top)*.55+"px,0) scale(1.035)",filter:"brightness(1.07)",offset:.55},
    {transform:"translate3d("+(b.left-a.left)+"px,"+(b.top-a.top)+"px,0) scale(1)",filter:"brightness(1)"}
   ],{duration,easing:"cubic-bezier(.22,.7,.2,1)"});
   motion.animation=animation;
