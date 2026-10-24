@@ -270,6 +270,11 @@ function start(){
  
  try{worker=new Worker(variant?"fairy-stockfish.js":"stockfish-19-lite-single.js");worker.onmessage=e=>{
   if(t!==token||!active)return;const line=String(e.data);
+  if(line.startsWith("info string Fairy-Stockfish init error:")||line.startsWith("info string Fairy-Stockfish initialization failed")){
+   active=false;const msg="Varianten-Engine konnte nicht geladen werden. Bitte die Fairy-Stockfish-Dateien in der APK prüfen.";
+   progress.textContent=msg;$("overviewProgress").textContent=msg;$("overviewStart").disabled=true;
+   try{worker.terminate();}catch(e){}worker=null;return;
+  }
   if(line==="uciok"){if(variant){for(const cmd of window.schachNovaVariantUciOptions(variantMode))worker.postMessage(cmd);}worker.postMessage("isready");return;}
   if(line==="readyok"){next(t);return;}
   if(line.startsWith("info ")&&line.includes(" score ")){
@@ -277,7 +282,7 @@ function start(){
    if(m){const depth=Number(line.match(/\bdepth (\d+)/)?.[1]||0);if(depth>=engineDepth&&!/\bmultipv [2-9]/.test(line)){engineDepth=depth;principal=(line.match(/\bpv ([a-h][1-8][a-h][1-8][qrbn]?(?:\s+[a-h][1-8][a-h][1-8][qrbn]?)*)/)?.[1]||"").split(/\s+/).filter(Boolean);const v=Number(m[2]);score=(m[1]==="cp"?v:Math.sign(v)*10000)*positions[index].t;}}
   }
   if(line.startsWith("bestmove ")){best=line.split(" ")[1];results.push({cp:score===null?null:score,best,pv:principal.slice(),depth:engineDepth});index++;next(t);}
- };worker.onerror=()=>{active=false;progress.textContent="Stockfish konnte nicht gestartet werden. Bitte die Offline-Engine prüfen.";};worker.postMessage("uci");}
+ };worker.onerror=()=>{if(t!==token)return;active=false;const msg=(variant?"Fairy-Stockfish":"Stockfish")+" konnte nicht gestartet werden. Bitte die Offline-Engine prüfen.";progress.textContent=msg;$("overviewProgress").textContent=msg;$("overviewStart").disabled=true;try{worker.terminate();}catch(e){}worker=null;};worker.postMessage("uci");}
  catch(e){active=false;progress.textContent="Analyse nicht verfügbar: "+e.message;}
 }
 launch.onclick=()=>{stopReplay();review.hidden=true;$("reviewOverview").hidden=false;$("overviewStart").disabled=true;$("overviewProgress").textContent="Stockfish analysiert deine Partie …";$("overviewResult").textContent=ended||"Partierückblick";start();};
