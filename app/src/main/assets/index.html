@@ -385,6 +385,29 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
 #reviewOverview .overview-chart{background:#11253e!important;border-radius:14px!important}
 #reviewOverview #overviewStart{background:linear-gradient(145deg,#3174b9,#15518d)!important;border:1px solid #7db8ef!important;color:white!important}
 @media(max-width:380px){#reviewOverview .overview-stats{grid-template-columns:minmax(0,1fr) 48px 57px!important}#reviewOverview .overview-grade-name{font-size:13px!important}}
+
+/* Clear side identity in post-game review: white is silver/white, black is dark graphite. */
+#reviewOverview .overview-players{gap:10px!important}
+#reviewOverview .overview-players>strong:first-child{
+ background:#e7eef8!important;color:#17273d!important;border:2px solid #f8fbff!important;
+ border-radius:10px!important;padding:7px 5px!important;
+}
+#reviewOverview .overview-players>strong:last-child{
+ background:#141923!important;color:#fff!important;border:2px solid #76869a!important;
+ border-radius:10px!important;padding:7px 5px!important;
+}
+#reviewOverview .overview-accuracy>div:first-child{
+ background:linear-gradient(150deg,#f4f7fc,#cdd8e8)!important;color:#142337!important;
+ border:2px solid #fff!important;box-shadow:0 2px 9px #0003!important;
+}
+#reviewOverview .overview-accuracy>div:last-child{
+ background:linear-gradient(150deg,#303847,#111924)!important;color:#fff!important;
+ border:2px solid #8694a9!important;box-shadow:0 2px 9px #0006!important;
+}
+#reviewOverview .overview-accuracy>div:first-child strong{color:#0b2749!important}
+#reviewOverview .overview-accuracy>div:last-child strong{color:#fff!important}
+#reviewOverview .overview-stat-heading:nth-child(2){color:#eef5ff!important;text-shadow:0 0 3px #fff7}
+#reviewOverview .overview-stat-heading:nth-child(3){color:#a8b8cf!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
