@@ -230,7 +230,20 @@ function start(){
  catch(e){active=false;progress.textContent="Analyse nicht verfügbar: "+e.message;}
 }
 launch.onclick=()=>{stopReplay();review.hidden=true;$("reviewOverview").hidden=false;$("overviewStart").disabled=true;$("overviewProgress").textContent="Stockfish analysiert deine Partie …";$("overviewResult").textContent=ended||"Partierückblick";start();};
-$("overviewStart").onclick=()=>{$("reviewOverview").hidden=true;review.hidden=false;selectReview(0);};
+$("overviewStart").onclick=()=>{
+ $("reviewOverview").hidden=true;
+ review.hidden=false;
+ selectReview(0);
+ // Start with the summary at the top, like the compact reference view.
+ // Do this once when opening, never on individual moves or during replay.
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  const card=$("reviewSummary");
+  if(card&&review&&!review.hidden){
+   const top=card.getBoundingClientRect().top-review.getBoundingClientRect().top+review.scrollTop-12;
+   review.scrollTop=Math.max(0,top);
+  }
+ }));
+};
 $("overviewClose").onclick=()=>{$("reviewOverview").hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
 close.onclick=()=>{stopReplay();review.hidden=true;active=false;token++;if(worker){worker.terminate();worker=null;}};
 $("reviewAgain").onclick=start;
