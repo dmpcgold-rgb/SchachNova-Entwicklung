@@ -131,7 +131,7 @@ function animateMovedPiece(m){
 }
 function choose(i){if(ended||viewIndex!==history.length-1)return;const s=current();
 // Im Bot-Modus darf Weiß während der gegnerischen Bedenkzeit genau einen Zug vormerken.
-if(s.t===(window.schachNovaBotColor===1?1:-1)&&document.getElementById("botMode").value==="bot"){return;}\nif(s.t===-1&&window.schachNovaBotColor!==1&&document.getElementById("botMode").value==="bot"){
+if(s.t===(window.schachNovaBotColor===1?1:-1)&&document.getElementById("botMode").value==="bot"){return;}
  const previous=s;
  if(premoveFrom<0){if(previous&&side(previous.b[i])===1){premoveFrom=i;}else{premoveFrom=-1;}render();return;}
  if(i===premoveFrom){premoveFrom=-1;render();return;}
