@@ -4,6 +4,7 @@
  const rules=window.SchachNovaRectangularRules,geo=window.SchachNovaBoardGeometry;
  if(!rules||!geo)return;
  let position=null,selected=null,legal=[],history=[],flipped=false,ended=false;
+ let motion=null;
  const glyphs={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",A:"♗♘",C:"♖♘",J:"♗♘",k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟",a:"♝♞",c:"♜♞",j:"♝♞"};
  function render(){
   if(!position)return;
@@ -21,6 +22,7 @@
    square.type="button";
    square.className="rect-preview-square "+((x+y)%2?"rect-preview-dark":"rect-preview-light");
    if(idx===selected)square.classList.add("rect-preview-selected");
+   if(motion&&motion.to===idx)square.style.visibility="hidden";
    if(legal.some(m=>m.to===idx))square.classList.add("rect-preview-target");
    if(["a","c","j"].includes(piece.toLowerCase()))square.classList.add("rect-preview-compound");
    if(piece!=="."&&"KQRBNP kqrbnp".includes(piece)&&piece!==" "){
@@ -36,7 +38,15 @@
   board.replaceChildren(fragment);
   document.getElementById("rectPreviewUndo").disabled=history.length===0;
  }
+ function clearMotion(){
+  if(!motion)return;
+  const old=motion;motion=null;
+  old.animation?.cancel();old.sprite.remove();
+  const board=document.getElementById("rectPreviewBoard");
+  if(board&&position){const shape=geo.geometry(position.variant);const idx=flipped?shape.squares-1-old.to:old.to;board.children[idx]?.style.removeProperty("visibility");}
+ }
  function animateMove(from,to){
+  clearMotion();
   const board=document.getElementById("rectPreviewBoard");
   if(!board||window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)return;
   const shape=geo.geometry(position.variant);
@@ -49,14 +59,16 @@
   moving.style.cssText="position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+a.width+"px;height:"+a.height+"px;z-index:9999;pointer-events:none;margin:0;border:0;";
   document.body.append(moving);
   const duration=Math.min(340,Math.max(170,160+Math.hypot(b.left-a.left,b.top-a.top)/2.7));
+  motion={to,sprite:moving,animation:null};
   const animation=moving.animate([
    {transform:"translate3d(0,0,0) scale(1)",filter:"brightness(1)"},
    {transform:"translate3d("+(b.left-a.left)*.55+"px,"+(b.top-a.top)*.55+"px,0) scale(1.07)",filter:"brightness(1.13)",offset:.55},
    {transform:"translate3d("+(b.left-a.left)+"px,"+(b.top-a.top)+"px,0) scale(1)",filter:"brightness(1)"}
   ],{duration,easing:"cubic-bezier(.22,.7,.2,1)"});
-  animation.onfinish=()=>moving.remove();
+  motion.animation=animation;
+  animation.onfinish=()=>{if(motion?.sprite===moving)clearMotion();else moving.remove();};
   animation.oncancel=()=>moving.remove();
-  setTimeout(()=>moving.remove(),duration+150);
+  setTimeout(()=>{if(motion?.sprite===moving)clearMotion();else moving.remove();},duration+150);
  }
  function tap(index){
   if(ended||!position)return;
@@ -82,6 +94,7 @@
   render();
  }
  function start(name){
+  clearMotion();
   position=rules.initial(name);history=[];selected=null;legal=[];ended=false;flipped=false;
   document.getElementById("rectPreviewTitle").textContent=name==="capablanca"?"Capablanca-Schach":"Janus-Schach";
   document.getElementById("rectPreview").hidden=false;
@@ -90,9 +103,9 @@
  }
  document.addEventListener("DOMContentLoaded",()=>{
   document.querySelectorAll("[data-rect-preview]").forEach(button=>button.addEventListener("click",()=>start(button.dataset.rectPreview)));
-  document.getElementById("rectPreviewClose")?.addEventListener("click",()=>document.getElementById("rectPreview").hidden=true);
+  document.getElementById("rectPreviewClose")?.addEventListener("click",()=>{clearMotion();document.getElementById("rectPreview").hidden=true});
   document.getElementById("rectPreviewRestart")?.addEventListener("click",()=>{if(position)start(position.variant)});
-  document.getElementById("rectPreviewFlip")?.addEventListener("click",()=>{flipped=!flipped;render()});
-  document.getElementById("rectPreviewUndo")?.addEventListener("click",()=>{if(history.length){position=history.pop();selected=null;legal=[];ended=false;render()}});
+  document.getElementById("rectPreviewFlip")?.addEventListener("click",()=>{clearMotion();flipped=!flipped;render()});
+  document.getElementById("rectPreviewUndo")?.addEventListener("click",()=>{if(history.length){clearMotion();position=history.pop();selected=null;legal=[];ended=false;render()}});
  });
 })();
