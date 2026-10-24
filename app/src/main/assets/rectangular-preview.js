@@ -56,8 +56,12 @@
   if(!origin||!destination||!origin.animate)return;
   if(origin.querySelector(".rect-piece-svg")?.complete===false)return;
   const a=origin.getBoundingClientRect(),b=destination.getBoundingClientRect();
-  const moving=origin.cloneNode(true);
-  moving.removeAttribute("id");moving.setAttribute("aria-hidden","true");
+  const moving=document.createElement("div");
+  moving.className="rect-preview-piece-motion";
+  moving.setAttribute("aria-hidden","true");
+  const pieceNode=origin.querySelector(".rect-piece-svg");
+  if(pieceNode)moving.append(pieceNode.cloneNode(true));
+  else moving.textContent=origin.textContent;
   moving.style.cssText="position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+a.width+"px;height:"+a.height+"px;z-index:9999;pointer-events:none;margin:0;border:0;";
   document.body.append(moving);
   const duration=Math.min(340,Math.max(170,160+Math.hypot(b.left-a.left,b.top-a.top)/2.7));
