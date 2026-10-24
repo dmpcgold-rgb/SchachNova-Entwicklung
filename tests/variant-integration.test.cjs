@@ -45,7 +45,7 @@ for(const item of documented){
  assert.equal(status.documented,true,item.id+" must remain documented");
  assert.equal(status.analysisEligible,Boolean(status.localRules&&status.engineConfigured),item.id+" cannot be marked ready without rules and engine");
 }
-for(const id of ["standard","hill","threecheck","antichess","atomic"]){
+for(const id of ["standard","hill","threecheck","fivecheck","antichess","atomic"]){
  assert.equal(context.window.SchachNovaVariantStatus(id).analysisEligible,true,id+" must have a local rules/engine configuration");
 }
 for(const id of ["shogi","xiangqi","janggi","capablanca","crazyhouse","horde","racingkings"]){
