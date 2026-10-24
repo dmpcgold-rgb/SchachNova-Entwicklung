@@ -253,8 +253,16 @@ function next(t){
  worker.postMessage("go depth 10");
 }
 function start(){
- if(!history||history.length<2){progress.textContent="Noch keine Züge vorhanden.";return;}
- if(variantMode!=="standard"){progress.textContent="Die Stockfish-Analyse unterstützt derzeit nur klassisches Schach.";return;}
+ if(!history||history.length<2){const msg="Noch keine Züge vorhanden.";progress.textContent=msg;$("overviewProgress").textContent=msg;$("overviewStart").disabled=true;return;}
+ if(variantMode!=="standard"){
+  const names={"threecheck":"Drei-Schach","three-check":"Drei-Schach","3check":"Drei-Schach","atomic":"Atomschach","kingofthehill":"König des Hügels","horde":"Horde","antichess":"Räuberschach"};
+  const name=names[variantMode]||"Diese Schachvariante";
+  const msg=name+": Die vorhandene Stockfish-Engine unterstützt derzeit nur klassisches Schach. Eine Bewertung dieser Variante wäre nicht zuverlässig.";
+  progress.textContent=msg;$("overviewProgress").textContent=msg;
+  $("overviewCoach").textContent="Die Partie kann weiterhin gespielt werden. Für eine korrekte Variantenanalyse wird eine Engine mit den passenden Variantenregeln benötigt.";
+  $("overviewStart").disabled=true;
+  return;
+ }
  if(worker)worker.terminate();token++;const t=token;
  positions=history.slice();results=[];index=0;reviewAt=0;active=true;drawReviewBoard();items.replaceChildren();summary.textContent="";headline.textContent="Stockfish analysiert deine Partie";
  analysisKey=movesPlayed.map(notation).join("_");
