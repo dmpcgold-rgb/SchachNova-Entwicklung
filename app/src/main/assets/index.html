@@ -615,6 +615,11 @@ body{padding-top:max(34px,env(safe-area-inset-top,0px))!important;padding-bottom
 #rectPreviewBoard .rect-piece-svg{max-width:86%;max-height:86%;object-fit:contain}
 
 .header-actions[hidden]{display:none!important}
+
+/* Maximize 10x8 board within the viewport while retaining perfectly square cells. */
+#rectPreview.rect-preview-panel:not([hidden]){padding-left:4px!important;padding-right:4px!important}
+#rectPreview #rectPreviewBoard{width:min(100%,calc((100dvh - 175px)*1.25))!important;max-width:none!important;box-sizing:border-box!important;border-width:2px!important;aspect-ratio:10 / 8!important;margin-inline:auto!important}
+#rectPreview .rect-preview-header,#rectPreview #rectPreviewCaption,#rectPreview .rect-preview-controls{margin-left:5px;margin-right:5px}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions" hidden><button id="settingsButton" type="button" tabindex="-1" aria-hidden="true">⚙</button><button id="statsButton" type="button" tabindex="-1" aria-hidden="true">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
