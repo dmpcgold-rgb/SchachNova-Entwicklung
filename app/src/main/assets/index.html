@@ -599,6 +599,11 @@ body{padding-top:max(34px,env(safe-area-inset-top,0px))!important;padding-bottom
 #rectPreview .rect-preview-board{border:3px solid #a9c5e6!important;box-sizing:border-box!important;max-width:min(720px,calc(100dvh - 195px)*1.25)!important}
 .rect-variant-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
 .rect-variant-choices button{min-width:0;padding:12px 6px;border-radius:10px;background:#174476;color:#edf5ff;border:1px solid #82b6eb}
+
+#rectPreviewBoard .rect-compound-svg{display:flex;align-items:center;justify-content:center;width:94%;height:94%;pointer-events:none}
+#rectPreviewBoard .rect-compound-svg-icon{display:block;width:54%;height:86%;object-fit:contain;min-width:0;filter:drop-shadow(0 2px 2px #071a3677)}
+#rectPreviewBoard .rect-compound-svg-icon+.rect-compound-svg-icon{margin-left:-15%}
+#rectPreviewBoard .rect-preview-motion-target .rect-compound-svg{visibility:hidden}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
