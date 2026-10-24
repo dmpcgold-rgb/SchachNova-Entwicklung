@@ -1,7 +1,7 @@
 "use strict";
 const fs=require("node:fs"),vm=require("node:vm"),assert=require("node:assert/strict");
 const source=fs.readFileSync("app/src/main/assets/chess.js","utf8");
-const engine=source.slice(0,source.indexOf("let warnedClock=false;"));
+const engine=source.slice(0,source.indexOf("let premove=null"));
 assert.ok(engine.length>7000,"Expected chess rules core");
 function evaluate(mode,body){
  const context={console};
