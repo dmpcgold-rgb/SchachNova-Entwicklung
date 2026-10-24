@@ -39,6 +39,20 @@ s=position({e1:"K",b1:"N"},{e8:"k",g8:"n"});assert(!insufficient(s),"Knight vers
 s=position({e1:"K",c1:"B"},{e8:"k",c8:"b"});assert(!insufficient(s),"Bishops on opposite colors are not dead");
 s=position({e1:"K",c1:"B"},{e8:"k",f8:"b"});assert(insufficient(s),"Bishops on same square color are dead");
 s=initial();assert.equal(key(s),key({...s,ep:sq("e3")}),"Uncapturable en-passant target does not alter repetition identity");
+// Standard chess: kings must never enter attacked squares.
+variantMode="standard";
+s=position({e1:"K"},{h8:"k",e8:"r"},1);
+assert(!legal(s).some(m=>uci(m)==="e1e2"),"King cannot step onto rook-attacked e2");
+s=position({e1:"K"},{h8:"k",g3:"b"},1);
+assert(!legal(s).some(m=>uci(m)==="e1f2"),"King cannot step onto bishop-attacked f2");
+s=position({e1:"K"},{h8:"k",g3:"n"},1);
+assert(!legal(s).some(m=>uci(m)==="e1f1"),"King cannot step onto knight-attacked f1");
+s=position({e1:"K"},{h8:"k",d3:"p"},1);
+assert(!legal(s).some(m=>uci(m)==="e1e2"),"King cannot step onto pawn-attacked e2");
+s=position({e4:"K"},{e6:"k"},1);
+assert(!legal(s).some(m=>uci(m)==="e4e5"),"Kings cannot become adjacent in standard chess");
+s=position({e1:"K",e2:"R"},{h8:"k",e8:"r"},1);
+assert(!legal(s).some(m=>uci(m)==="e2d2"),"Pinned rook cannot expose its king");
 // Antichess: compulsory capture, no check restriction, no castling, king promotion.
 variantMode="antichess";
 s=position({e1:"K",e4:"P"},{e8:"k",d5:"p"},1);
