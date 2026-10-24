@@ -23,6 +23,7 @@ const ends=[
  {title:"Dame gegen Turm",group:"Materialungleichgewicht",fen:"7k/8/5K2/8/4Q3/8/8/7r w - - 0 1",goal:"Finde einen Weg, die gegnerische Verteidigung zu überwinden.",kind:"mate"}
 ];
 let active=null,state=null,selected=-1,ply=0,errors=0,worker=null,busy=false;
+let previousVariantMode=null;
 function sq(n){return (8-Number(n[1]))*16+"abcdefgh".indexOf(n[0]);}
 function fenState(f){const [board,turn,castling,ep,half,full]=f.split(" ");const b=Array(128).fill(".");board.split("/").forEach((row,r)=>{let c=0;for(const ch of row){if(/[1-8]/.test(ch))c+=Number(ch);else b[r*16+c++]=ch;}});return {b,t:turn==="w"?1:-1,c:(castling.includes("K")?1:0)|(castling.includes("Q")?2:0)|(castling.includes("k")?4:0)|(castling.includes("q")?8:0),ep:ep==="-"?-1:sq(ep),half:Number(half),full:Number(full)};}
 function posFen(s){let rows=[];for(let r=0;r<8;r++){let row="",n=0;for(let c=0;c<8;c++){const p=s.b[r*16+c];if(p===".")n++;else{if(n)row+=n;n=0;row+=p;}}if(n)row+=n;rows.push(row);}return rows.join("/")+" "+(s.t===1?"w":"b")+" - - "+s.half+" "+s.full;}
@@ -50,7 +51,7 @@ function showMenu(group){
  }
  $("trainingBack").onclick=()=>group==="home"?exit():showMenu(["e4","d4","other"].includes(group)?"openings":"home");
 }
-function exit(){stopWorker();$("trainingScreen").hidden=true;$("homeScreen").hidden=false;active=null;}
+function exit(){stopWorker();$("trainingScreen").hidden=true;$("homeScreen").hidden=false;active=null;if(previousVariantMode!==null){variantMode=previousVariantMode;previousVariantMode=null;}}
 let hintStep=0,hintFrom=-1,hintTo=-1;
 function resetHint(){hintStep=0;hintFrom=-1;hintTo=-1;}
 function renderTraining(){
@@ -86,7 +87,7 @@ function animateTrainingMove(m,piece){
 }
 function applyTrainingMove(m){const piece=state.b[m[0]];state=apply(state,m);renderTraining();animateTrainingMove(m,piece);}
 function start(data,isOpening){
- stopWorker();active={data,opening:isOpening};ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
+ stopWorker();if(previousVariantMode===null)previousVariantMode=variantMode;variantMode="standard";active={data,opening:isOpening};ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
  $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
  $("trainingBack").onclick=()=>showMenu(isOpening?data.group:"endgames");
  $("trainingReset").onclick=()=>start(data,isOpening);
