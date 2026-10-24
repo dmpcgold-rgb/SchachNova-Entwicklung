@@ -4,7 +4,7 @@
  const rules=window.SchachNovaRectangularRules,geo=window.SchachNovaBoardGeometry;
  if(!rules||!geo)return;
  let position=null,selected=null,legal=[],history=[],flipped=false,ended=false;
- let motion=null;
+ let motion=null,lastMove=null;
  const glyphs={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",A:"♗♘",C:"♖♘",J:"♗♘",k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟",a:"♝♞",c:"♜♞",j:"♝♞"};
  function render(){
   if(!position)return;
@@ -22,6 +22,7 @@
    square.type="button";
    square.className="rect-preview-square "+((x+y)%2?"rect-preview-dark":"rect-preview-light");
    if(idx===selected)square.classList.add("rect-preview-selected");
+   if(lastMove&&(idx===lastMove.from||idx===lastMove.to))square.classList.add("rect-preview-lastmove");
    if(motion&&motion.to===idx)square.style.visibility="hidden";
    if(legal.some(m=>m.to===idx))square.classList.add("rect-preview-target");
    if(["a","c","j"].includes(piece.toLowerCase()))square.classList.add("rect-preview-compound");
@@ -81,7 +82,8 @@
     move=moves.find(m=>m.promotion===answer.trim().toLowerCase())||moves[0];
    }
    animateMove(move.from,move.to);
-   history.push(position);
+   lastMove={from:move.from,to:move.to};
+   history.push({position,move:lastMove});
    position=rules.apply(position,move);
    selected=null;legal=[];
    ended=rules.status(position).ended;
@@ -95,7 +97,7 @@
  }
  function start(name){
   clearMotion();
-  position=rules.initial(name);history=[];selected=null;legal=[];ended=false;flipped=false;
+  position=rules.initial(name);history=[];lastMove=null;selected=null;legal=[];ended=false;flipped=false;
   document.getElementById("rectPreviewTitle").textContent=name==="capablanca"?"Capablanca-Schach":"Janus-Schach";
   document.getElementById("rectPreview").hidden=false;
   render();
@@ -106,6 +108,6 @@
   document.getElementById("rectPreviewClose")?.addEventListener("click",()=>{clearMotion();document.getElementById("rectPreview").hidden=true});
   document.getElementById("rectPreviewRestart")?.addEventListener("click",()=>{if(position)start(position.variant)});
   document.getElementById("rectPreviewFlip")?.addEventListener("click",()=>{clearMotion();flipped=!flipped;render()});
-  document.getElementById("rectPreviewUndo")?.addEventListener("click",()=>{if(history.length){clearMotion();position=history.pop();selected=null;legal=[];ended=false;render()}});
+  document.getElementById("rectPreviewUndo")?.addEventListener("click",()=>{if(history.length){clearMotion();const previous=history.pop();position=previous.position;lastMove=history.length>1?history[history.length-2].move:null;selected=null;legal=[];ended=false;render()}});
  });
 })();
