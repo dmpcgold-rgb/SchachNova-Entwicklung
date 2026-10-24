@@ -27,7 +27,7 @@
    board[geometry.index(x,shape.height-2,shape)]="P";
    board[geometry.index(x,shape.height-1,shape)]=layout.back[x];
   }
-  return {variant:name,width:shape.width,height:shape.height,board,turn:"w",castling:"",enPassant:null,halfmove:0,fullmove:1};
+  return {variant:name,width:shape.width,height:shape.height,board,turn:"w",castling:"KQkq",enPassant:null,halfmove:0,fullmove:1};
  }
  function movesFrom(position,from){
   const shape=geometry.geometry(position.variant);
@@ -95,6 +95,7 @@
   const board=position.board.slice(),piece=board[move.from];
   if(!piece||piece===".")throw Error("Ungültiger Ausgangspunkt");
   const capture=board[move.to];
+  if(move.castle){if(piece.toLowerCase()!=="k"||board[move.rookFrom]!==(upper(piece)?"R":"r"))throw Error("Ungültige Rochade");board[move.rookTo]=board[move.rookFrom];board[move.rookFrom]=".";}
   if(move.enPassant){const taken=move.to+(upper(piece)?shape.width:-shape.width);if(board[taken]!==(upper(piece)?"p":"P"))throw Error("Ungültiges En passant");board[taken]=".";}
   board[move.from]=".";
   const rank=Math.floor(move.to/shape.width),promotion=piece.toLowerCase()==="p"&&(rank===0||rank===shape.height-1);
@@ -103,7 +104,12 @@
   board[move.to]=promotion?(upper(piece)?promoteTo.toUpperCase():promoteTo):piece;
   const doubleStep=piece.toLowerCase()==="p"&&Math.abs(move.to-move.from)===2*shape.width;
   const enPassant=doubleStep?(move.to+move.from)/2:null;
-  return {...position,board,turn:position.turn==="w"?"b":"w",enPassant,
+  let castling=position.castling;
+  if(piece==="K")castling=castling.replace(/[KQ]/g,"");
+  if(piece==="k")castling=castling.replace(/[kq]/g,"");
+  const rights=[["R",shape.height-1,shape.width-1,"K"],["R",shape.height-1,0,"Q"],["r",0,shape.width-1,"k"],["r",0,0,"q"]];
+  for(const [r,rank,file,right] of rights){const sq=geometry.index(file,rank,shape);if((move.from===sq&&piece===r)||(move.to===sq&&capture===r))castling=castling.replace(right,"");}
+  return {...position,board,castling,turn:position.turn==="w"?"b":"w",enPassant,
    halfmove:piece.toLowerCase()==="p"||capture!=="."||move.enPassant?0:position.halfmove+1,
    fullmove:position.fullmove+(position.turn==="b"?1:0)};
  }
@@ -116,7 +122,25 @@
     if(!inCheck(apply(position,move),white))out.push(...promotions(position,move));
    }
   }
-  return out;
+  return out.concat(castleMoves(position));
+ }
+ function castleMoves(position){
+  const shape=geometry.geometry(position.variant),white=position.turn==="w",row=white?shape.height-1:0;
+  const king=geometry.index(5,row,shape),piece=white?"K":"k",rook=white?"R":"r";
+  if(position.board[king]!==piece||inCheck(position,white))return [];
+  const results=[];
+  for(const [right,rookFile,direction] of [[white?"K":"k",shape.width-1,1],[white?"Q":"q",0,-1]]){
+   if(!position.castling.includes(right))continue;
+   const rookSquare=geometry.index(rookFile,row,shape);
+   if(position.board[rookSquare]!==rook)continue;
+   const kingTarget=geometry.index(5+2*direction,row,shape),rookTarget=geometry.index(5+direction,row,shape);
+   let clear=true;
+   for(let file=Math.min(5,rookFile)+1;file<Math.max(5,rookFile);file++)if(position.board[geometry.index(file,row,shape)]!=="."){clear=false;break;}
+   if(!clear)continue;
+   for(const file of [5+direction,5+2*direction])if(attacked(position,geometry.index(file,row,shape),!white)){clear=false;break;}
+   if(clear)results.push({from:king,to:kingTarget,castle:true,rookFrom:rookSquare,rookTo:rookTarget});
+  }
+  return results;
  }
  function promotions(position,move){
   const shape=geometry.geometry(position.variant),piece=position.board[move.from];
