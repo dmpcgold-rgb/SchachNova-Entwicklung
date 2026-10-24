@@ -187,8 +187,10 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  $("overviewAccuracy").innerHTML=accuracy.map((v,i)=>"<div>"+(i?"Schwarz":"Weiß")+"<strong style='display:block'>"+(v===null?"–":v+"/100")+"</strong></div>").join("");
  const table=$("overviewStats");table.replaceChildren();
  for(const title of ["Zugbewertung","Weiß","Schwarz"]){const heading=document.createElement("strong");heading.textContent=title;heading.className="overview-stat-heading";table.append(heading);}
- for(const labelName of labels){const name=document.createElement("span");name.textContent=labelName;table.append(name);
-  for(let k=0;k<2;k++){const v=document.createElement("span");v.className="stat-value";v.textContent=String(stats[k][labelName]||0);table.append(v);}
+ const colors={"Bester Zug":"#42bba3","Sehr gut":"#72c8a6","Gut":"#81b9ec","Ungenauigkeit":"#e7c35d","Fehler":"#f2a15e","Grober Fehler":"#f07581"};
+ for(const labelName of labels){
+  const name=document.createElement("span");name.textContent=labelName;name.className="overview-grade-name";name.style.setProperty("--grade-color",colors[labelName]);table.append(name);
+  for(let k=0;k<2;k++){const v=document.createElement("span");v.className="stat-value";v.textContent=String(stats[k][labelName]||0);v.style.color=colors[labelName];v.setAttribute("aria-label",(k?"Schwarz: ":"Weiß: ")+v.textContent+" "+labelName);table.append(v);}
  }
  const chart=$("overviewChart");chart.replaceChildren();
  const values=results.map(r=>Number.isFinite(r?.cp)?Math.max(-1000,Math.min(1000,r.cp)):null),w=600,h=110;
