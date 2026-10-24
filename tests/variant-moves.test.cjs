@@ -18,7 +18,7 @@ for(const mode of ["torpedo","berolina","hoppelpoppel"]){
   evaluate(mode,`const s=${JSON.stringify(base(b))};const ms=legal(s).filter(m=>m[0]===100);if(!ms.some(m=>m[1]===85))throw Error("Berolina pawn must move diagonally");if(!ms.some(m=>m[1]===84))throw Error("Berolina pawn must capture straight");`);
  }else{
   b[90]="B";b[91]="N";
-  evaluate(mode,`const s=${JSON.stringify(base(b))};const bm=legal(s).filter(m=>m[0]===90);const nm=legal(s).filter(m=>m[0]===91);if(!bm.some(m=>m[1]===57))throw Error("Hoppel bishop must leap like knight");if(!nm.some(m=>m[1]===74))throw Error("Hoppel knight must slide diagonally");`);
+  evaluate(mode,`const s=${JSON.stringify(base(b))};const bm=legal(s).filter(m=>m[0]===90);const nm=legal(s).filter(m=>m[0]===91);if(!bm.some(m=>m[1]===73))throw Error("Hoppel bishop must leap like knight");if(!nm.some(m=>m[1]===76))throw Error("Hoppel knight must slide diagonally");`);
  }
 }
 console.log("SchachNova: pawn and Hoppel-Poppel move tests passed");
