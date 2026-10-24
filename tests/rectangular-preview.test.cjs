@@ -15,7 +15,8 @@ for(const id of ["rectPreviewUndo","rectPreviewFlip","rectPreviewRestart"])asser
 assert.match(js,/rules.legalMoves\(position\)/);
 assert.match(js,/rules.apply\(position,move\)/);
 assert.doesNotMatch(js,/\b(?:localStorage|sessionStorage)\b/);
-assert.match(js,/if\(motion&&motion.to===idx\)square.style.visibility="hidden"/);
+assert.match(js,/if\(motion&&motion.to===idx\)square.classList.add\("rect-preview-motion-target"\)/);
+assert.match(html,/\.rect-preview-motion-target>\.rect-piece-svg\{visibility:hidden\}/);
 assert.match(js,/function clearMotion\(\)/);
 assert.match(js,/motion.animation=animation/);
 const classic=fs.readFileSync("app/src/main/assets/chess.js","utf8");
