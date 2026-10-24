@@ -560,6 +560,17 @@ body{padding-top:max(34px,env(safe-area-inset-top,0px))!important;padding-bottom
 .sq.white-piece .piece-img{filter:brightness(1.02) saturate(.55) drop-shadow(0 1px 1px #1c2c47a8) drop-shadow(0 3px 2px #101d3280)}
 .sq.black-piece .piece-img{filter:sepia(.45) saturate(1.6) hue-rotate(169deg) brightness(.9) drop-shadow(0 1px 1px #071529b0) drop-shadow(0 3px 2px #07152980)}
 .rect-preview-light,.rect-preview-dark{font-weight:650}
+
+/* Classic 8x8 boards only: restore blue-and-silver SchachNova identity.
+   Deliberately do not style .rect-preview-* 10x8 variant boards. */
+:root{--board-frame:#9baecb;--board-light:#e1e9f3;--board-dark:#3d6598}
+.boardpanel{background:linear-gradient(145deg,#203b62,#10243e 65%,#0b192d);border-color:#8299b9}
+.board{border:3px solid #b7c8df;box-shadow:0 0 0 2px #203a5b,0 0 0 4px #819bbd,0 12px 26px #0009}
+.sq.light{background:linear-gradient(145deg,#f1f5fa,#d5e0ee)}
+.sq.dark{background:linear-gradient(145deg,#557cae,#345d91)}
+.sq.lastmove{background:linear-gradient(145deg,#d6e8fb,#8fb5e2)!important}
+.sq.selected{box-shadow:inset 0 0 0 3px #eff7ff,inset 0 0 0 5px #255b9c}
+.sq.target{box-shadow:inset 0 0 0 3px #b9d8ff,inset 0 0 0 5px #1c426f}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
