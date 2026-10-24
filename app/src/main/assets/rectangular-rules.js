@@ -45,6 +45,7 @@
    for(const dx of [-1,1])if(inside(x+dx,ny,shape)){
     const to=geometry.index(x+dx,ny,shape),target=position.board[to];
     if(target!=="."&&upper(target)!==own&&target.toLowerCase()!=="k")out.push({from,to,capture:true});
+    else if(target==="."&&position.enPassant===to){const captured=geometry.index(x+dx,y,shape);if(position.board[captured]===(own?"p":"P"))out.push({from,to,capture:true,enPassant:true});}
    }
    return out;
   }
@@ -94,11 +95,16 @@
   const board=position.board.slice(),piece=board[move.from];
   if(!piece||piece===".")throw Error("Ungültiger Ausgangspunkt");
   const capture=board[move.to];
+  if(move.enPassant){const taken=move.to+(upper(piece)?shape.width:-shape.width);if(board[taken]!==(upper(piece)?"p":"P"))throw Error("Ungültiges En passant");board[taken]=".";}
   board[move.from]=".";
   const rank=Math.floor(move.to/shape.width),promotion=piece.toLowerCase()==="p"&&(rank===0||rank===shape.height-1);
-  board[move.to]=promotion?(upper(piece)?"Q":"q"):piece;
-  return {...position,board,turn:position.turn==="w"?"b":"w",enPassant:null,
-   halfmove:piece.toLowerCase()==="p"||capture!=="."?0:position.halfmove+1,
+  const promoteTo=move.promotion||"q";
+  if(promotion&&!["q","r","b","n","a","c"].includes(promoteTo))throw Error("Ungültige Umwandlung");
+  board[move.to]=promotion?(upper(piece)?promoteTo.toUpperCase():promoteTo):piece;
+  const doubleStep=piece.toLowerCase()==="p"&&Math.abs(move.to-move.from)===2*shape.width;
+  const enPassant=doubleStep?(move.to+move.from)/2:null;
+  return {...position,board,turn:position.turn==="w"?"b":"w",enPassant,
+   halfmove:piece.toLowerCase()==="p"||capture!=="."||move.enPassant?0:position.halfmove+1,
    fullmove:position.fullmove+(position.turn==="b"?1:0)};
  }
  function legalMoves(position){
