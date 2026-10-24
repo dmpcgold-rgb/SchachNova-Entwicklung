@@ -150,6 +150,29 @@ button{border-color:#3778b8;color:#eaf5ff}
 #homeScreen.nova-setup-mode #novaPlaySection{display:none!important}
 #homeScreen.nova-setup-mode #novaGameSetup,#homeScreen.nova-setup-mode #novaDesignPicker{display:block!important}
 #homeScreen.nova-setup-mode .nova-main-nav{display:none!important}
+
+/* Final silver-blue overrides for ALL screens, including dynamically generated overlays. */
+:root{--bg:#07182f!important;--edge:#438fd0!important;--muted:#aec6e5!important;--green:#2875c4!important;color-scheme:dark}
+body{background:radial-gradient(ellipse at 50% 0,#123d78 0%,#071831 54%,#030b1b 100%)!important}
+.board>.sq.light,.training-board>.sq.light{background:linear-gradient(135deg,#f6fbff,#b9c9dd 55%,#e9f2fc)!important}
+.board>.sq.dark,.training-board>.sq.dark{background:linear-gradient(135deg,#1a5eb0,#082b67 60%,#10498e)!important}
+.board>.sq.lastmove,.training-board>.sq.lastmove,.training-board>.sq.hint-origin{background:#4b9be1!important}
+.board>.sq.king-in-check,.training-board>.sq.king-in-check{background:#dc4855!important}
+.training-screen,.training-top,.training-list,.training-board-area{background:transparent!important}
+.training-card,.training-top button,.training-actions button,.training-info,.training-message,.opening-card,.lesson-card,
+.history,.settings,.modal-box,.side button,.side button.primary,
+#homeScreen button,#homeScreen .time-group,#homeScreen .custom-time,
+button.primary,button[style*="green"],button[style*="#6"]{
+ background:linear-gradient(145deg,#164b87,#0b284f)!important;
+ border-color:#5197d5!important;color:#f4faff!important
+}
+.training-card{box-shadow:0 3px 14px #0004!important}
+.training-card:active,button:active{filter:brightness(1.2)}
+/* Keep board highlights visible while retaining the chosen blue/silver squares. */
+.board>.sq.selected,.training-board>.sq.selected{box-shadow:inset 0 0 0 4px #9ddaff!important}
+.board>.sq.target,.training-board>.sq.target{box-shadow:inset 0 0 0 4px #3bb4ff!important}
+#homeScreen.nova-setup-mode .nova-main-nav{display:none!important}
+#homeScreen .nova-main-nav{z-index:5}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
