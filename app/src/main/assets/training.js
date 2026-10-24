@@ -23,7 +23,7 @@ const ends=[
  {title:"Dame gegen Turm",group:"Materialungleichgewicht",fen:"7k/8/5K2/8/4Q3/8/8/7r w - - 0 1",goal:"Finde einen Weg, die gegnerische Verteidigung zu überwinden.",kind:"mate"}
 ];
 let active=null,state=null,selected=-1,ply=0,errors=0,worker=null,busy=false;
-let previousVariantMode=null;
+let previousVariantMode=null,trainingFinished=false;
 function sq(n){return (8-Number(n[1]))*16+"abcdefgh".indexOf(n[0]);}
 function fenState(f){const [board,turn,castling,ep,half,full]=f.split(" ");const b=Array(128).fill(".");board.split("/").forEach((row,r)=>{let c=0;for(const ch of row){if(/[1-8]/.test(ch))c+=Number(ch);else b[r*16+c++]=ch;}});return {b,t:turn==="w"?1:-1,c:(castling.includes("K")?1:0)|(castling.includes("Q")?2:0)|(castling.includes("k")?4:0)|(castling.includes("q")?8:0),ep:ep==="-"?-1:sq(ep),half:Number(half),full:Number(full)};}
 function posFen(s){let rows=[];for(let r=0;r<8;r++){let row="",n=0;for(let c=0;c<8;c++){const p=s.b[r*16+c];if(p===".")n++;else{if(n)row+=n;n=0;row+=p;}}if(n)row+=n;rows.push(row);}return rows.join("/")+" "+(s.t===1?"w":"b")+" - - "+s.half+" "+s.full;}
@@ -95,9 +95,19 @@ function endgameResult(){
  if(active?.data.kind==="promotion"&&state.b.includes("Q"))return "Geschafft: Der Bauer wurde umgewandelt!";
  return "";
 }
+function finishTraining(message){trainingFinished=true;selected=-1;stopWorker();label(message);renderTraining();}
+function animateHint(){
+ const board=$("trainingBoard");if(!board||hintFrom<0)return;
+ const flipped=active.opening&&active.data.side===-1;
+ for(const index of [hintFrom,hintTo]){
+  if(index<0)continue;
+  const cell=board.children[(flipped?7-(index>>4):(index>>4))*8+(flipped?7-(index&7):(index&7))];
+  if(cell&&cell.animate)cell.animate([{filter:"brightness(1)"},{filter:"brightness(1.55)"},{filter:"brightness(1)"}],{duration:650,iterations:2});
+ }
+}
 function requestEndgameHint(){
- if(!active||active.opening||busy||state.t!==1)return;
- const result=endgameResult();if(result){label(result);return;}
+ if(!active||active.opening||busy||trainingFinished||state.t!==1)return;
+ const result=endgameResult();if(result){finishTraining(result);return;}
  const snapshot=state;busy=true;label("Stockfish analysiert die Endspielstellung …");
  try{
   stopWorker();busy=true;
@@ -112,7 +122,7 @@ function requestEndgameHint(){
     stopWorker();if(!active||state!==snapshot)return;
     if(!m){label("Kein gültiger Hinweis verfügbar.");return;}
     hintStep=Math.min(2,hintStep+1);hintFrom=m[0];hintTo=hintStep===2?m[1]:-1;
-    label(hintStep===1?"Hinweis 1/2: Die empfohlene Figur ist markiert.":"Hinweis 2/2: Der empfohlene Zug ist mit einem Pfeil markiert.");renderTraining();
+    label(hintStep===1?"Hinweis 1/2: Die empfohlene Figur ist markiert.":"Hinweis 2/2: Der empfohlene Zug ist mit einem Pfeil markiert.");renderTraining();animateHint();
    }
   };
   w.onerror=()=>{stopWorker();label("Stockfish-Hinweis derzeit nicht verfügbar.");};
@@ -120,13 +130,13 @@ function requestEndgameHint(){
  }catch(_){stopWorker();label("Stockfish-Hinweis derzeit nicht verfügbar.");}
 }
 function start(data,isOpening){
- stopWorker();if(previousVariantMode===null)previousVariantMode=variantMode;variantMode="standard";active={data,opening:isOpening};ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
+ stopWorker();if(previousVariantMode===null)previousVariantMode=variantMode;variantMode="standard";active={data,opening:isOpening};trainingFinished=false;ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
  $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
  $("trainingBack").onclick=()=>showMenu(isOpening?data.group:"endgames");
  $("trainingReset").onclick=()=>start(data,isOpening);
- $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{requestEndgameHint();return;}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();};
+ $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{requestEndgameHint();return;}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();animateHint();};
  label(isOpening?"Übe die Eröffnung mit "+(data.side===1?"Weiß":"Schwarz")+". Ziehe die richtige Figur.":"Ziel: "+data.goal);
- renderTraining();if(isOpening)autoOpening();
+ renderTraining();if(isOpening)autoOpening();else{const outcome=endgameResult();if(outcome)finishTraining(outcome);}
 }
 function autoOpening(){
  if(!active||!active.opening)return;
@@ -137,11 +147,11 @@ function autoOpening(){
   resetHint();applyTrainingMove(m);ply++;
  }
  renderTraining();
- if(ply>=data.moves.length)label("Sehr gut! Eröffnung abgeschlossen. Fehler: "+errors+". Du kannst die Übung wiederholen.");
+ if(ply>=data.moves.length)finishTraining("Sehr gut! Eröffnung abgeschlossen. Fehler: "+errors+". Du kannst die Übung wiederholen.");
 }
 function uci(m){return "abcdefgh"[m[0]&7]+(8-(m[0]>>4))+"abcdefgh"[m[1]&7]+(8-(m[1]>>4))+(m[2]||"");}
 function click(i){
- if(!active||busy)return;
+ if(!active||busy||trainingFinished)return;
  if(side(state.b[i])===state.t){selected=i;renderTraining();return;}
  const m=legal(state).find(m=>m[0]===selected&&m[1]===i&&(m[2]===""||m[2]==="q"));selected=-1;
  if(!m){renderTraining();return;}
@@ -151,7 +161,7 @@ function click(i){
   resetHint();applyTrainingMove(m);ply++;label("Richtig! "+active.data.notes[ply-1]);autoOpening();return;
  }
  resetHint();applyTrainingMove(m);
- const outcome=endgameResult();if(outcome){label(outcome);return;}
+ const outcome=endgameResult();if(outcome){finishTraining(outcome);return;}
  engineReply();
 }
 function engineReply(){
@@ -163,7 +173,7 @@ function engineReply(){
    if(w!==worker)return;const line=String(e.data);
    if(line==="uciok"){w.postMessage("isready");return;}
    if(line==="readyok"){w.postMessage("position fen "+posFen(state));w.postMessage("go depth 8");return;}
-   if(line.startsWith("bestmove ")){const moveText=line.split(" ")[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){applyTrainingMove(m);const outcome=endgameResult();label(outcome||"Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else label(endgameResult()||"Kein gültiger Gegenzug gefunden.");}
+   if(line.startsWith("bestmove ")){const moveText=line.split(" ")[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){applyTrainingMove(m);const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else {const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Kein gültiger Gegenzug gefunden.");}}
   };
   w.onerror=()=>{stopWorker();label("Offline-Engine nicht verfügbar. Die Übung kann zurückgesetzt werden.");};
   w.postMessage("uci");
