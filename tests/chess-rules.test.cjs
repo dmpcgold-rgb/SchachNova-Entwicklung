@@ -167,7 +167,7 @@ s=position({c4:"K",d4:"P"},{e2:"k",e4:"p"},-1,0,sq("d3"));
 assert(!atomicKingThreat(s,1),"En passant cannot explode both kings");
 // End-state and move legality regressions for standard and special variants.
 variantMode="standard";
-s=position({h1:"K"},{f2:"k",g2:"q"},1);
+s=position({h1:"K"},{f2:"k",g3:"q"},1);
 assert.equal(legal(s).length,0,"Stalemate has no legal moves");
 assert(!checked(s),"Stalemate is not check");
 s=position({h1:"K"},{f3:"k",g2:"q"},1);
