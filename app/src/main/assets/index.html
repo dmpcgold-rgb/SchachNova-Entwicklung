@@ -298,4 +298,21 @@ window.schachNovaGoBack=function(){
  if(setup&&!setup.hidden){setup.hidden=true;return true}
  return false;
 };
+</script><script>
+document.addEventListener('DOMContentLoaded',function(){
+ const home=document.getElementById('homeScreen');
+ const setup=document.getElementById('novaGameSetup');
+ if(!home||!setup)return;
+ document.querySelectorAll('#novaPlaySection button[data-mode]').forEach(function(button){
+  button.addEventListener('click',function(){
+   setTimeout(function(){if(!setup.hidden){home.classList.add('nova-setup-mode');setup.scrollIntoView({block:'start'});}},0);
+  });
+ });
+ document.getElementById('novaBackHome')?.addEventListener('click',function(){home.classList.remove('nova-setup-mode');});
+ const previous=window.schachNovaGoBack;
+ window.schachNovaGoBack=function(){
+  if(home.classList.contains('nova-setup-mode')){home.classList.remove('nova-setup-mode');setup.hidden=true;return true;}
+  return typeof previous==='function'?previous():false;
+ };
+});
 </script></body></html>
