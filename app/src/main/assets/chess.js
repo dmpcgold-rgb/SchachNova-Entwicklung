@@ -86,7 +86,7 @@ function legal(s){
  }
  return pseudo(s).filter(m=>!checked(apply(s,m),s.t));
 }
-function key(s){const epLegal=s.ep>=0&&legal(s).some(m=>m[3]==="ep");return s.b.join("")+":"+s.t+":"+s.c+":"+(epLegal?s.ep:-1);}
+function key(s){const epLegal=s.ep>=0&&legal(s).some(m=>m[3]==="ep"||m[3]==="berolinaEp");return s.b.join("")+":"+s.t+":"+s.c+":"+(epLegal?s.ep:-1);}
 function insufficient(s){const p=[];for(let i=0;i<128;i++)if(on(i)&&s.b[i]!=="."&&!/[kK]/.test(s.b[i]))p.push([s.b[i].toLowerCase(),((i>>4)+(i&7))%2]);if(!p.length)return true;if(p.length===1)return ["n","b"].includes(p[0][0]);if(p.every(x=>x[0]==="b")&&new Set(p.map(x=>x[1])).size===1)return true;return false;}
 let premove=null,premoveFrom=-1,premoveQueue=[];let variantMode="standard",blindLevel=0,checksGiven=[0,0];let lastEndShown="";
 let history=[initial()],movesPlayed=[],clockHistory=[[600,600]],viewIndex=0,flipped=false,selected=-1,clock=[600,600],running=false,ended="",rated=false,vibrationOn=true,last=performance.now(),timer;
