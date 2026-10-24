@@ -316,6 +316,32 @@ border-color:#5b9bd6!important;color:#f1f7ff!important
 #reviewPanel .review-playback button{min-height:42px!important}
 #reviewPanel .review-playback #reviewStep{font-variant-numeric:tabular-nums;white-space:nowrap}
 #reviewPanel .review-move{border-left-width:5px!important}
+
+/* Fixed chess-board geometry during moves, replay and analysis. */
+#gameScreen .board,#trainingScreen .training-board,#reviewPanel .review-board{
+ aspect-ratio:1/1!important;
+ height:auto!important;
+ min-height:0!important;
+ box-sizing:border-box!important;
+ grid-template-columns:repeat(8,minmax(0,1fr))!important;
+ grid-template-rows:repeat(8,minmax(0,1fr))!important;
+ grid-auto-rows:minmax(0,1fr)!important;
+ gap:0!important;
+ align-content:stretch!important;
+ justify-content:stretch!important;
+ overflow:hidden!important;
+}
+#gameScreen .board>.sq,#trainingScreen .training-board>.sq,#reviewPanel .review-board>.review-square{
+ width:100%!important;height:100%!important;
+ min-width:0!important;min-height:0!important;
+ box-sizing:border-box!important;
+ contain:layout style!important;
+}
+#reviewPanel .review-board-wrap{width:100%!important;max-width:650px!important;aspect-ratio:1/1!important;margin:8px auto!important;overflow:hidden!important;flex-shrink:0!important}
+#reviewPanel .review-board{width:100%!important;height:100%!important}
+#reviewPanel .review-arrow-overlay{contain:strict!important}
+#reviewPanel{overflow-anchor:none!important}
+#reviewPanel .review-summary,#reviewPanel .review-coach{overflow-anchor:none!important}
 </style></head><body><main>
 <header class="header"><div class="brandline"><span class="logo">♞</span><h1>Schach<span class="accent">Nova</span></h1></div><div class="header-actions"><button id="settingsButton" class="iconbutton" aria-label="Einstellungen">⚙</button><button id="statsButton" class="iconbutton" aria-label="Zugverlauf">▥</button></div></header>
 <section id="homeScreen" class="home"><div class="nova-hero"><span class="nova-eyebrow">SCHACHNOVA</span><h2 id="homeTitle">Dein Schach. Dein Fortschritt.</h2><p>Spielen, lernen und deine Partien verbessern.</p></div><div class="nova-premium-menu" aria-label="SchachNova Hauptfunktionen">
