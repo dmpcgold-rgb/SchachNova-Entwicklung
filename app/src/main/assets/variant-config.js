@@ -15,6 +15,29 @@ window.SchachNovaVariants=Object.freeze({
  racingkings:{label:"Racing Kings",uci:"racingkings",local:false},
  crazyhouse:{label:"Crazyhouse",uci:"crazyhouse",local:false}
 });
+/* Complete documented catalog. A catalog entry is not proof of playable
+ * local rules or of support in the bundled Fairy-Stockfish binary. */
+window.SchachNovaVariantStatus=function(name){
+ const catalog=window.SchachNovaVariantCatalog||[];
+ const entry=catalog.find(item=>item.id===name);
+ const config=window.SchachNovaVariants[name];
+ return {
+  id:name,
+  label:config?.label||entry?.name||name,
+  documented:!!entry||!!config,
+  localRules:!!config?.local,
+  engineConfigured:!!config?.uci,
+  analysisEligible:!!config?.local&&!!config?.uci,
+  requiresImplementation:!config?.local,
+  reason:!config?.local
+   ?"Regeln, Brett und Zugdarstellung müssen zuerst vollständig implementiert und getestet werden."
+   :!config?.uci?"Keine geprüfte Engine-Konfiguration vorhanden.":"Lokale Regeln und Engine-Konfiguration vorhanden; Engine-Laufzeittest erforderlich."
+ };
+};
+window.SchachNovaAllVariantStatuses=function(){
+ const ids=new Set(["standard",...Object.keys(window.SchachNovaVariants),...(window.SchachNovaVariantCatalog||[]).map(v=>v.id)]);
+ return [...ids].map(window.SchachNovaVariantStatus);
+};
 window.schachNovaVariantUciOptions=function(name){
  const variant=window.SchachNovaVariants[name];
  if(!variant)throw new Error("Unbekannte Schachvariante: "+name);
