@@ -3,6 +3,8 @@ const assert=require("node:assert/strict"),fs=require("node:fs");
 const html=fs.readFileSync("app/src/main/assets/index.html","utf8");
 const js=fs.readFileSync("app/src/main/assets/rectangular-preview.js","utf8");
 const css=fs.readFileSync("app/src/main/assets/schachnova-theme.css","utf8");
+for(const name of ["appearance-preferences.js","piece-appearance.js"]){assert.ok(html.includes('<script src="'+name+'"></script>'));assert.ok(fs.readFileSync("app/src/main/assets/"+name,"utf8").length>100);}
+assert.ok(html.indexOf('src="appearance-preferences.js"')<html.indexOf('src="piece-appearance.js"'));
 assert.match(html,/<link rel="stylesheet" href="schachnova-theme.css">/);
 for(const name of ["capablanca","janus"]){
  assert.match(html,new RegExp('data-rect-preview="'+name+'"'));
