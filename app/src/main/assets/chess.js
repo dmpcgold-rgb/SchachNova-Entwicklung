@@ -101,10 +101,10 @@ function clockWarning(index,second){if(clockAlertSecond[index]===second)return;c
 function tick(){const now=performance.now(),dt=(now-last)/1000;last=now;if(running&&!ended&&viewIndex===history.length-1){const i=current().t===1?0:1;const before=Math.ceil(clock[i]);clock[i]=Math.max(0,clock[i]-dt);const after=Math.ceil(clock[i]);for(let threshold=10;threshold>=1;threshold--){if(before>threshold&&after<=threshold&&clock[i]>0)clockWarning(i,threshold);}if(clock[i]<=0){clock[i]=0;ended="Zeit abgelaufen – "+(i===0?"Schwarz":"Weiß")+" gewinnt";running=false;}}renderClocks();}
 function renderClocks(){document.getElementById("whiteClock").textContent=format(Math.ceil(clock[0]));document.getElementById("blackClock").textContent=format(Math.ceil(clock[1]));document.getElementById("status").textContent=ended||status();if(ended&&ended!==lastEndShown){lastEndShown=ended;showGameResult(ended);}document.getElementById("whiteClock").classList.toggle("active-clock",running&&current().t===1);document.getElementById("blackClock").classList.toggle("active-clock",running&&current().t===-1);const claim=document.getElementById("claimDraw");if(claim){const reason=drawClaimReason();claim.disabled=!!ended||!reason;claim.textContent=reason?"½ Remis beanspruchen ("+reason+")":"½ Remis beanspruchen";}}
 function move(m){if(ended)return;const permitted=legal(current()).find(x=>Array.isArray(m)&&x[0]===m[0]&&x[1]===m[1]&&x[2]===m[2]&&x[3]===m[3]);if(!permitted)return;tick();if(ended)return;m=permitted;const old=current(),capture=old.b[m[1]]!=="."||m[3]==="ep"||m[3]==="berolinaEp";history.push(apply(old,m));movesPlayed.push(m);if((variantMode==="threecheck"||variantMode==="fivecheck")&&checked(current()))checksGiven[old.t===1?0:1]++;if(movesPlayed.length===2&&!running){running=true;last=performance.now();}if(window.schachNovaIncrement){clock[old.t===1?0:1]+=window.schachNovaIncrement;}clockHistory.push(clock.slice());viewIndex=history.length-1;selected=-1;warnedClock=false;clockAlertSecond[old.t===1?0:1]=null;const normalKingRules=variantMode!=="antichess"&&variantMode!=="atomic";const isMate=normalKingRules&&!legal(current()).length&&checked(current());const isCheck=normalKingRules&&checked(current());vibrate(isMate?[65,85,65]:isCheck?[160,65,80]:capture?[110]:[35]);const stateText=status();ended=stateText.startsWith("Weiß am Zug")||stateText.startsWith("Schwarz am Zug")?"":stateText;if(ended){running=false;premove=null;premoveQueue=[];}last=performance.now();render();animateMovedPiece(m);saveGame();
-if(!premove&&premoveQueue.length&&current().t===1&&!ended&&document.getElementById("botMode").value==="bot"){premove=premoveQueue.shift();}
-if(premove&&current().t===1&&!ended&&document.getElementById("botMode").value==="bot"){
+if(!premove&&premoveQueue.length&&current().t===(window.schachNovaBotColor===1?-1:1)&&!ended&&document.getElementById("botMode").value==="bot"){premove=premoveQueue.shift();}
+if(premove&&current().t===(window.schachNovaBotColor===1?-1:1)&&!ended&&document.getElementById("botMode").value==="bot"){
  const queued=premove;premove=null;premoveFrom=-1;
- setTimeout(()=>{if(ended||current().t!==1)return;const legalPremove=legal(current()).find(x=>x[0]===queued[0]&&x[1]===queued[1]);if(legalPremove)move(legalPremove);else{premoveQueue=[];render();}},120);
+ setTimeout(()=>{if(ended||current().t!==(window.schachNovaBotColor===1?-1:1))return;const legalPremove=legal(current()).find(x=>x[0]===queued[0]&&x[1]===queued[1]);if(legalPremove)move(legalPremove);else{premoveQueue=[];render();}},120);
 }}
 let activePieceAnimation=null;
 let activePieceCleanup=null;
@@ -174,8 +174,27 @@ function choose(i){
  const s=current();
  const botPlaying=document.getElementById("botMode").value==="bot";
  const botColor=window.schachNovaBotColor===1?1:-1;
- // A human may not move the computer's pieces.
- if(botPlaying&&s.t===botColor)return;
+ const humanColor=-botColor;
+ if(botPlaying&&s.t===botColor){
+  // Premove input belongs to the human side, even though it is the bot's turn.
+  if(side(s.b[i])===humanColor){
+   premoveFrom=premoveFrom===i?-1:i;
+   render();return;
+  }
+  if(premoveFrom>=0&&on(i)&&side(s.b[i])!==humanColor){
+   const from=premoveFrom;
+   premoveFrom=-1;
+   // Only geometrically plausible premoves; legality is checked after the bot moves.
+   const hypothetical={...s,b:s.b.slice(),t:humanColor,ep:-1};
+   const candidates=legal(hypothetical).filter(m=>m[0]===from&&m[1]===i);
+   if(candidates.length){
+    const queued=candidates.find(m=>m[2]==="q")||candidates[0];
+    if(premove)premoveQueue.push(queued);else premove=queued;
+   }
+   render();return;
+  }
+  premoveFrom=-1;render();return;
+ }
  const moves=legal(s);
  if(side(s.b[i])===s.t){selected=selected===i?-1:i;render();return;}
  const choices=moves.filter(m=>m[0]===selected&&m[1]===i);
