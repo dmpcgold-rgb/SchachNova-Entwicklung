@@ -7,6 +7,26 @@ const info=document.getElementById("engineInfo"),bot=document.getElementById("bo
 const homeLevel=document.getElementById("homeBotLevel");
 const notation=m=>"abcdefgh"[m[0]&7]+(8-(m[0]>>4))+"abcdefgh"[m[1]&7]+(8-(m[1]>>4))+(m[2]||"");
 const setInfo=t=>{if(info)info.textContent=t;};
+/* Deliberate, strength-dependent thinking time. Skill controls playing strength;
+   this delay controls how quickly a computed move becomes visible. */
+const botThinkMs=()=>Math.round(1100+Math.max(0,Math.min(20,strength))*115);
+let botDelayTimer=null,botDelayGeneration=0;
+function cancelBotDelay(){botDelayGeneration++;if(botDelayTimer!==null)clearTimeout(botDelayTimer);botDelayTimer=null;}
+function deliverBotMove(chosen,position,expected,started){
+ cancelBotDelay();
+ const generation=botDelayGeneration;
+ const wait=Math.max(0,botThinkMs()-(Date.now()-started));
+ botDelayTimer=setTimeout(()=>{
+  botDelayTimer=null;
+  if(generation!==botDelayGeneration||mode!=="bot"||ended||current()!==position||
+     current().t!==botSide()||viewIndex!==history.length-1||
+     movesPlayed.map(notation).join(" ")!==expected)return;
+  const valid=legal(current()).find(m=>notation(m)===notation(chosen));
+  if(valid)move(valid);
+ },wait);
+}
+let botStartedAt=0;
+
 function startEngine(){
  if(worker)return;
  try{
@@ -14,7 +34,7 @@ function startEngine(){
    worker.onmessage=e=>{const line=String(e.data);if(line==="uciok"){worker.postMessage("isready");}
      if(line==="readyok"){ready=true;setInfo("Stockfish 19 bereit · offline");maybePlay();}
      if(line.startsWith("info depth")&&line.includes(" score ")){const m=line.match(/score (cp|mate) (-?\d+)/);if(m){lastScore=m[1]==="cp"?(Number(m[2])/100).toFixed(2):"Matt in "+m[2];if(pending==="analysis")setInfo("Analyse · "+lastScore); }}
-     if(line.startsWith("bestmove ")){busy=false;const u=line.split(" ")[1];if(pending==="bot"){pending=null;const expected=botPosition;botPosition=null;if(expected!==movesPlayed.map(notation).join(" "))return;const match=legal(current()).find(m=>notation(m)===u);if(mode==="bot"&&variantMode==="standard"&&match&&current().t===botSide()&&!ended&&viewIndex===history.length-1)move(match);}else{pending=null;setInfo("Stockfish empfiehlt: "+u+(lastScore!==null?" · Bewertung "+lastScore:""));} }
+     if(line.startsWith("bestmove ")){busy=false;const u=line.split(" ")[1];if(pending==="bot"){pending=null;const expected=botPosition;botPosition=null;if(expected!==movesPlayed.map(notation).join(" "))return;const match=legal(current()).find(m=>notation(m)===u);if(mode==="bot"&&variantMode==="standard"&&match&&current().t===botSide()&&!ended&&viewIndex===history.length-1)deliverBotMove(match,current(),expected,botStartedAt);}else{pending=null;setInfo("Stockfish empfiehlt: "+u+(lastScore!==null?" · Bewertung "+lastScore:""));} }
    };
    worker.onerror=()=>{const failed=worker;worker=null;try{failed.terminate();}catch(_){}ready=false;busy=false;pending=null;botPosition=null;setInfo("Engine konnte nicht geladen werden");};
    worker.postMessage("uci");
@@ -39,7 +59,7 @@ let torpedoPending=false;
 function playTorpedoBot(){
  if(torpedoPending)return;
  torpedoPending=true;
- const position=current(),snapshot=movesPlayed.map(notation).join(" "),sideToMove=position.t;
+ const position=current(),snapshot=movesPlayed.map(notation).join(" "),sideToMove=position.t,torpedoStartedAt=Date.now();
  setInfo("Torpedo-Bot berechnet einen legalen Zug …");
  setTimeout(()=>{
   torpedoPending=false;
@@ -60,7 +80,7 @@ function playTorpedoBot(){
   });
   scored.sort((a,b)=>b.score-a.score);
   const chosen=legal(current()).find(m=>notation(m)===notation(scored[0].m));
-  if(chosen)move(chosen);
+  if(chosen)deliverBotMove(chosen,current(),snapshot,torpedoStartedAt);
  },100);
 }
 function maybePlay(){
@@ -80,9 +100,9 @@ function maybePlay(){
   return;
  }
  if(!ready||busy)return;
- busy=true;pending="bot";botPosition=movesPlayed.map(notation).join(" ");worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");
+ busy=true;pending="bot";botStartedAt=Date.now();botPosition=movesPlayed.map(notation).join(" ");worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");
 }
-bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"){if(fairy)fairy.stop();if(worker&&busy){worker.postMessage("stop");}botPosition=null;}if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
+bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"){cancelBotDelay();if(fairy)fairy.stop();if(worker&&busy){worker.postMessage("stop");}botPosition=null;}if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
 try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&[...level.options].some(o=>o.value===saved))level.value=saved;}catch(e){}strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;
 level.addEventListener("change",()=>{strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;try{localStorage.setItem("schachnova.botStrength",level.value);}catch(e){}setInfo("Bot-Stärke eingestellt: "+level.selectedOptions[0].textContent);if(worker&&ready&&!busy)worker.postMessage("setoption name Skill Level value "+strength);});
 homeLevel?.addEventListener("change",()=>{level.value=homeLevel.value;level.dispatchEvent(new Event("change"));});
@@ -90,5 +110,5 @@ analysis.addEventListener("click",()=>{if(variantMode!=="standard"){setInfo("Sto
 window.schachNovaBotKickoff=()=>{mode=bot.value;if(mode==="bot"){startEngine();maybePlay();}};
 const baseMove=move;move=function(m){baseMove(m);if(coachEnabled&&variantMode==="standard"&&mode==="human"&&ready&&!busy){busy=true;pending="analysis";lastScore=null;sendPosition();worker.postMessage("go movetime 800");}maybePlay();};
 const coachButton=document.getElementById("coachButton");coachButton.onclick=()=>{coachEnabled=!coachEnabled;coachButton.textContent=coachEnabled?"🟢 Coach an":"🔇 Coach";if(coachEnabled){if(variantMode==="standard"){startEngine();setInfo("Coach aktiv: Stellung nach jedem Zug analysieren");}else setInfo("Coach für diese Variante noch nicht freigegeben");}else setInfo("Coach deaktiviert");};
-const baseNew=document.getElementById("newGame").onclick;document.getElementById("newGame").onclick=()=>{if(worker)worker.postMessage("stop");if(fairy)fairy.stop();fairyVariant=null;busy=false;pending=null;botPosition=null;baseNew();maybePlay();};
+const baseNew=document.getElementById("newGame").onclick;document.getElementById("newGame").onclick=()=>{cancelBotDelay();if(worker)worker.postMessage("stop");if(fairy)fairy.stop();fairyVariant=null;busy=false;pending=null;botPosition=null;baseNew();maybePlay();};
 })();
