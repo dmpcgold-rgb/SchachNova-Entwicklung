@@ -54,7 +54,14 @@
    tab.classList.toggle('active',active);
    tab.setAttribute('aria-current',active?'page':'false');
   });
-  if(section!=='play')setup.hidden=true;
+  if(section!=='play'){
+   setup.hidden=true;
+   home.classList.remove('nova-setup-mode');
+  }else{
+   const selected=!!document.querySelector('#novaPlaySection [data-mode].active');
+   home.classList.toggle('nova-setup-mode',selected);
+   setup.hidden=!selected;
+  }
 }));
  document.querySelectorAll('#novaPlaySection [data-mode]').forEach(button=>button.addEventListener('click',closeSettings));
 })();
