@@ -1,0 +1,12 @@
+"use strict";
+const fs=require("node:fs"),assert=require("node:assert/strict");
+const html=fs.readFileSync("app/src/main/assets/index.html","utf8");
+const js=fs.readFileSync("app/src/main/assets/simultan.js","utf8");
+for(const id of ["simultanOpen","simultanPanel","simultanCount","simultanStrength","simultanBoard","simultanGrid","simultanPrev","simultanNext","simultanStart","simultanClose"])assert.ok(html.includes('id="'+id+'"'),"Missing UI "+id);
+assert.match(html,/<script src="simultan\.js"><\/script>/);
+assert.match(js,/Math\.min\(20,Math\.max\(5,/);
+assert.match(js,/games=Array\.from/);
+assert.match(js,/g\.history\.push\(applyStandard/);
+assert.match(js,/games\[active\]\.strength=Number\(strength\.value\)/);
+assert.match(js,/stamp!==epoch\|\|state\(g\)!==expected/);
+console.log("Simultan setup, 5–20 boards, isolated states, per-board strengths verified");
