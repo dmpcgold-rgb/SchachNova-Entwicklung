@@ -228,7 +228,7 @@ function showGameResult(message){running=false;const dialog=document.getElementB
 function clearPremoves(){premove=null;premoveFrom=-1;premoveQueue=[];render();}
 function removeLastPremove(){if(premoveQueue.length)premoveQueue.pop();else premove=null;premoveFrom=-1;render();}
 
-function setVariantMode(v){if(!["standard","hill","threecheck","fivecheck","hoppelpoppel","torpedo","berolina","antichess","atomic"].includes(v))return false;variantMode=v;document.getElementById("newGame").click();return true;}
+function setVariantMode(v){if(!["standard","hill","threecheck","fivecheck","hoppelpoppel","torpedo","berolina","nocastling","antichess","atomic"].includes(v))return false;variantMode=v;document.getElementById("newGame").click();return true;}
 function setBlindLevel(v){blindLevel=Math.max(0,Math.min(5,Number(v)||0));render();saveGame();}
 
 function claimDraw(){const reason=drawClaimReason();if(!reason||ended)return;ended="Remis – "+reason+" beansprucht";running=false;render();saveGame();}
