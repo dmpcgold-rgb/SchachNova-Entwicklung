@@ -47,7 +47,7 @@ const variantVsBotEl=document.getElementById('variantVsBot');
 function syncVariantBotChoice(source='variant'){
  const opponent=document.getElementById('variantOpponent');
  const message=document.getElementById('variantModeAvailability');
- const unsupported=['atomic','antichess','fivecheck','hoppelpoppel','torpedo','berolina','nocastling'].includes(variantSelectEl.value);
+ const unsupported=window.SchachNovaVariants?.[variantSelectEl.value]?.bot===false;
  if(source==='checkbox'&&opponent)opponent.value=variantVsBotEl.checked?'bot':'local';
  if(unsupported){
   variantVsBotEl.checked=false;
