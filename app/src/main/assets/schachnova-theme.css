@@ -722,3 +722,17 @@ body[data-piece-skin="reference"] #board .sq.black-piece>.piece-img{filter:grays
 .simultan-square{display:flex;align-items:center;justify-content:center;overflow:hidden}
 .simultan-piece{display:block;width:94%;height:94%;object-fit:contain;pointer-events:none;filter:grayscale(1) drop-shadow(0 2px 1px #0005)}
 .simultan-square:has(img[src*="/b"]) .simultan-piece{filter:grayscale(1) brightness(.52) drop-shadow(0 2px 1px #0008)}
+
+/* Native-feeling page transition for simultaneous chess. */
+#simultanPanel{overscroll-behavior:contain;box-sizing:border-box;min-height:100dvh;background:linear-gradient(160deg,#07172c,#102c4b);padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 18px)}
+#simultanPanel.simultan-opening{animation:simultanEnter .28s cubic-bezier(.2,.7,.2,1) both}
+#simultanPanel.simultan-closing{animation:simultanExit .22s ease-in both;pointer-events:none}
+@keyframes simultanEnter{from{opacity:.35;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
+@keyframes simultanExit{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(24px)}}
+#simultanPanel .review-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+#simultanPanel .review-top h2{margin:0;font-size:clamp(20px,5vw,28px)}
+#simultanPanel .simultan-settings{background:#132e4c;border:1px solid #315b82;border-radius:14px;padding:12px;gap:10px}
+#simultanPanel .simultan-settings select,#simultanPanel .simultan-settings button{min-height:42px;border-radius:9px}
+#simultanPanel .simultan-grid{grid-template-columns:repeat(auto-fit,minmax(100px,1fr));max-height:118px}
+#simultanPanel .simultan-board{width:min(100%,calc(100dvh - 355px),540px);min-width:0}
+@media(prefers-reduced-motion:reduce){#simultanPanel.simultan-opening,#simultanPanel.simultan-closing{animation:none}}
