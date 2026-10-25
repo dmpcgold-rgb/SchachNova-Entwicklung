@@ -1,0 +1,46 @@
+/* Single owner for home menu navigation: prevent settings from leaking into play. */
+(function(){
+ const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup'),picker=document.getElementById('novaDesignPicker'),panel=document.getElementById('settingsPanel'),back=document.getElementById('novaBackHome');
+ if(!home||!setup||!picker||!back)return;
+ function closeSettings(){
+  home.classList.remove('nova-show-design');
+  if(panel)panel.hidden=true;
+ }
+ function enter(){
+  closeSettings();
+  home.classList.add('nova-submenu');
+  window.scrollTo({top:0,behavior:'smooth'});
+ }
+ function openSettings(){
+  home.classList.add('nova-submenu','nova-show-design');
+  home.classList.remove('nova-setup-mode');
+  setup.hidden=true;
+  if(panel)panel.hidden=true;
+  picker.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ function reset(){
+  closeSettings();
+  home.classList.remove('nova-submenu','nova-setup-mode');
+  document.querySelectorAll('#novaPlaySection [data-mode].active').forEach(b=>b.classList.remove('active'));
+  setup.hidden=true;
+  document.querySelector('.nova-nav[data-section="play"]')?.click();
+  window.scrollTo({top:0,behavior:'smooth'});
+ }
+ const actions={
+  play:()=>document.querySelector('.nova-nav[data-section="play"]')?.click(),
+  online:()=>document.querySelector('#novaPlaySection [data-mode="online"]')?.click(),
+  training:()=>document.querySelector('.nova-nav[data-section="training"]')?.click(),
+  variants:()=>document.querySelector('#novaPlaySection [data-mode="variants"]')?.click(),
+  analysis:()=>document.querySelector('.nova-nav[data-section="analysis"]')?.click(),
+  blind:()=>document.querySelector('#novaPlaySection [data-mode="blind"]')?.click()
+ };
+ back.addEventListener('click',reset);
+ document.querySelectorAll('[data-nova-jump]').forEach(button=>button.addEventListener('click',()=>{
+  const target=button.dataset.novaJump;
+  if(target==='settings'){openSettings();return;}
+  enter();
+  actions[target]?.();
+ }));
+ document.querySelectorAll('.nova-main-nav .nova-nav').forEach(button=>button.addEventListener('click',enter));
+ document.querySelectorAll('#novaPlaySection [data-mode]').forEach(button=>button.addEventListener('click',closeSettings));
+})();
