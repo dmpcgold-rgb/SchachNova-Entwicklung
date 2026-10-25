@@ -642,3 +642,9 @@ body[data-board-skin="marble"] #rectPreviewBoard .rect-preview-dark{background:l
 #homeScreen.nova-show-design #novaPlaySection,#homeScreen.nova-show-design #novaTrainingSection,#homeScreen.nova-show-design #novaAnalysisSection,#homeScreen.nova-show-design #novaProfileSection,#homeScreen.nova-show-design #novaGameSetup{display:none!important}
 #homeScreen.nova-show-design #novaDesignPicker{display:block!important}
 #homeScreen:not(.nova-show-design) #novaDesignPicker{display:none!important}
+
+/* Exclusive mode setup: never show the mode grid together with the launch form. */
+#homeScreen.nova-setup-mode #novaPlaySection{display:none!important}
+#homeScreen.nova-setup-mode #novaGameSetup:not([hidden]){display:block!important}
+#homeScreen:not(.nova-setup-mode) #novaGameSetup{display:none!important}
+#homeScreen #novaGameSetup[hidden]{display:none!important}
