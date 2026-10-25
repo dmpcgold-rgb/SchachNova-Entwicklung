@@ -73,3 +73,8 @@ assert.match(js,/origin.querySelector\("\.rect-piece-svg, \.rect-compound-svg"\)
 assert.match(js,/moving.append\(pieceNode.cloneNode\(true\)\)/);
 assert.match(css,/\.rect-preview-piece-motion>\.rect-compound-svg/);
 console.log("SchachNova: 8x8 and 10x8 piece-only animation and cleanup tests passed");
+
+const blindCss=fs.readFileSync("app/src/main/assets/schachnova-theme.css","utf8");
+assert.match(blindCss,/#gameScreen #board \.sq>\.blind-disk/);
+assert.match(blindCss,/aspect-ratio:1 \/ 1!important/);
+assert.match(blindCss,/border-radius:50%!important/);
