@@ -15,6 +15,11 @@ assert.match(css,/#homeScreen:not\(\.nova-show-design\) #novaDesignPicker\{displ
 
 assert.match(css,/#settingsPanel\[hidden\]\{display:none!important\}/);
 const gameNavigation=fs.readFileSync("app/src/main/assets/game-mode-navigation.js","utf8");
+assert.match(gameNavigation,/home\?\.classList\.add\('nova-submenu','nova-setup-mode'\)/);
+assert.match(gameNavigation,/setup\.hidden=false/);
+assert.match(css,/#homeScreen\.nova-setup-mode #novaPlaySection\{display:none!important\}/);
+assert.match(css,/#homeScreen #novaGameSetup\[hidden\]\{display:none!important\}/);
+
 assert.match(gameNavigation,/document\.getElementById\('settingsPanel'\)\.hidden=true;home\.hidden=true;game\.hidden=false/);
 for(const id of ["settingsBoardSkin","settingsPieceSkin"])assert.ok(html.includes('id="'+id+'"'));
 assert.ok(html.includes('<script src="settings-appearance.js"></script>'));
