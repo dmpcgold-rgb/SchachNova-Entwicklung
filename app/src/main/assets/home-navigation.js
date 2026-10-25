@@ -23,7 +23,14 @@
   home.classList.remove('nova-submenu','nova-setup-mode');
   document.querySelectorAll('#novaPlaySection [data-mode].active').forEach(b=>b.classList.remove('active'));
   setup.hidden=true;
-  document.querySelector('.nova-nav[data-section="play"]')?.click();
+  for(const name of ['play','training','analysis','profile']){
+   const view=document.getElementById('nova'+name[0].toUpperCase()+name.slice(1)+'Section');
+   if(view)view.hidden=name!=='play';
+  }
+  document.querySelectorAll('.nova-main-nav .nova-nav').forEach(tab=>{
+   const selected=tab.dataset.section==='play';tab.classList.toggle('active',selected);
+   tab.setAttribute('aria-current',selected?'page':'false');
+  });
   window.scrollTo({top:0,behavior:'smooth'});
  }
  const actions={
