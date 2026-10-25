@@ -3,6 +3,11 @@ const assert=require("node:assert/strict"),fs=require("node:fs");
 const html=fs.readFileSync("app/src/main/assets/index.html","utf8");
 const js=fs.readFileSync("app/src/main/assets/rectangular-preview.js","utf8");
 const css=fs.readFileSync("app/src/main/assets/schachnova-theme.css","utf8");
+for(const id of ["settingsBoardSkin","settingsPieceSkin"])assert.ok(html.includes('id="'+id+'"'));
+assert.ok(html.includes('<script src="settings-appearance.js"></script>'));
+const settingsAppearance=fs.readFileSync("app/src/main/assets/settings-appearance.js","utf8");
+assert.match(settingsAppearance,/source.dispatchEvent\(new Event\('change'/);
+
 for(const name of ["game-mode-navigation.js","android-back-navigation.js"]){assert.ok(html.includes('<script src="'+name+'"></script>'));assert.ok(fs.readFileSync("app/src/main/assets/"+name,"utf8").length>100);}
 assert.match(fs.readFileSync("app/src/main/assets/game-mode-navigation.js","utf8"),/function chooseMode\(value\)/);
 assert.match(fs.readFileSync("app/src/main/assets/android-back-navigation.js","utf8"),/window.schachNovaGoBack=function/);
