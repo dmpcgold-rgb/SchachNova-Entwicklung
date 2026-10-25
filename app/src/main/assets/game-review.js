@@ -241,7 +241,7 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
  $("overviewCoach").textContent=top.length
   ?"Deine wichtigsten Trainingsstellen: "+top.join(" · ")+". Tippe auf die Bewertungskurve oder öffne die Analyse, um die Züge zu prüfen."
   :"Die Analyse ist bereit. Keine größeren Fehler in den auswertbaren Zügen gefunden.";
- $("overviewStart").disabled=false;
+ $("overviewStart").disabled=false;$("overviewStart").textContent="▶ Analyse öffnen";
  if(typeof window.schachnovaRecordReview==="function"){const errors=losses.flat().filter(v=>v>=170).length;window.schachnovaRecordReview({id:analysisKey,white:accuracy[0],black:accuracy[1],errors,opening:openingName()});}
 }
 function finish(){try{localStorage.setItem("schachnova.review.v3."+analysisKey,JSON.stringify({results,version:3}));}catch(e){console.warn("Analyse-Cache nicht gespeichert",e);}active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();drawReviewBoard();renderOverview();}
@@ -286,10 +286,11 @@ function start(){
  };worker.onerror=()=>{if(t!==token)return;active=false;const msg=(variant?"Fairy-Stockfish":"Stockfish")+" konnte nicht gestartet werden. Bitte die Offline-Engine prüfen.";progress.textContent=msg;$("overviewProgress").textContent=msg;$("overviewStart").disabled=true;try{worker.terminate();}catch(e){}worker=null;};worker.postMessage("uci");}
  catch(e){active=false;progress.textContent="Analyse nicht verfügbar: "+e.message;}
 }
-launch.onclick=()=>{stopReplay();review.hidden=true;$("reviewOverview").hidden=false;$("overviewStart").disabled=true;$("overviewProgress").textContent="Stockfish analysiert deine Partie …";$("overviewResult").textContent=ended||"Partierückblick";start();};
+launch.onclick=()=>{stopReplay();review.hidden=true;$("reviewOverview").hidden=false;$("overviewStart").disabled=false;$("overviewStart").textContent="▶ Analyse öffnen";$("overviewProgress").textContent="Stockfish analysiert deine Partie im Hintergrund …";$("overviewResult").textContent=ended||"Partierückblick";start();};
 $("overviewStart").onclick=()=>{
  $("reviewOverview").hidden=true;
  review.hidden=false;
+ if(!positions.length)positions=history.slice();
  selectReview(0);
  // Start with the summary at the top, like the compact reference view.
  // Do this once when opening, never on individual moves or during replay.
