@@ -82,7 +82,7 @@ function maybePlay(){
  if(!ready||busy)return;
  busy=true;pending="bot";botPosition=movesPlayed.map(notation).join(" ");worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");
 }
-bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"&&fairy)fairy.stop();if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
+bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"){if(fairy)fairy.stop();if(worker&&busy){worker.postMessage("stop");}botPosition=null;}if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
 try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&[...level.options].some(o=>o.value===saved))level.value=saved;}catch(e){}strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;
 level.addEventListener("change",()=>{strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;try{localStorage.setItem("schachnova.botStrength",level.value);}catch(e){}setInfo("Bot-Stärke eingestellt: "+level.selectedOptions[0].textContent);if(worker&&ready&&!busy)worker.postMessage("setoption name Skill Level value "+strength);});
 homeLevel?.addEventListener("change",()=>{level.value=homeLevel.value;level.dispatchEvent(new Event("change"));});
