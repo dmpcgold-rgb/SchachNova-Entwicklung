@@ -4,6 +4,7 @@ const html=fs.readFileSync("app/src/main/assets/index.html","utf8");
 const js=fs.readFileSync("app/src/main/assets/rectangular-preview.js","utf8");
 const css=fs.readFileSync("app/src/main/assets/schachnova-theme.css","utf8");
 const homeNavigation=fs.readFileSync("app/src/main/assets/home-navigation.js","utf8");
+const gameNavigation=fs.readFileSync("app/src/main/assets/game-mode-navigation.js","utf8");
 assert.match(html,/<script src="home-navigation.js"><\/script>/);
 assert.match(homeNavigation,/function closeSettings\(\)/);
 assert.match(homeNavigation,/setup\.hidden=false/);
@@ -17,7 +18,7 @@ assert.match(homeNavigation,/enter\(\);\s*actions\[target\]/);
 assert.match(css,/#homeScreen:not\(\.nova-show-design\) #novaDesignPicker\{display:none!important\}/);
 
 assert.match(css,/#settingsPanel\[hidden\]\{display:none!important\}/);
-const gameNavigation=fs.readFileSync("app/src/main/assets/game-mode-navigation.js","utf8");
+
 assert.match(gameNavigation,/home\?\.classList\.add\('nova-submenu','nova-setup-mode'\)/);
 assert.match(gameNavigation,/setup\.hidden=false/);
 assert.match(css,/#homeScreen\.nova-setup-mode #novaPlaySection\{display:none!important\}/);
