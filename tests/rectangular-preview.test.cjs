@@ -78,3 +78,7 @@ const blindCss=fs.readFileSync("app/src/main/assets/schachnova-theme.css","utf8"
 assert.match(blindCss,/#gameScreen #board \.sq>\.blind-disk/);
 assert.match(blindCss,/aspect-ratio:1 \/ 1!important/);
 assert.match(blindCss,/border-radius:50%!important/);
+
+assert.match(blindCss,/#gameScreen #board \.sq>\.blind-disk\{[\s\S]*?position:absolute!important/);
+assert.match(blindCss,/inset:12%!important/);
+assert.match(blindCss,/height:76%!important/);
