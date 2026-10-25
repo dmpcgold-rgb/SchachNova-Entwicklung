@@ -707,3 +707,14 @@ body[data-piece-skin="reference"] #board .sq>.piece-img{
 }
 body[data-piece-skin="reference"] #board .sq.white-piece>.piece-img{filter:grayscale(1) brightness(1.16) drop-shadow(0 2px 1px #0005)!important}
 body[data-piece-skin="reference"] #board .sq.black-piece>.piece-img{filter:grayscale(1) brightness(.52) drop-shadow(0 2px 1px #0008)!important}
+
+#simultanPanel[hidden]{display:none!important}
+#simultanPanel{position:fixed;inset:0;z-index:1000;overflow:auto;background:#07172c;color:#fff;padding:14px}
+.simultan-settings,.simultan-controls{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.simultan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;max-height:150px;overflow:auto}
+.simultan-card{padding:9px;background:#163454;color:white;border:1px solid #5785b4;border-radius:8px}
+.simultan-card.active{outline:2px solid #65b7ff}
+.simultan-board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:min(100%,540px);aspect-ratio:1;margin:12px auto}
+.simultan-square{border:0;border-radius:0;padding:0;min-width:0;min-height:0;aspect-ratio:1;font-size:clamp(24px,7vw,58px);color:#fff;text-shadow:1px 2px 2px #111}
+.simultan-square.light{background:#f0efd3}.simultan-square.dark{background:#70984e}
+.simultan-square.selected{box-shadow:inset 0 0 0 4px #ffd700}.simultan-square.target{box-shadow:inset 0 0 0 4px #44aaff}
