@@ -6,7 +6,7 @@ if(!panel||!count||!strength||!grid||!board)return;
 let games=[],active=0,selected=-1,epoch=0,timers=new Set(),switchTimer=null,viewGeneration=0;
 function cancelSwitch(){viewGeneration++;if(switchTimer!==null){clearTimeout(switchTimer);switchTimer=null;}}
 function showBoard(i){cancelSwitch();active=(i+games.length)%games.length;selected=-1;draw();}
-function autoNext(g,delay=2000){if(panel.hidden||games[active]!==g)return;const generation=viewGeneration;switchTimer=setTimeout(()=>{switchTimer=null;if(generation!==viewGeneration||panel.hidden||games[active]!==g)return;const eligible=(x)=>!x.finished&&state(x).t===x.humanColor;let next=-1;for(let offset=1;offset<=games.length;offset++){const i=(active+offset)%games.length;if(eligible(games[i])){next=i;break;}}if(next>=0&&next!==active)showBoard(next);},delay);}
+function autoNext(g,delay=2000){if(panel.hidden||games[active]!==g)return;const generation=viewGeneration;switchTimer=setTimeout(()=>{switchTimer=null;if(generation!==viewGeneration||panel.hidden||games[active]!==g)return;const next=(active+1)%games.length;if(next!==active)showBoard(next);},delay);}
 function animateMove(g,m){
  if(panel.hidden||games[active]!==g)return;
  const from=board.querySelector('[data-square="'+m[0]+'"]'),to=board.querySelector('[data-square="'+m[1]+'"]');
