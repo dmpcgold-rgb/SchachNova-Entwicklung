@@ -76,5 +76,5 @@ document.getElementById('blindVsBot').addEventListener('change',()=>{if(mode==='
 syncVariantBotChoice();
 document.getElementById('backHome').onclick=()=>{game.hidden=true;home.hidden=false;};document.getElementById('exportGame').onclick=()=>exportPgn();document.getElementById('claimDraw').onclick=()=>claimDraw();document.getElementById('agreeDraw').onclick=()=>agreeDraw();document.getElementById('removePremove').onclick=()=>removeLastPremove();document.getElementById('clearPremoves').onclick=()=>clearPremoves();document.getElementById('resultReviewButton').onclick=()=>{document.getElementById('resultDialog').hidden=true;document.getElementById('openReview').click();};document.getElementById('closeResultButton').onclick=()=>document.getElementById('resultDialog').hidden=true;document.getElementById('rematchButton').onclick=()=>{document.getElementById('resultDialog').hidden=true;document.getElementById('newGame').click();};
 document.getElementById('newGame').textContent='♙ Neue Partie';
-chooseMode('human');
+// Do not open a setup screen automatically during initialization.
 })();
