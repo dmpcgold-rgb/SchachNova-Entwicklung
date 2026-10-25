@@ -63,5 +63,24 @@
    setup.hidden=!selected;
   }
 }));
- document.querySelectorAll('#novaPlaySection [data-mode]').forEach(button=>button.addEventListener('click',closeSettings));
+ // Defensive fallback: a mode tap must always reveal the setup even if another listener fails.
+ document.querySelectorAll('#novaPlaySection [data-mode]').forEach(button=>button.addEventListener('click',()=>{
+  closeSettings();
+  const mode=button.dataset.mode;
+  if(mode==='training'||mode==='analysis')return;
+  home.classList.add('nova-submenu','nova-setup-mode');
+  home.classList.remove('nova-show-design');
+  for(const section of ['play','training','analysis','profile']){
+   const view=document.getElementById('nova'+section[0].toUpperCase()+section.slice(1)+'Section');
+   if(view)view.hidden=section!=='play';
+  }
+  setup.hidden=false;
+  document.querySelectorAll('#novaPlaySection [data-mode]').forEach(item=>item.classList.toggle('active',item===button));
+  const variant=document.getElementById('variantChooser'),blind=document.getElementById('blindChooser');
+  if(variant)variant.hidden=mode!=='variants';
+  if(blind)blind.hidden=mode!=='blind';
+  const strength=document.getElementById('homeBotStrength');
+  if(strength)strength.hidden=!['bot','coach'].includes(mode);
+ }));
+
 })();
