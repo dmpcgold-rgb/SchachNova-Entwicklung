@@ -8,6 +8,13 @@ function chooseMode(value){
  if(value==='analysis'){document.getElementById('archiveOpen').click();return;}
  mode=value;
  const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup');
+ // Make the setup view exclusive: a selected mode must never leave the mode grid on top.
+ for(const section of ['play','training','analysis','profile']){
+  const element=document.getElementById('nova'+section[0].toUpperCase()+section.slice(1)+'Section');
+  if(element)element.hidden=section!=='play';
+ }
+ home?.classList.add('nova-submenu','nova-setup-mode');
+ home?.classList.remove('nova-show-design');
  setup.hidden=false;
  const variants=value==='variants',blind=value==='blind';
  document.getElementById('variantChooser').hidden=!variants;
