@@ -11,7 +11,6 @@ assert.match(js,/games\[active\]\.strength=Number\(strength\.value\)/);
 assert.match(js,/stamp!==epoch\|\|state\(g\)!==expected/);
 assert.match(js,/function animateMove\(g,m\)/,"Simultan moves must animate");
 assert.match(js,/duration:430/,"Animated moves must have visible duration");
-assert.match(js,/function autoNext\(g\)/,"Simultan must advance automatically");
 assert.match(js,/function autoNext\(g,delay=2000\)/,"White must wait two seconds after bot");
 assert.match(js,/g\.humanColor===-1\?500:2000/,"Black must switch after own move animation");
 assert.match(js,/\(g\.humanColor===1&&isBot\)\|\|\(g\.humanColor===-1&&!isBot\)/,"White switches after bot, black after human");
