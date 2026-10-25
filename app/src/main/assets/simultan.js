@@ -1,0 +1,30 @@
+/* SchachNova Simultan: 5–20 independent standard-chess boards against configurable bots. */
+(function(){
+"use strict";
+const $=id=>document.getElementById(id),panel=$("simultanPanel"),count=$("simultanCount"),strength=$("simultanStrength"),grid=$("simultanGrid"),board=$("simultanBoard"),info=$("simultanInfo");
+if(!panel||!count||!strength||!grid||!board)return;
+let games=[],active=0,selected=-1,epoch=0,timers=new Set();
+const files="abcdefgh",notation=m=>files[m[0]&7]+(8-(m[0]>>4))+files[m[1]&7]+(8-(m[1]>>4))+(m[2]||"");
+const fresh=()=>({history:[initial()],moves:[],strength:Number(strength.value),finished:"",thinking:false});
+const state=g=>g.history[g.history.length-1];
+function legalStandard(s){const saved=variantMode;try{variantMode="standard";return legal(s);}finally{variantMode=saved;}}
+function applyStandard(s,m){const saved=variantMode;try{variantMode="standard";return apply(s,m);}finally{variantMode=saved;}}
+function checkStandard(s){const saved=variantMode;try{variantMode="standard";return checked(s);}finally{variantMode=saved;}}
+function status(g){const s=state(g),moves=legalStandard(s);if(!moves.length)return checkStandard(s)?"Schachmatt":"Patt";if(s.half>=150)return "Remis (75 Züge)";return "";}
+function draw(){
+ grid.replaceChildren();games.forEach((g,i)=>{const b=document.createElement("button");b.type="button";b.className="simultan-card"+(i===active?" active":"");b.textContent="Brett "+(i+1)+" · "+(g.finished|| (state(g).t===1?"Du bist dran":"Bot denkt"))+" · Stärke "+g.strength;b.onclick=()=>{active=i;selected=-1;draw();};grid.append(b);});
+ board.replaceChildren();const g=games[active];if(!g)return;
+ const s=state(g),moves=s.t===1&&!g.finished?legalStandard(s):[],targets=moves.filter(m=>m[0]===selected).map(m=>m[1]);
+ for(let j=0;j<64;j++){const i=(j>>3)*16+(j&7),p=s.b[i],cell=document.createElement("button");cell.type="button";cell.className="simultan-square "+(((j>>3)+(j&7))%2?"dark":"light")+(selected===i?" selected":"")+(targets.includes(i)?" target":"");cell.textContent=glyph[p];cell.setAttribute("aria-label",files[i&7]+(8-(i>>4)));cell.onclick=()=>choose(i);board.append(cell);}
+ info.textContent="Brett "+(active+1)+" von "+games.length+" · "+(g.finished|| (s.t===1?"Du bist am Zug (Weiß)":"Computer überlegt (Schwarz)"))+" · Bot-Stärke "+g.strength;
+}
+function choose(i){const g=games[active];if(!g||g.finished||state(g).t!==1)return;const s=state(g);if(side(s.b[i])===1){selected=selected===i?-1:i;draw();return;}const candidates=legalStandard(s).filter(m=>m[0]===selected&&m[1]===i);if(!candidates.length){selected=-1;draw();return;}const m=candidates.find(m=>m[2]==="q")||candidates[0];commit(g,m);}
+function commit(g,m){const s=state(g),valid=legalStandard(s).find(x=>notation(x)===notation(m));if(!valid)return;g.history.push(applyStandard(s,valid));g.moves.push(valid);g.finished=status(g);selected=-1;draw();if(!g.finished&&state(g).t===-1)botMove(g);}
+function botMove(g){if(g.thinking)return;g.thinking=true;const stamp=epoch,expected=state(g),delay=1100+g.strength*115;const timer=setTimeout(()=>{timers.delete(timer);g.thinking=false;if(stamp!==epoch||state(g)!==expected||g.finished)return;const options=legalStandard(expected);if(!options.length){g.finished=status(g);draw();return;}const values={p:100,n:320,b:330,r:500,q:900,k:0};const ranked=options.map(m=>{const next=applyStandard(expected,m),capture=expected.b[m[1]];const reply=legalStandard(next),danger=reply.some(x=>x[1]===m[1]);const gain=capture==="."?0:values[capture.toLowerCase()]||0;const center=3.5-Math.abs((m[1]&7)-3.5);const mate=reply.length===0&&checkStandard(next)?100000:0;return {m,score:mate+gain-danger*(values[expected.b[m[0]].toLowerCase()]||0)*.6+center*8+Math.random()*Math.max(5,(21-g.strength)*35)};});ranked.sort((a,b)=>b.score-a.score);commit(g,ranked[0].m);},delay);timers.add(timer);}
+function start(){epoch++;for(const t of timers)clearTimeout(t);timers.clear();games=Array.from({length:Math.min(20,Math.max(5,Number(count.value)||5))},fresh);active=0;selected=-1;panel.hidden=false;draw();}
+$("simultanOpen").addEventListener("click",()=>{panel.hidden=false;if(!games.length)start();else draw();});
+$("simultanStart").addEventListener("click",start);
+$("simultanClose").addEventListener("click",()=>{panel.hidden=true;});
+$("simultanPrev").addEventListener("click",()=>{active=(active+games.length-1)%games.length;selected=-1;draw();});
+$("simultanNext").addEventListener("click",()=>{active=(active+1)%games.length;selected=-1;draw();});
+})();
