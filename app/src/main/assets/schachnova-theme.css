@@ -740,3 +740,19 @@ body[data-piece-skin="reference"] #board .sq.black-piece>.piece-img{filter:grays
 /* The return-to-home control belongs to submenus only, never the root screen. */
 #homeScreen:not(.nova-submenu) #novaBackHome{display:none!important}
 #homeScreen.nova-submenu #novaBackHome{display:block!important}
+
+/* Stable simultaneous-game viewport: board never moves when status/cards change. */
+#simultanPanel:not([hidden]){display:flex!important;flex-direction:column;height:100dvh;max-height:100dvh;overflow:hidden;gap:5px}
+#simultanPanel .review-top{flex:0 0 auto;margin:0}
+#simultanPanel>p{flex:0 0 auto;margin:2px 0;font-size:12px;line-height:1.2}
+#simultanPanel .simultan-settings{flex:0 0 auto;padding:6px;margin:2px 0;gap:6px}
+#simultanPanel .simultan-settings label{font-size:12px}
+#simultanPanel .simultan-settings select,#simultanPanel .simultan-settings button{min-height:32px;padding:4px}
+#simultanPanel .simultan-grid{flex:0 0 75px;min-height:75px;max-height:75px;margin:2px 0;overflow-y:auto;grid-auto-rows:min-content}
+#simultanPanel .simultan-card{padding:5px;font-size:11px;line-height:1.15;min-height:34px}
+#simultanInfo{flex:0 0 34px;min-height:34px;max-height:34px;overflow:hidden;font-size:12px;line-height:1.25}
+#simultanPanel .simultan-board{flex:0 1 auto;align-self:center;width:min(100%,calc(100dvh - 315px),540px)!important;max-height:calc(100dvh - 315px);height:auto;aspect-ratio:1/1;margin:auto auto 4px!important;overflow:hidden;contain:layout paint}
+#simultanPanel .simultan-controls{flex:0 0 auto;justify-content:space-between;margin:3px 0 0}
+#simultanPanel .simultan-controls button{font-size:12px;padding:7px}
+#simultanPanel .simultan-piece{transform:translateZ(0);backface-visibility:hidden}
+@media(max-height:720px){#simultanPanel>p{display:none}#simultanPanel .simultan-grid{flex-basis:60px;min-height:60px;max-height:60px}#simultanPanel .simultan-board{width:min(100%,calc(100dvh - 265px),540px)!important;max-height:calc(100dvh - 265px)}}
