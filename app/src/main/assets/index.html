@@ -33,30 +33,4 @@
  window.addEventListener('resize',sizeBoard);
  requestAnimationFrame(sizeBoard);
 })();
-</script><script src="game-mode-navigation.js"></script><script src="appearance-preferences.js"></script><script src="settings-appearance.js"></script><script src="piece-appearance.js"></script><script>
-document.addEventListener('DOMContentLoaded',()=>{
- const actions={play:()=>document.querySelector('.nova-nav[data-section="play"]')?.click(),
- online:()=>document.querySelector('#novaPlaySection [data-mode="online"]')?.click(),
- training:()=>document.querySelector('.nova-nav[data-section="training"]')?.click(),
- variants:()=>document.querySelector('#novaPlaySection [data-mode="variants"]')?.click(),
- analysis:()=>document.querySelector('.nova-nav[data-section="analysis"]')?.click(),
- blind:()=>document.querySelector('#novaPlaySection [data-mode="blind"]')?.click(),
- settings:()=>{const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup'),picker=document.getElementById('novaDesignPicker');if(home&&setup&&picker){setup.hidden=false;home.classList.add('nova-submenu','nova-setup-mode');home.classList.remove('nova-show-design');picker.scrollIntoView({behavior:'smooth',block:'start'});}}
- };
- document.querySelectorAll('[data-nova-jump]').forEach(btn=>btn.addEventListener('click',()=>actions[btn.dataset.novaJump]?.()));
-});
-</script><script>
-document.addEventListener('DOMContentLoaded',()=>{
- const home=document.getElementById('homeScreen'),back=document.getElementById('novaBackHome'),picker=document.getElementById('novaDesignPicker');
- if(!home||!back)return;
- const enter=()=>{home.classList.add('nova-submenu');window.scrollTo({top:0,behavior:'smooth'});};
- const reset=()=>{home.classList.remove('nova-submenu','nova-show-design','nova-setup-mode');document.querySelectorAll('#novaPlaySection [data-mode].active').forEach(b=>b.classList.remove('active'));document.getElementById('novaGameSetup')?.setAttribute('hidden','');document.querySelector('.nova-nav[data-section="play"]')?.click();window.scrollTo({top:0,behavior:'smooth'});};
- back.addEventListener('click',reset);
- document.querySelectorAll('[data-nova-jump]').forEach(button=>button.addEventListener('click',()=>{
-  if(button.dataset.novaJump==='settings'){
-   home.classList.add('nova-show-design');picker?.scrollIntoView({behavior:'smooth',block:'start'});
-  }else enter();
- }));
- document.querySelectorAll('.nova-main-nav .nova-nav').forEach(button=>button.addEventListener('click',()=>{home.classList.add('nova-submenu');home.classList.remove('nova-show-design');}));
-});
-</script><script src="android-back-navigation.js"></script></body></html>
+</script><script src="game-mode-navigation.js"></script><script src="appearance-preferences.js"></script><script src="settings-appearance.js"></script><script src="piece-appearance.js"></script><script src="home-navigation.js"></script><script src="android-back-navigation.js"></script></body></html>
