@@ -628,3 +628,9 @@ body[data-board-skin="dark"] #rectPreviewBoard .rect-preview-light{background:#8
 body[data-board-skin="dark"] #rectPreviewBoard .rect-preview-dark{background:#24364b!important}
 body[data-board-skin="marble"] #rectPreviewBoard .rect-preview-light{background:linear-gradient(135deg,#fff,#ccd1da 50%,#f5f6f9)!important}
 body[data-board-skin="marble"] #rectPreviewBoard .rect-preview-dark{background:linear-gradient(135deg,#65798d,#27384d)!important}
+
+/* Appearance controls within game settings. */
+#settingsPanel .settings-appearance{display:grid;gap:8px;margin:12px 0;padding:12px;border:1px solid #4b89bc;border-radius:12px;background:#0b2545}
+#settingsPanel .settings-appearance legend{padding:0 6px;color:#d9eaff;font-weight:700}
+#settingsPanel .settings-appearance select{width:100%;min-height:42px;padding:8px;border-radius:9px;background:#071c3c;color:#fff;border:1px solid #508dc4}
+#settingsPanel .settings-appearance small{color:#b8d0e7}
