@@ -94,6 +94,7 @@ jobs:
           node tests/torpedo-regression.test.cjs
           node tests/animation-regression.test.cjs
           node tests/integration-regression.test.cjs
+          node tests/simultan-regression.test.cjs
           node tests/board-geometry.test.cjs
           node tests/rectangular-rules.test.cjs
           node tests/rectangular-legality.test.cjs
