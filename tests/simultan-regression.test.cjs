@@ -18,4 +18,9 @@ assert.match(js,/\(g\.humanColor===1&&isBot\)\|\|\(g\.humanColor===-1&&!isBot\)/
 assert.match(js,/const next=\(active\+1\)%games\.length/,"Automatic switch must follow fixed numeric board order");
 assert.match(js,/g\.awaitingSwitch\|\|state\(g\)\.t!==g\.humanColor/,"Block second human move while switching");
 assert.match(js,/g\.awaitingSwitch=true;autoNext/,"Lock board when automatic switch is scheduled");
+assert.match(js,/document\.getElementById\("vibrationToggle"\)/,"Respect normal-board vibration setting");
+assert.match(js,/window\.AndroidHaptics\.vibrate\(pattern\.join\(","\)\)/,"Use Android haptics bridge");
+assert.match(js,/navigator\.vibrate\(pattern\)/,"Fallback to web vibration");
+assert.match(js,/isMate\?\[65,85,65\]:isCheck\?\[160,65,80\]:capture\?\[110\]:\[35\]/,"Match standard board haptic patterns");
+assert.match(js,/feedbackForMove\(s,nextState,valid\)/,"Trigger vibration for human and bot moves");
 console.log("Simultan setup, 5–20 boards, isolated states, per-board strengths verified");
