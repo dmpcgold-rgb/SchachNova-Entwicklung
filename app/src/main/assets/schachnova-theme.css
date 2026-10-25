@@ -736,3 +736,7 @@ body[data-piece-skin="reference"] #board .sq.black-piece>.piece-img{filter:grays
 #simultanPanel .simultan-grid{grid-template-columns:repeat(auto-fit,minmax(100px,1fr));max-height:118px}
 #simultanPanel .simultan-board{width:min(100%,calc(100dvh - 355px),540px);min-width:0}
 @media(prefers-reduced-motion:reduce){#simultanPanel.simultan-opening,#simultanPanel.simultan-closing{animation:none}}
+
+/* The return-to-home control belongs to submenus only, never the root screen. */
+#homeScreen:not(.nova-submenu) #novaBackHome{display:none!important}
+#homeScreen.nova-submenu #novaBackHome{display:block!important}
