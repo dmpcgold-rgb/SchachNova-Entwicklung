@@ -634,3 +634,6 @@ body[data-board-skin="marble"] #rectPreviewBoard .rect-preview-dark{background:l
 #settingsPanel .settings-appearance legend{padding:0 6px;color:#d9eaff;font-weight:700}
 #settingsPanel .settings-appearance select{width:100%;min-height:42px;padding:8px;border-radius:9px;background:#071c3c;color:#fff;border:1px solid #508dc4}
 #settingsPanel .settings-appearance small{color:#b8d0e7}
+
+/* Hidden settings must never occupy space or overlay other screens. */
+#settingsPanel[hidden]{display:none!important}
