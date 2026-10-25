@@ -41,6 +41,20 @@
   enter();
   actions[target]?.();
  }));
- document.querySelectorAll('.nova-main-nav .nova-nav').forEach(button=>button.addEventListener('click',enter));
+ document.querySelectorAll('.nova-main-nav .nova-nav').forEach(button=>button.addEventListener('click',()=>{
+  enter();
+  const section=button.dataset.section;
+  if(!['play','training','analysis','profile'].includes(section))return;
+  for(const name of ['play','training','analysis','profile']){
+   const panel=document.getElementById('nova'+name[0].toUpperCase()+name.slice(1)+'Section');
+   if(panel)panel.hidden=name!==section;
+  }
+  document.querySelectorAll('.nova-main-nav .nova-nav').forEach(tab=>{
+   const active=tab.dataset.section===section;
+   tab.classList.toggle('active',active);
+   tab.setAttribute('aria-current',active?'page':'false');
+  });
+  if(section!=='play')setup.hidden=true;
+}));
  document.querySelectorAll('#novaPlaySection [data-mode]').forEach(button=>button.addEventListener('click',closeSettings));
 })();
