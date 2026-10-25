@@ -74,3 +74,8 @@ assert.match(chess,/variantMode==="berolina"/,"Berolina must have distinct pawn 
 assert.match(chess,/variantMode==="torpedo"\|\|\(f>>4\)===\(s\.t===1\?6:1\)/,"Torpedo must allow a double-step after the pawn has moved");
 assert.match(navigation,/selectedMode=document\.querySelector\('#novaPlaySection \[data-mode\]\.active'\)\?\.dataset\.mode/,"Launch must read the actual selected game mode");
 assert.match(navigation,/variantMode=mode==='variants'\?document\.getElementById\('variantSelect'\)\.value:'standard'/,"Selected variant must be applied before new game");
+
+assert.match(html,/<option value="nocastling">Schach ohne Rochade/);
+assert.match(chess,/variantMode!=="nocastling"&&f===home/);
+assert.match(config,/nocastling:\{label:"Schach ohne Rochade",uci:null,local:true,bot:false\}/);
+assert.match(navigation,/const botSupported=window\.SchachNovaVariants\?\.\[selectedVariant\]\?\.bot!==false/);
