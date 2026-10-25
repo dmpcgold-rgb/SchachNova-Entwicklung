@@ -17,9 +17,9 @@ function animateMove(g,m){
  // from its source coordinates, without ever showing two copies.
  const dx=a.left-b.left,dy=a.top-b.top;
  if(!piece.animate)return;
- const animation=piece.animate([{transform:"translate("+dx+"px,"+dy+"px)"},{transform:"translate(0px,0px)"}],
+ piece.style.willChange="transform";const animation=piece.animate([{transform:"translate3d("+dx+"px,"+dy+"px,0)"},{transform:"translate3d(0,0,0)"}],
   {duration:650,easing:"cubic-bezier(.2,.65,.25,1)"});
- animation.onfinish=()=>{piece.style.transform="";};
+ animation.onfinish=()=>{piece.style.willChange="";};
 }
 
 const files="abcdefgh",notation=m=>files[m[0]&7]+(8-(m[0]>>4))+files[m[1]&7]+(8-(m[1]>>4))+(m[2]||"");
@@ -40,7 +40,7 @@ function draw(){
  strength.value=String(g.strength);info.textContent="Brett "+(active+1)+" von "+games.length+" · "+(g.finished|| (s.t===g.humanColor?"Du bist am Zug":"Computer überlegt"))+" · Deine Farbe: "+(g.humanColor===1?"Weiß":"Schwarz")+" · Bot-Stärke "+g.strength;
 }
 function choose(i){const g=games[active];if(!g||g.finished||state(g).t!==g.humanColor)return;const s=state(g);if(side(s.b[i])===g.humanColor){selected=selected===i?-1:i;draw();return;}const candidates=legalStandard(s).filter(m=>m[0]===selected&&m[1]===i);if(!candidates.length){selected=-1;draw();return;}const m=candidates.find(m=>m[2]==="q")||candidates[0];commit(g,m);}
-function commit(g,m){const s=state(g),valid=legalStandard(s).find(x=>notation(x)===notation(m));if(!valid)return;const isBot=s.t!==g.humanColor;if(games[active]===g)cancelSwitch();g.history.push(applyStandard(s,valid));g.moves.push(valid);g.finished=status(g);selected=-1;if(games[active]===g){draw();animateMove(g,valid);}else{drawCards();}if((g.humanColor===1&&isBot)||(g.humanColor===-1&&!isBot))autoNext(g,g.humanColor===-1?680:2650);if(!g.finished&&state(g).t!==g.humanColor)botMove(g);}
+function commit(g,m){const s=state(g),valid=legalStandard(s).find(x=>notation(x)===notation(m));if(!valid)return;const isBot=s.t!==g.humanColor;if(games[active]===g)cancelSwitch();g.history.push(applyStandard(s,valid));g.moves.push(valid);g.finished=status(g);selected=-1;if(games[active]===g){draw();requestAnimationFrame(()=>animateMove(g,valid));}else{drawCards();}if((g.humanColor===1&&isBot)||(g.humanColor===-1&&!isBot))autoNext(g,g.humanColor===-1?700:2650);if(!g.finished&&state(g).t!==g.humanColor)botMove(g);}
 function botMove(g){if(g.thinking)return;g.thinking=true;const stamp=epoch,expected=state(g),delay=1100+g.strength*115;const timer=setTimeout(()=>{timers.delete(timer);g.thinking=false;if(stamp!==epoch||state(g)!==expected||g.finished)return;const options=legalStandard(expected);if(!options.length){g.finished=status(g);draw();return;}const values={p:100,n:320,b:330,r:500,q:900,k:0};const ranked=options.map(m=>{const next=applyStandard(expected,m),capture=expected.b[m[1]];const reply=legalStandard(next),danger=reply.some(x=>x[1]===m[1]);const gain=capture==="."?0:values[capture.toLowerCase()]||0;const center=3.5-Math.abs((m[1]&7)-3.5);const mate=reply.length===0&&checkStandard(next)?100000:0;return {m,score:mate+gain-danger*(values[expected.b[m[0]].toLowerCase()]||0)*.6+center*8+Math.random()*Math.max(5,(21-g.strength)*35)};});ranked.sort((a,b)=>b.score-a.score);commit(g,ranked[0].m);},delay);timers.add(timer);}
 function start(){cancelSwitch();epoch++;for(const t of timers)clearTimeout(t);timers.clear();games=Array.from({length:Math.min(20,Math.max(5,Number(count.value)||5))},fresh);active=0;selected=-1;panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");draw();for(const g of games)if(g.humanColor===-1)botMove(g);}
 $("simultanOpen").addEventListener("click",()=>{panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");if(!games.length)start();else draw();});
