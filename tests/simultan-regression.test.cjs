@@ -12,7 +12,7 @@ assert.match(js,/stamp!==epoch\|\|state\(g\)!==expected/);
 assert.match(js,/function animateMove\(g,m\)/,"Simultan moves must animate");
 assert.match(js,/duration:650/,"Animated moves must have visible duration");
 assert.match(js,/function autoNext\(g,delay=2000\)/,"White must wait two seconds after bot");
-assert.match(js,/g\.humanColor===-1\?680:2650/,"Black switches after animation, white two seconds after animation");
+assert.match(js,/g\.humanColor===-1\?700:2650/,"Black switches after animation, white two seconds after animation");
 assert.match(js,/\(g\.humanColor===1&&isBot\)\|\|\(g\.humanColor===-1&&!isBot\)/,"White switches after bot, black after human");
 assert.match(js,/const next=\(active\+1\)%games\.length/,"Automatic switch must follow fixed numeric board order");
 console.log("Simultan setup, 5–20 boards, isolated states, per-board strengths verified");
