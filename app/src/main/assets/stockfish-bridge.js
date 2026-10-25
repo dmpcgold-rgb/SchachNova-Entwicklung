@@ -34,9 +34,39 @@ if(fairy)fairy.subscribe(event=>{
   if(match)move(match);else setInfo("Fairy-Stockfish-Zug nicht durch lokale Regeln bestätigt: "+event.move);
  }
 });
+// Local rules-aware bot for Torpedo chess. Never uses standard Stockfish moves.
+let torpedoPending=false;
+function playTorpedoBot(){
+ if(torpedoPending)return;
+ torpedoPending=true;
+ const position=current(),snapshot=movesPlayed.map(notation).join(" "),sideToMove=position.t;
+ setInfo("Torpedo-Bot berechnet einen legalen Zug …");
+ setTimeout(()=>{
+  torpedoPending=false;
+  if(mode!=="bot"||variantMode!=="torpedo"||ended||current()!==position||current().t!==sideToMove||sideToMove!==botSide()||movesPlayed.map(notation).join(" ")!==snapshot)return;
+  const options=legal(position);
+  if(!options.length)return;
+  const values={p:100,n:320,b:330,r:500,q:900,k:0};
+  const scored=options.map(m=>{
+   const captured=position.b[m[1]],enPassant=m[3]==="ep";
+   const next=apply(position,m);
+   const replies=legal(next);
+   const immediate=(captured!=="."?values[captured.toLowerCase()]||0:0)+(enPassant?100:0)+(m[2]?values[m[2]]-100:0);
+   const threatened=replies.filter(x=>x[1]===m[1]).reduce((max,x)=>Math.max(max,values[next.b[m[1]].toLowerCase()]||0),0);
+   const center=3.5-Math.abs((m[1]&7)-3.5);
+   const mobility=Math.min(20,replies.length);
+   const mate=replies.length===0&&checked(next)?100000:0;
+   return {m,score:mate+immediate*1.2-threatened*.65+center*5-mobility*.2+Math.random()*Math.max(1,22-strength)};
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  const chosen=legal(current()).find(m=>notation(m)===notation(scored[0].m));
+  if(chosen)move(chosen);
+ },100);
+}
 function maybePlay(){
  if(mode!=="bot"||current().t!==botSide()||ended||viewIndex!==history.length-1)return;
  if(variantMode!=="standard"){
+  if(variantMode==="torpedo"){playTorpedoBot();return;}
   if(window.SchachNovaVariants?.[variantMode]?.bot===false){setInfo("Für diese Variante ist nur das lokale Spiel zu zweit freigegeben");return;}
   if(!fairy){setInfo("Fairy-Stockfish nicht verfügbar");return;}
   if(!fairyRequested){fairyRequested=true;try{fairy.start();}catch(e){fairyRequested=false;setInfo("Fairy-Stockfish-Start fehlgeschlagen: "+e.message);}return;}
