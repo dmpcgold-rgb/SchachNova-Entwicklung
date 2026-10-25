@@ -51,7 +51,7 @@ if(fairy)fairy.subscribe(event=>{
   if(!req||mode!=="bot"||variantMode!==req.variant||current().t!==botSide()||ended||viewIndex!==history.length-1)return;
   if(req.moves.join(" ")!==movesPlayed.map(notation).join(" "))return;
   const match=legal(current()).find(m=>notation(m)===event.move);
-  if(match)move(match);else setInfo("Fairy-Stockfish-Zug nicht durch lokale Regeln bestätigt: "+event.move);
+  if(match)deliverBotMove(match,current(),req.moves.join(" "),req.startedAt||Date.now());else setInfo("Fairy-Stockfish-Zug nicht durch lokale Regeln bestätigt: "+event.move);
  }
 });
 // Local rules-aware bot for Torpedo chess. Never uses standard Stockfish moves.
