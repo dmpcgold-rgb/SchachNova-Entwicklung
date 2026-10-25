@@ -14,7 +14,7 @@ function startEngine(){
    worker.onmessage=e=>{const line=String(e.data);if(line==="uciok"){worker.postMessage("isready");}
      if(line==="readyok"){ready=true;setInfo("Stockfish 19 bereit · offline");maybePlay();}
      if(line.startsWith("info depth")&&line.includes(" score ")){const m=line.match(/score (cp|mate) (-?\d+)/);if(m){lastScore=m[1]==="cp"?(Number(m[2])/100).toFixed(2):"Matt in "+m[2];if(pending==="analysis")setInfo("Analyse · "+lastScore); }}
-     if(line.startsWith("bestmove ")){busy=false;const u=line.split(" ")[1];if(pending==="bot"){pending=null;const expected=botPosition;botPosition=null;if(expected!==movesPlayed.map(notation).join(" "))return;const match=legal(current()).find(m=>notation(m)===u);if(match&&current().t===botSide()&&!ended&&viewIndex===history.length-1)move(match);}else{pending=null;setInfo("Stockfish empfiehlt: "+u+(lastScore!==null?" · Bewertung "+lastScore:""));} }
+     if(line.startsWith("bestmove ")){busy=false;const u=line.split(" ")[1];if(pending==="bot"){pending=null;const expected=botPosition;botPosition=null;if(expected!==movesPlayed.map(notation).join(" "))return;const match=legal(current()).find(m=>notation(m)===u);if(mode==="bot"&&variantMode==="standard"&&match&&current().t===botSide()&&!ended&&viewIndex===history.length-1)move(match);}else{pending=null;setInfo("Stockfish empfiehlt: "+u+(lastScore!==null?" · Bewertung "+lastScore:""));} }
    };
    worker.onerror=()=>{const failed=worker;worker=null;try{failed.terminate();}catch(_){}ready=false;busy=false;pending=null;botPosition=null;setInfo("Engine konnte nicht geladen werden");};
    worker.postMessage("uci");
