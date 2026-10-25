@@ -74,13 +74,13 @@
   moving.append(pieceNode.cloneNode(true));
   moving.style.cssText="position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+a.width+"px;height:"+a.height+"px;z-index:9999;pointer-events:none;margin:0;border:0;";
   document.body.append(moving);
-  const duration=Math.min(340,Math.max(170,160+Math.hypot(b.left-a.left,b.top-a.top)/2.7));
+  const duration=Math.min(410,Math.max(190,180+Math.hypot(b.left-a.left,b.top-a.top)/2.8));
   motion={to,sprite:moving,animation:null};
   const animation=moving.animate([
    {transform:"translate3d(0,0,0) scale(1)",filter:"brightness(1)"},
-   {transform:"translate3d("+(b.left-a.left)*.55+"px,"+(b.top-a.top)*.55+"px,0) scale(1.035)",filter:"brightness(1.07)",offset:.55},
+   {transform:"translate3d("+(b.left-a.left)*.55+"px,"+(b.top-a.top)*.55+"px,0) scale(1.025)",filter:"brightness(1.035)",offset:.58},
    {transform:"translate3d("+(b.left-a.left)+"px,"+(b.top-a.top)+"px,0) scale(1)",filter:"brightness(1)"}
-  ],{duration,easing:"cubic-bezier(.22,.7,.2,1)"});
+  ],{duration,easing:"cubic-bezier(.25,.72,.22,1)"});
   motion.animation=animation;
   animation.onfinish=()=>{if(motion?.sprite===moving)clearMotion();else moving.remove();};
   animation.oncancel=()=>moving.remove();
