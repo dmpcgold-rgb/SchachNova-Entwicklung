@@ -2,6 +2,8 @@
 (function(){
 const home=document.getElementById('homeScreen'),game=document.getElementById('gameScreen'),notice=document.getElementById('homeNotice');let mode='human',seconds=600,increment=0;
 function chooseMode(value){
+ document.getElementById('settingsPanel').hidden=true;
+ home?.classList.remove('nova-show-design');
  if(value==='training'){if(typeof window.openSchachTraining==='function')window.openSchachTraining();else notice.textContent='Trainingsmenü konnte nicht geladen werden.';return;}
  if(value==='analysis'){document.getElementById('archiveOpen').click();return;}
  mode=value;
@@ -21,7 +23,7 @@ function chooseMode(value){
 }
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>chooseMode(b.dataset.mode)));
 document.addEventListener('DOMContentLoaded',()=>{const picker=document.getElementById('novaDesignPicker'),setup=document.getElementById('novaGameSetup');if(picker&&setup&&picker.parentElement!==setup)setup.insertBefore(picker,document.getElementById('timeChooser')||setup.firstChild);});
-function novaSection(name){for(const n of ['play','training','analysis','profile'])document.getElementById('nova'+n[0].toUpperCase()+n.slice(1)+'Section').hidden=n!==name;document.querySelectorAll('[data-section]').forEach(b=>{b.classList.toggle('active',b.dataset.section===name);b.setAttribute('aria-current',b.dataset.section===name?'page':'false');});const setup=document.getElementById('novaGameSetup'),home=document.getElementById('homeScreen');const selected=!!document.querySelector('#novaPlaySection [data-mode].active');setup.hidden=name!=='play'||!selected;if(home){home.classList.toggle('nova-setup-mode',name==='play'&&selected);home.classList.remove('nova-show-design');}}
+function novaSection(name){document.getElementById('settingsPanel').hidden=true;document.getElementById('homeScreen')?.classList.remove('nova-show-design');for(const n of ['play','training','analysis','profile'])document.getElementById('nova'+n[0].toUpperCase()+n.slice(1)+'Section').hidden=n!==name;document.querySelectorAll('[data-section]').forEach(b=>{b.classList.toggle('active',b.dataset.section===name);b.setAttribute('aria-current',b.dataset.section===name?'page':'false');});const setup=document.getElementById('novaGameSetup'),home=document.getElementById('homeScreen');const selected=!!document.querySelector('#novaPlaySection [data-mode].active');setup.hidden=name!=='play'||!selected;if(home){home.classList.toggle('nova-setup-mode',name==='play'&&selected);home.classList.remove('nova-show-design');}}
 document.querySelectorAll('[data-section]').forEach(b=>b.addEventListener('click',()=>novaSection(b.dataset.section)));
 
 document.getElementById('novaTrainingOpen').onclick=()=>window.openSchachTraining?.();
