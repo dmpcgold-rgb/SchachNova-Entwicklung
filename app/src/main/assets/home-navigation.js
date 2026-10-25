@@ -32,12 +32,14 @@
   training:()=>document.querySelector('.nova-nav[data-section="training"]')?.click(),
   variants:()=>document.querySelector('#novaPlaySection [data-mode="variants"]')?.click(),
   analysis:()=>document.querySelector('.nova-nav[data-section="analysis"]')?.click(),
-  blind:()=>document.querySelector('#novaPlaySection [data-mode="blind"]')?.click()
+  blind:()=>document.querySelector('#novaPlaySection [data-mode="blind"]')?.click(),
+  simultan:()=>document.getElementById('simultanOpen')?.click()
  };
  back.addEventListener('click',reset);
  document.querySelectorAll('[data-nova-jump]').forEach(button=>button.addEventListener('click',()=>{
   const target=button.dataset.novaJump;
   if(target==='settings'){openSettings();return;}
+  if(target==='simultan'){actions.simultan();return;}
   enter();
   actions[target]?.();
  }));
