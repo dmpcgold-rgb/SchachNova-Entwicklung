@@ -637,3 +637,8 @@ body[data-board-skin="marble"] #rectPreviewBoard .rect-preview-dark{background:l
 
 /* Hidden settings must never occupy space or overlay other screens. */
 #settingsPanel[hidden]{display:none!important}
+
+/* Settings are a separate home view, never a permanent panel under Play. */
+#homeScreen.nova-show-design #novaPlaySection,#homeScreen.nova-show-design #novaTrainingSection,#homeScreen.nova-show-design #novaAnalysisSection,#homeScreen.nova-show-design #novaProfileSection,#homeScreen.nova-show-design #novaGameSetup{display:none!important}
+#homeScreen.nova-show-design #novaDesignPicker{display:block!important}
+#homeScreen:not(.nova-show-design) #novaDesignPicker{display:none!important}
