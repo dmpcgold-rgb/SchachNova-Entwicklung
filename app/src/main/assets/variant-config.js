@@ -10,7 +10,7 @@ window.SchachNovaVariants=Object.freeze({
  threecheck:{label:"Drei-Schach",uci:"3check",local:true},
  fivecheck:{label:"Fünf-Schach",uci:"5check",local:true,bot:false},
  hoppelpoppel:{label:"Hoppel-Poppel",uci:null,local:true,bot:false},
- torpedo:{label:"Torpedo-Schach",uci:null,local:true,bot:false},
+ torpedo:{label:"Torpedo-Schach",uci:null,local:true,bot:true,botEngine:"local"},
  nocastling:{label:"Schach ohne Rochade",uci:null,local:true,bot:false},
  berolina:{label:"Berolina-Schach",uci:null,local:true,bot:false},
  antichess:{label:"Räuberschach",uci:"antichess",local:true,bot:true},
