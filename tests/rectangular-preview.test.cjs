@@ -2,6 +2,10 @@
 const assert=require("node:assert/strict"),fs=require("node:fs");
 const html=fs.readFileSync("app/src/main/assets/index.html","utf8");
 const js=fs.readFileSync("app/src/main/assets/rectangular-preview.js","utf8");
+const standardChess=fs.readFileSync("app/src/main/assets/chess.js","utf8");
+assert.match(standardChess,/cubic-bezier\(\.25,\.72,\.22,1\)/);
+assert.match(js,/cubic-bezier\(\.25,\.72,\.22,1\)/);
+
 const css=fs.readFileSync("app/src/main/assets/schachnova-theme.css","utf8");
 const homeNavigation=fs.readFileSync("app/src/main/assets/home-navigation.js","utf8");
 const gameNavigation=fs.readFileSync("app/src/main/assets/game-mode-navigation.js","utf8");
