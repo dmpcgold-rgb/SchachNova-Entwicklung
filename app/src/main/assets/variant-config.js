@@ -13,9 +13,9 @@ window.SchachNovaVariants=Object.freeze({
  torpedo:{label:"Torpedo-Schach",uci:null,local:true,bot:false},
  nocastling:{label:"Schach ohne Rochade",uci:null,local:true,bot:false},
  berolina:{label:"Berolina-Schach",uci:null,local:true,bot:false},
- antichess:{label:"Räuberschach",uci:"antichess",local:true,bot:false},
+ antichess:{label:"Räuberschach",uci:"antichess",local:true,bot:true},
  chess960:{label:"Schach960",uci:"chess",uciChess960:true,local:false},
- atomic:{label:"Atomschach",uci:"atomic",local:true,bot:false},
+ atomic:{label:"Atomschach",uci:"atomic",local:true,bot:true},
  horde:{label:"Horde",uci:"horde",local:false},
  racingkings:{label:"Racing Kings",uci:"racingkings",local:false},
  crazyhouse:{label:"Crazyhouse",uci:"crazyhouse",local:false}
