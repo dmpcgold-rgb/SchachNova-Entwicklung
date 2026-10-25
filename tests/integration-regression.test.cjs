@@ -1,0 +1,12 @@
+"use strict";
+const fs=require("node:fs"),assert=require("node:assert/strict");
+const bridge=fs.readFileSync("app/src/main/assets/stockfish-bridge.js","utf8");
+const review=fs.readFileSync("app/src/main/assets/game-review.js","utf8");
+const chess=fs.readFileSync("app/src/main/assets/chess.js","utf8");
+assert.match(bridge,/if\(match\)deliverBotMove\(match,current\(\),req\.moves\.join\(" "\)/,"Variant bot must respect think time");
+assert.match(bridge,/if\(valid\)move\(valid\)/,"Delayed bot moves must be revalidated");
+assert.match(review,/function next\(t\)\{\s*const variant=variantMode!=="standard";/,"Analysis step must define variant");
+assert.match(review,/\$\("overviewStart"\)\.disabled=false;\$\("overviewStart"\)\.textContent="▶ Analyse öffnen"/,"Analysis button must be enabled during calculation");
+assert.match(chess,/const humanColor=-botColor/,"Premoves must use human color");
+assert.match(chess,/if\(botPlaying&&s\.t===botColor\)/,"Premoves must work on bot turn");
+console.log("Review, premoves and all bot engine delay regression checks passed");
