@@ -246,6 +246,7 @@ function renderOverview(){ $("overviewOpening").textContent="Eröffnung: "+openi
 }
 function finish(){try{localStorage.setItem("schachnova.review.v3."+analysisKey,JSON.stringify({results,version:3}));}catch(e){console.warn("Analyse-Cache nicht gespeichert",e);}active=false;if(worker){worker.terminate();worker=null;}progress.textContent="Alle "+movesPlayed.length+" Züge analysiert. Tippe auf einen Zug für die Erklärung.";renderReview();drawReviewBoard();renderOverview();}
 function next(t){
+ const variant=variantMode!=="standard";
  if(t!==token||!active)return;
  if(index>=positions.length){finish();return;}
  score=null;best="";principal=[];engineDepth=0;progress.textContent="Analysiere Stellung "+(index+1)+" von "+positions.length+" …";$("overviewProgress").textContent=progress.textContent;
