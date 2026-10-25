@@ -104,7 +104,7 @@ document.getElementById('backHome').onclick=()=>{game.hidden=true;home.hidden=fa
 document.getElementById('newGame').textContent='♙ Neue Partie';
 chooseMode('human');
 })();
-</script><script>(function(){const board=document.getElementById('novaBoardSkin'),piece=document.getElementById('novaPieceSkin');if(!board||!piece)return;const valid=(v,options,fallback)=>[...options.options].some(o=>o.value===v)?v:fallback;board.value=valid(localStorage.getItem('schachnova_board_skin'),board,'silverblue');piece.value=valid(localStorage.getItem('schachnova_piece_skin'),piece,'silverblue');function apply(){document.body.dataset.boardSkin=board.value;document.body.dataset.pieceSkin=piece.value;localStorage.setItem('schachnova_board_skin',board.value);localStorage.setItem('schachnova_piece_skin',piece.value)}board.addEventListener('change',apply);piece.addEventListener('change',apply);apply()})();</script><script>
+</script><script src="appearance-preferences.js"></script><script>
 /* Distinct, locally generated sculpted chrome/sapphire SVG piece set.
    Existing SVG pieces remain available under Originalfiguren. */
 (function(){
