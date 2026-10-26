@@ -756,3 +756,18 @@ body[data-piece-skin="reference"] #board .sq.black-piece>.piece-img{filter:grays
 #simultanPanel .simultan-controls button{font-size:12px;padding:7px}
 #simultanPanel .simultan-piece{transform:translateZ(0);backface-visibility:hidden}
 @media(max-height:720px){#simultanPanel>p{display:none}#simultanPanel .simultan-grid{flex-basis:60px;min-height:60px;max-height:60px}#simultanPanel .simultan-board{width:min(100%,calc(100dvh - 265px),540px)!important;max-height:calc(100dvh - 265px)}}
+
+/* Simultan interaction polish: compact touch targets, clear turn status, fixed board. */
+#simultanPanel .simultan-card{position:relative;min-height:42px;cursor:pointer;touch-action:manipulation;transition:background-color .16s ease,border-color .16s ease;white-space:normal}
+#simultanPanel .simultan-card.active{background:linear-gradient(145deg,#2367a1,#173f68);border-color:#a4dcff;box-shadow:inset 0 0 0 1px #a4dcff,0 0 10px #2779b855}
+#simultanPanel .simultan-card:focus-visible,#simultanPanel .simultan-square:focus-visible{outline:3px solid #ffdd57;outline-offset:-3px}
+#simultanPanel .simultan-square{position:relative;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
+#simultanPanel .simultan-square.last-move:before{content:"";position:absolute;inset:0;background:rgba(255,213,63,.23);pointer-events:none}
+#simultanPanel .simultan-square.selected{box-shadow:inset 0 0 0 4px #ffda58}
+#simultanPanel .simultan-square.target:after{content:"";position:absolute;width:23%;aspect-ratio:1;border-radius:50%;background:rgba(15,65,109,.5);pointer-events:none}
+#simultanPanel .simultan-square.target:has(.simultan-piece):after{width:82%;background:transparent;border:4px solid rgba(22,93,167,.8)}
+#simultanPanel .simultan-piece{position:relative;z-index:1;max-width:94%;max-height:94%}
+#simultanPanel .simultan-board{isolation:isolate}
+#simultanPanel .simultan-controls button{min-height:44px;touch-action:manipulation}
+#simultanInfo{display:flex;align-items:center;color:#d6eaff;font-weight:600}
+@media(prefers-reduced-motion:reduce){#simultanPanel .simultan-card{transition:none}}
