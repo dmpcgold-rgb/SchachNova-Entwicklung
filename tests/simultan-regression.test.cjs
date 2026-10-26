@@ -23,4 +23,8 @@ assert.match(js,/window\.AndroidHaptics\.vibrate\(pattern\.join\(","\)\)/,"Use A
 assert.match(js,/navigator\.vibrate\(pattern\)/,"Fallback to web vibration");
 assert.match(js,/isMate\?\[65,85,65\]:isCheck\?\[160,65,80\]:capture\?\[110\]:\[35\]/,"Match standard board haptic patterns");
 assert.match(js,/feedbackForMove\(s,nextState,valid\)/,"Trigger vibration for human and bot moves");
+assert.match(js,/previous\.awaitingSwitch=false/,"Manual board navigation must release old switch lock");
+assert.match(js,/games\[active\]\.awaitingSwitch=false/,"Returning to a board must release stale switch lock");
+assert.match(js,/if\(games\[active\]===g&&\(\(g\.humanColor===1&&isBot\)/,"Background bot move must not lock an inactive board");
+assert.match(js,/aria-pressed/,"Board square selection must be accessible");
 console.log("Simultan setup, 5–20 boards, isolated states, per-board strengths verified");
