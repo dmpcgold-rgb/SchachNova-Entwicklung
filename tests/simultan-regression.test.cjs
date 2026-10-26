@@ -6,7 +6,7 @@ for(const id of ["simultanOpen","simultanPanel","simultanCount","simultanStrengt
 assert.match(html,/<script src="simultan\.js"><\/script>/);
 assert.match(js,/Math\.min\(20,Math\.max\(5,/);
 assert.match(js,/games=Array\.from/);
-assert.match(js,/g\.history\.push\(applyStandard/);
+assert.match(js,/const nextState=applyStandard\(s,valid\);g\.history\.push\(nextState\)/,"Commit must retain next state for haptic feedback");
 assert.match(js,/games\[active\]\.strength=Number\(strength\.value\)/);
 assert.match(js,/stamp!==epoch\|\|state\(g\)!==expected/);
 assert.match(js,/function animateMove\(g,m\)/,"Simultan moves must animate");
