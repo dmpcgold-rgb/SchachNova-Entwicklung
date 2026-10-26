@@ -771,3 +771,13 @@ body[data-piece-skin="reference"] #board .sq.black-piece>.piece-img{filter:grays
 #simultanPanel .simultan-controls button{min-height:44px;touch-action:manipulation}
 #simultanInfo{display:flex;align-items:center;color:#d6eaff;font-weight:600}
 @media(prefers-reduced-motion:reduce){#simultanPanel .simultan-card{transition:none}}
+
+.nova-material-display{display:flex;flex-direction:column;gap:3px;width:100%;max-width:540px;margin:5px auto 8px;color:#dceaff;font-size:12px}
+.nova-material-row{display:flex;align-items:center;gap:7px;min-height:23px;white-space:nowrap;overflow:hidden}
+.nova-material-row>span:first-child{min-width:56px;font-weight:600}
+.nova-material-pieces{display:flex;flex:1;align-items:center;min-width:0;overflow:hidden}
+.nova-material-pieces img{width:20px;height:20px;object-fit:contain;margin-left:-5px;filter:drop-shadow(0 1px 1px #0008)}
+.nova-material-pieces img:first-child{margin-left:0}
+.nova-material-row strong{min-width:26px;text-align:right;font-size:13px;color:#f8df80}
+#simultanPanel .nova-material-display{flex:0 0 48px;max-height:48px;margin:0 auto;gap:0}
+#simultanPanel .nova-material-row{min-height:22px}
