@@ -781,3 +781,42 @@ body[data-piece-skin="reference"] #board .sq.black-piece>.piece-img{filter:grays
 .nova-material-row strong{min-width:26px;text-align:right;font-size:13px;color:#f8df80}
 #simultanPanel .nova-material-display{flex:0 0 48px;max-height:48px;margin:0 auto;gap:0}
 #simultanPanel .nova-material-row{min-height:22px}
+
+/* Fix: a fixed-size 8x8 grid must not allow square intrinsic heights to overflow. */
+#simultanPanel .simultan-board{
+  display:grid!important;
+  grid-template-columns:repeat(8,minmax(0,1fr))!important;
+  grid-template-rows:repeat(8,minmax(0,1fr))!important;
+  aspect-ratio:1/1!important;
+  height:auto!important;
+  flex-shrink:0!important;
+  min-height:0!important;
+  padding:0!important;
+  gap:0!important;
+}
+#simultanPanel .simultan-square{
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  aspect-ratio:auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  line-height:1!important;
+  overflow:hidden!important;
+}
+#simultanPanel .simultan-square .simultan-piece{
+  display:block!important;
+  width:88%!important;
+  height:88%!important;
+  max-width:88%!important;
+  max-height:88%!important;
+  object-fit:contain!important;
+  flex:none!important;
+  margin:0!important;
+  padding:0!important;
+}
