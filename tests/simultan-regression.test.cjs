@@ -29,4 +29,8 @@ assert.match(js,/if\(games\[active\]===g&&\(\(g\.humanColor===1&&isBot\)/,"Backg
 assert.match(js,/aria-pressed/,"Board square selection must be accessible");
 assert.match(js,/\|\|g\.finished\)\)\{g\.awaitingSwitch=true;autoNext/,"Finished game must not stall fixed board rotation");
 assert.match(js,/autoNext\(g,1200\)/,"Bot with no legal moves must advance to next board");
+assert.match(js,/board\.addEventListener\("pointerdown"/,"Drag gesture must support pointer start");
+assert.match(js,/board\.addEventListener\("pointerup"/,"Drag gesture must support pointer release");
+assert.match(js,/document\.elementFromPoint/,"Drop target must resolve from pointer position");
+assert.match(js,/if\(suppressTap\)return/,"Drag must not trigger duplicate tap");
 console.log("Simultan setup, 5–20 boards, isolated states, per-board strengths verified");
