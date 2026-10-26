@@ -27,4 +27,6 @@ assert.match(js,/previous\.awaitingSwitch=false/,"Manual board navigation must r
 assert.match(js,/games\[active\]\.awaitingSwitch=false/,"Returning to a board must release stale switch lock");
 assert.match(js,/if\(games\[active\]===g&&\(\(g\.humanColor===1&&isBot\)/,"Background bot move must not lock an inactive board");
 assert.match(js,/aria-pressed/,"Board square selection must be accessible");
+assert.match(js,/\|\|g\.finished\)\)\{g\.awaitingSwitch=true;autoNext/,"Finished game must not stall fixed board rotation");
+assert.match(js,/autoNext\(g,1200\)/,"Bot with no legal moves must advance to next board");
 console.log("Simultan setup, 5–20 boards, isolated states, per-board strengths verified");
