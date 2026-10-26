@@ -33,4 +33,6 @@ assert.match(js,/board\.addEventListener\("pointerdown"/,"Drag gesture must supp
 assert.match(js,/board\.addEventListener\("pointerup"/,"Drag gesture must support pointer release");
 assert.match(js,/document\.elementFromPoint/,"Drop target must resolve from pointer position");
 assert.match(js,/if\(suppressTap\)return/,"Drag must not trigger duplicate tap");
+assert.match(js,/sourceBoard!==active/,"Dragging across board switches must not commit a move");
+assert.match(js,/setTimeout\(\(\)=>\{suppressTap=false;\},300\)/,"Suppress synthetic click after drag release");
 console.log("Simultan setup, 5–20 boards, isolated states, per-board strengths verified");
